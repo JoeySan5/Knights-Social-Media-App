@@ -45,7 +45,9 @@
 >Admin: Functional testing of the admin dashboard, security permission checks, etc.
 >Web/Mobile: UI/UX consistency, cross-browser compatibility testing, responsiveness tests, etc.
 ### Backend
-- Test 1: 
+- Test 1: Verify post request sends correct data to database
+- Test 2: Verify get request gets all data from database, with 0, 1, or many entries.
+- Test 3: Verify that likes are correctly incremented to a post entry
 
 ### Admin
 - Test 1: 
