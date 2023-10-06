@@ -23,20 +23,16 @@
 - Test 2 (Automated):
 
 ## System Drawing
-
-Please refer to [Link_to_System_Drawing_Image] for the system drawing showing major components and their locations.
+[https://www.figma.com/file/u2eW6roMuLoCxf48U6QojV/Untitled?type=design&node-id=0%3A1&mode=design&t=kZlzrUD7VpRH0tJS-1](https://www.figma.com/file/u2eW6roMuLoCxf48U6QojV/Untitled?type=design&node-id=0%3A1&mode=design&t=kZlzrUD7VpRH0tJS-1)
 
 ## Mock Web/Mobile User Interface
-
-Please refer to [Link_to_UI_Mockup_Image] for the mockup of the web/mobile user interface.
+[https://www.figma.com/file/u2eW6roMuLoCxf48U6QojV/Untitled?type=design&node-id=0%3A1&mode=design&t=kZlzrUD7VpRH0tJS-1](https://www.figma.com/file/u2eW6roMuLoCxf48U6QojV/Untitled?type=design&node-id=0%3A1&mode=design&t=kZlzrUD7VpRH0tJS-1)
 
 ## State Machine Drawing
-
-Please refer to [Link_to_State_Machine_Drawing] for the drawing of the state machine representing the anonymous user persona’s interaction with the application.
+[https://lucid.app/lucidchart/1c343190-142a-4d53-8d64-69e251bbd56e/edit?viewport_l[…]C939%2C0_0&invitationId=inv_be08c6b2-8970-4fc0-aa6a-5e9e59796b3a](https://lucid.app/lucidchart/1c343190-142a-4d53-8d64-69e251bbd56e/edit?viewport_l[…]C939%2C0_0&invitationId=inv_be08c6b2-8970-4fc0-aa6a-5e9e59796b3a)
 
 ## Entity Relationship Diagram (ERD)
-
-Please refer to [Link_to_ERD_Image] for the entity relationship diagram showing the database table and fields.
+[https://lucid.app/lucidchart/addcf07b-8497-4cb1-950f-08842db2ab65/edit?invitationId=inv_5b2cb536-dce8-4f5d-a494-4f92b83ff0bc](https://lucid.app/lucidchart/addcf07b-8497-4cb1-950f-08842db2ab65/edit?invitationId=inv_5b2cb536-dce8-4f5d-a494-4f92b83ff0bc)
 
 ## Routes and Their Purposes
 - Details to be added as development progresses.
