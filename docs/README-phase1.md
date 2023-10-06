@@ -9,12 +9,10 @@
 - I want to be able to browse the basic content of the website and mobile app without logging in.
 
 ## Tests for Each User Story
-<small>
-**EXAMPLE:**  
-(This represents user-centric or requirement-based testing.)  
-User Story: "As a user, I want to post an article."  
-Related Tests: "Verify post upload upon clicking the 'post' button", "Field validation checks during article creation", etc.
-</small>
+> **EXAMPLE:**  
+> (This represents user-centric or requirement-based testing.)  
+> User Story: "As a user, I want to post an article."  
+> Related Tests: "Verify post upload upon clicking the 'post' button", "Field validation checks during article creation", etc.
 ### Admin Persona
 - Test 1 (Manual): 
 - Test 2 (Automated): 
@@ -45,13 +43,11 @@ Please refer to [Link_to_ERD_Image] for the entity relationship diagram showing 
 
 
 ## Tests Description
-<small>
-**EXAMPLE:**  
-(This represents system-centric testing.)
-Backend: API response time, database stability, security rule checks, etc.
-Admin: Functional testing of the admin dashboard, security permission checks, etc.
-Web/Mobile: UI/UX consistency, cross-browser compatibility testing, responsiveness tests, etc.
-</small>
+> **EXAMPLE:**  
+>(This represents system-centric testing.)
+>Backend: API response time, database stability, security rule checks, etc.
+>Admin: Functional testing of the admin dashboard, security permission checks, etc.
+>Web/Mobile: UI/UX consistency, cross-browser compatibility testing, responsiveness tests, etc.
 ### Backend
 - Test 1: 
 
