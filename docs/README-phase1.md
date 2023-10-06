@@ -3,13 +3,18 @@
 ## User Stories
 
 ### Admin Persona
-- I want to successfully complete this project through smooth communication among team members.
+- I hope that our team's development schedule is well shared and managed through the Trello board.
 
 ### Anonymous User Persona
 - I want to be able to browse the basic content of the website and mobile app without logging in.
 
 ## Tests for Each User Story
-
+<small>
+**EXAMPLE:**  
+(This represents user-centric or requirement-based testing.)  
+User Story: "As a user, I want to post an article."  
+Related Tests: "Verify post upload upon clicking the 'post' button", "Field validation checks during article creation", etc.
+</small>
 ### Admin Persona
 - Test 1 (Manual): 
 - Test 2 (Automated): 
@@ -31,15 +36,22 @@ Please refer to [Link_to_UI_Mockup_Image] for the mockup of the web/mobile user 
 
 Please refer to [Link_to_State_Machine_Drawing] for the drawing of the state machine representing the anonymous user persona’s interaction with the application.
 
-## Routes and Their Purposes
-- Details to be added as development progresses.
-
 ## Entity Relationship Diagram (ERD)
 
 Please refer to [Link_to_ERD_Image] for the entity relationship diagram showing the database table and fields.
 
-## Tests Description
+## Routes and Their Purposes
+- Details to be added as development progresses.
 
+
+## Tests Description
+<small>
+**EXAMPLE:**  
+(This represents system-centric testing.)
+Backend: API response time, database stability, security rule checks, etc.
+Admin: Functional testing of the admin dashboard, security permission checks, etc.
+Web/Mobile: UI/UX consistency, cross-browser compatibility testing, responsiveness tests, etc.
+</small>
 ### Backend
 - Test 1: 
 
