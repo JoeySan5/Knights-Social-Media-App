@@ -13,7 +13,7 @@
 ## URLs
 - **Git Repository**: [https://bitbucket.org/cse216-2023fa-team-25/cse216-2023fa-team-25/src/master/](https://bitbucket.org/cse216-2023fa-team-25/cse216-2023fa-team-25/src/master/)
 - **Trello Board**: [https://trello.com/invite/b/EnJtgGYY/ATTI0772a2683b64851fa36b0f707982fa087EC7746E/cse216](https://trello.com/invite/b/EnJtgGYY/ATTI0772a2683b64851fa36b0f707982fa087EC7746E/cse216)
-- **Backend URL**: [https://backend-url.com](https://backend-url.com)
+- **Backend URL**: [https://team-knights.dokku.cse.lehigh.edu/](https://team-knights.dokku.cse.lehigh.edu/)
 
 ## Release Description
 
@@ -28,8 +28,17 @@
 ## Build & Run Instructions
 
 ### Locally
-1. [Step 1 for building locally]
-
+1. From the backend maven project root, run mvn exec:java with the `PORT` and `DATABASE_URL` environment variables specified
+    * `PORT=8998 DATABASE_URL=postgres://pfdcoetq:VMXXrjrJtMXqzP6JwpjnapwpOVpk6e9o@peanut.db.elephantsql.com/pfdcoetq mvn exec:java`
+    * The address is `http://localhost:PORT/`
 
 ### On Dokku
-1. [Step 1 for deploying and running on Dokku]
+1. Ensure your ssh key is set up on Dokku
+2. Use `config:set` to edit and setup the environment variables
+    * For example, `ssh -i ~/.ssh/id_ed25519 -t dokku@dokku.cse.lehigh.edu 'config:set team-knights CORS_ENABLED=false'`
+    * `config:export` will show the environment variables
+3. From the *local* machine (not on dokku), run the following to use `ps:start`:
+    * `ssh -i ~/.ssh/id_ed25519 -t dokku@dokku.cse.lehigh.edu 'ps:start team-knights'`
+    * The address is `https://team-knights.dokku.cse.lehigh.edu/`
+4. To see continuous logs, run the following after starting:
+    * `ssh -i ~/.ssh/id_ed25519 -t dokku@dokku.cse.lehigh.edu 'logs team-knights -t'`
