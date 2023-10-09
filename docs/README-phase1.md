@@ -4,7 +4,7 @@
 [https://docs.google.com/document/d/1C4OfD5L5nKq0vlWan0W4J-hJVmqBhg63MFlT7vrJQk0/edit?usp=sharing](https://docs.google.com/document/d/1C4OfD5L5nKq0vlWan0W4J-hJVmqBhg63MFlT7vrJQk0/edit?usp=sharing)
 
 ## System Drawing
-[https://www.figma.com/file/u2eW6roMuLoCxf48U6QojV/Untitled?type=design&node-id=0%3A1&mode=design&t=kZlzrUD7VpRH0tJS-1](https://www.figma.com/file/u2eW6roMuLoCxf48U6QojV/Untitled?type=design&node-id=0%3A1&mode=design&t=kZlzrUD7VpRH0tJS-1)
+[https://lucid.app/lucidchart/771e3c0c-deb4-4fed-9848-4fca0c1b83a1/edit?viewport_l[…]1072%2C0_0&invitationId=inv_8800b53a-3b47-4c77-bc9d-2e07de228500](https://lucid.app/lucidchart/771e3c0c-deb4-4fed-9848-4fca0c1b83a1/edit?viewport_l[…]1072%2C0_0&invitationId=inv_8800b53a-3b47-4c77-bc9d-2e07de228500)
 
 ## Mock Web/Mobile User Interface
 [https://www.figma.com/file/u2eW6roMuLoCxf48U6QojV/Untitled?type=design&node-id=0%3A1&mode=design&t=kZlzrUD7VpRH0tJS-1](https://www.figma.com/file/u2eW6roMuLoCxf48U6QojV/Untitled?type=design&node-id=0%3A1&mode=design&t=kZlzrUD7VpRH0tJS-1)
