@@ -1,50 +1,85 @@
 import 'package:flutter/material.dart';
 
+
+//everytime like button is cliked it should be a new request, that either 
+//increments or decrements like counter
 void main() {
-  runApp(const MyApp());
+  runApp(const MyHomePage());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp(
-    {super.key}
-    );
-
-  // This widget is the root of your application.
+class myApp extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Knights Mobile App',
-      theme: ThemeData(
-        colorScheme: const ColorScheme.dark(),
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(),
-          bodySmall: TextStyle(), 
-        ).apply(
-          bodyColor: const Color.fromARGB(255, 185, 200, 185),
-          displayColor: const Color.fromARGB(255, 177, 187, 177)
-
-        ),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Knights'),
+    return const MaterialApp(
+      title: 'Knights App',
+      // theme: ThemeData(
+      //   primarySwatch: Colors.blue,
+      // ),
+      home: MyHomePage(),
     );
   }
 }
 
+
 class MyHomePage extends StatelessWidget{
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({super.key});
 
-  final String title;
-
-   @override
+  @override
   Widget build(BuildContext context) {
+    
     return const Column(
-      children: [
-        Text('h')
-      ],
-    );
-}
-}
+        
+          children: <Widget>[
+            Padding(padding: EdgeInsets.only(top: 40.0),
+            child: Text(
+              'Knights',
+              textDirection: TextDirection.ltr,
+              style: TextStyle(
+                fontSize: 40,
+                color: Color.fromARGB(221, 255, 255, 255),
+                fontFamily: 'roboto'
+              ),
+            )
+            ),
+
+            Padding( padding: EdgeInsets.only(top: 30.0),
+            child: Text('Here\'s what people have been saying:',
+            textDirection: TextDirection.ltr,
+              style: TextStyle(
+                fontSize: 20,
+                color: Color.fromARGB(221, 255, 255, 255),
+                fontFamily: 'roboto'
+              ),
+              ),
+            ),
+            Idea(),
+          ],
+        );
+      }
+    }
+
+    // This class is for an "idea", with a message, like counter, like button (increment counter), and dislike button (decrement counter)
+    class Idea extends StatelessWidget {
+      const Idea({super.key});
+
+      @override
+    Widget build(BuildContext context) {
+      return(
+        const Material(
+          child: Padding(
+          padding: EdgeInsets.only(top: 10.0),
+          child: TextField(decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            hintText: 'Please write your idea here...',
+            hintStyle: TextStyle(color: Colors.green),
+          ),
+          ),
+          ),
+        )
+      );
+    }
+
+    }
 
 // class MyHomePage extends StatefulWidget {
 //   const MyHomePage({super.key, required this.title});
