@@ -18,29 +18,29 @@ public class Database {
     private Connection mConnection;
 
     /**
-     * A prepared statement for getting all data in the database
+     * A prepared statement for getting all ideas in the database
      */
-    private PreparedStatement mSelectAll;
+    private PreparedStatement mSelectAllIdeas;
 
     /**
-     * A prepared statement for getting one row from the database
+     * A prepared statement for getting one idea from the database
      */
-    private PreparedStatement mSelectOne;
+    private PreparedStatement mSelectOneIdea;
 
     /**
-     * A prepared statement for deleting a row from the database
+     * A prepared statement for deleting an idea from the database
      */
-    private PreparedStatement mDeleteOne;
+    private PreparedStatement mDeleteOneIdea;
 
     /**
-     * A prepared statement for inserting into the database
+     * A prepared statement for inserting an idea into the database
      */
-    private PreparedStatement mInsertOne;
+    private PreparedStatement mInsertOneIdea;
 
     /**
-     * A prepared statement for updating a single row in the database
+     * A prepared statement for updating the likeCount of a single idea in the database
      */
-    private PreparedStatement mUpdateOne;
+    private PreparedStatement mUpdateIdeaLikeCount;
 
     /**
      * A prepared statement for creating the table in our database
@@ -79,15 +79,16 @@ public class Database {
             // creation/deletion, so multiple executions will cause an exception
             this.mCreateTable = this.mConnection.prepareStatement(
                     "CREATE TABLE ideas (id SERIAL PRIMARY KEY, content VARCHAR(2048) NOT NULL, likeCount INT)");
-            // tjp Note: should we use 'id' or 'ID'
+            // tjp Question: should we use 'id' or 'ID'? Really a choice for admin to make
             this.mDropTable = this.mConnection.prepareStatement("DROP TABLE ideas");
 
             // Standard CRUD operations
-            this.mDeleteOne = this.mConnection.prepareStatement("DELETE FROM ideas WHERE id = ?"); // Not implemented in Phase 1?
-            this.mInsertOne = this.mConnection.prepareStatement("INSERT INTO ideas VALUES (default, ?, 0)");
-            this.mSelectAll = this.mConnection.prepareStatement("SELECT id, content, likeCount FROM ideas");
-            this.mSelectOne = this.mConnection.prepareStatement("SELECT * from ideas WHERE id=?");
-            this.mUpdateOne = this.mConnection.prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE id = ?");
+            // tjp: these SQL prepared statement are essential for understanding exactly what the backend is asking the database
+            this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE id = ?"); // Not implemented in Phase 1?
+            this.mInsertOneIdea = this.mConnection.prepareStatement("INSERT INTO ideas VALUES (default, ?, 0)");
+            this.mSelectAllIdeas = this.mConnection.prepareStatement("SELECT id, content, likeCount FROM ideas");
+            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE id=?");
+            this.mUpdateIdeaLikeCount = this.mConnection.prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE id = ?");
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
             e.printStackTrace();
@@ -186,18 +187,19 @@ public class Database {
     }
 
     /**
-     * Insert a row into the database
+     * Insert an idea into the database. Content is given in the request, 
+     * and likeCount is set to 0
      * 
      * @param content The content body for this new idea
      * 
-     * @return The number of rows that were inserted
+     * @return The number of ideas that were inserted
      */
-    int insertRow(String content) {
+    int insertIdea(String content) {
         int count = 0;
         try {
-            mInsertOne.setString(1, content);
+            mInsertOneIdea.setString(1, content);
             // likeCount will automatically be set to 0
-            count += mInsertOne.executeUpdate();
+            count += mInsertOneIdea.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -205,14 +207,15 @@ public class Database {
     }
 
     /**
-     * Query the database for a list of posts with their ids, content, and likeCounts
+     * Query the database for a list of ideas 
+     * with their IDs, content, and likeCounts
      * 
-     * @return All rows, as an ArrayList
+     * @return All Ideas, as an ArrayList
      */
-    ArrayList<Idea> selectAll() {
+    ArrayList<Idea> selectAllIdeas() {
         ArrayList<Idea> res = new ArrayList<Idea>();
         try {
-            ResultSet rs = mSelectAll.executeQuery();
+            ResultSet rs = mSelectAllIdeas.executeQuery();
             while (rs.next()) {
                 res.add(new Idea(rs.getInt("id"), rs.getString("content")));
             }
@@ -224,19 +227,18 @@ public class Database {
         }
     }
 
-    // Not yet aded in Phase 1?
     /**
-     * Get all data for a specific row, by ID
+     * Get all data for a specific idea, by ID
      * 
-     * @param id The id of the row being requested
+     * @param id The ID of the idea being requested
      * 
-     * @return The data for the requested row, or null if the ID was invalid
+     * @return The data for the requested idea, or null if the ID was invalid
      */
-    Idea selectOne(int id) {
+    Idea selectOneIdea(int id) {
         Idea res = null;
         try {
-            mSelectOne.setInt(1, id);
-            ResultSet rs = mSelectOne.executeQuery();
+            mSelectOneIdea.setInt(1, id);
+            ResultSet rs = mSelectOneIdea.executeQuery();
             if (rs.next()) {
                 res = new Idea(rs.getInt("id"), rs.getString("content"));
             }
@@ -247,17 +249,17 @@ public class Database {
     }
 
     /**
-     * Delete a row by ID
+     * Delete an idea by ID
      * 
      * @param id The id of the row to delete
      * 
      * @return The number of rows that were deleted.  -1 indicates an error.
      */
-    int deleteRow(int id) {
+    int deleteIdea(int id) {
         int res = -1;
         try {
-            mDeleteOne.setInt(1, id);
-            res = mDeleteOne.executeUpdate();
+            mDeleteOneIdea.setInt(1, id);
+            res = mDeleteOneIdea.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -265,21 +267,21 @@ public class Database {
     }
 
     /**
-     * Update the message for a row in the database
+     * Update the likeCount for an idea in the database
      * 
      * @param id The id of the row to update
      * @param likeDelta the requested amount to change likes by; must be 1 or -1 to be successful
      * 
      * @return The amount of posts affected by the given likeCountged.  -1 indicates an error.
      */
-    int updateOne(int id, int likeDelta) {
+    int updateIdeaLikeCount(int id, int likeDelta) {
         // tjp: open to changing what the return value should be, e.g. differentiating between a dislike and like
         int res = -1;
         try {
             if(likeDelta == 1 || likeDelta == -1){
-                mUpdateOne.setInt(1, likeDelta);
-                mUpdateOne.setInt(2, id);
-                res = mUpdateOne.executeUpdate();
+                mUpdateIdeaLikeCount.setInt(1, likeDelta);
+                mUpdateIdeaLikeCount.setInt(2, id);
+                res = mUpdateIdeaLikeCount.executeUpdate();
             }
         } catch (SQLException e) {
             e.printStackTrace();

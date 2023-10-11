@@ -1,23 +1,25 @@
 package edu.lehigh.cse216.knights.backend;
 
 /**
- * SimpleRequest provides a format for clients to present id int and title and content 
- * strings to the server.
+ * IdeaRequest provides a format for clients to present a content for POST-ing ideas, 
+ * or a likeIncrement value for PUT-ing ideas through likes and dislikes
  * 
  * NB: since this will be created from JSON, all fields must be public, and we
  *     do not need a constructor.
  */
-public class IdeaRequest {
-     /**
-     * The title being provided by the client.
-     */
-    public String mTitle;
-
+public class IdeaRequest {    
     /**
-     * The content being provided by the client. 
-     * Or in the case of like/dislike requests, the amount by which the like total should be changed.
+     * The content being provided by the client.
+     * 
+     * In the case of POST, mContent contains the idea's content, so the json should
+     * look like "{'mContent':'an example idea'}".
      */
     public String mContent;
 
-    // Should likes by part of requests? tjp says no - likes should be handles by backend
+    /**
+     * In the case of like/dislike requests through PUT, mLikeIncrement is the amount 
+     * by which the like total should be changed (+1 or -1). The json should
+     * look like "{'mLikeIncrement':'1'}" or "{'mLikeIncrement':'-1'}".
+     */
+    public int mLikeIncrement;
 }
