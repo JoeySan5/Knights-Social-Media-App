@@ -54,7 +54,7 @@ public class App
         // the data, embed it in a StructuredResponse, turn it into JSON, and 
         // return it.  If there's no data, we return "[]", so there's no need 
         // for error handling.
-        Spark.get("/posts", (request, response) -> {
+        Spark.get("/ideas", (request, response) -> {
             // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
@@ -62,88 +62,87 @@ public class App
         });
 
         /**
-         * Phase 1 does not have any specific GET route, only a route to get all posts
+         * Phase 1 does not have any specific GET route, only a route to get all ideas
          */
-        // // GET route that returns everything for a single row in the Database.
-        // // The ":id" suffix in the first parameter to get() becomes 
-        // // request.params("id"), so that we can get the requested row ID.  If 
-        // // ":id" isn't a number, Spark will reply with a status 500 Internal
-        // // Server Error.  Otherwise, we have an integer, and the only possible 
-        // // error is that it doesn't correspond to a row with data.
-        // Spark.get("/posts/:id", (request, response) -> {
-        //     int idx = Integer.parseInt(request.params("id"));
-        //     // ensure status 200 OK, with a MIME type of JSON
-        //     response.status(200);
-        //     response.type("application/json");
-        //     DataRow data = db.selectOne(idx);
-        //     if (data == null) {
-        //         return gson.toJson(new StructuredResponse("error", idx + " not found", null));
-        //     } else {
-        //         return gson.toJson(new StructuredResponse("ok", null, data));
-        //     }
-        // });
+        // GET route that returns everything for a single row in the Database.
+        // The ":id" suffix in the first parameter to get() becomes 
+        // request.params("id"), so that we can get the requested row ID.  If 
+        // ":id" isn't a number, Spark will reply with a status 500 Internal
+        // Server Error.  Otherwise, we have an integer, and the only possible 
+        // error is that it doesn't correspond to a row with data.
+        Spark.get("/ideas/:id", (request, response) -> {
+            int idx = Integer.parseInt(request.params("id"));
+            // ensure status 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            Idea idea = db.selectOne(idx);
+            if (idea == null) {
+                return gson.toJson(new StructuredResponse("error", idx + " not found", null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", null, idea));
+            }
+        });
 
         // POST route for adding a new element to the Database.  This will read
-        // JSON from the body of the request, turn it into a SimpleRequest 
+        // JSON from the body of the request, turn it into a IdeaRequest 
         // object, extract the title and content, insert them, and return the 
         // ID of the newly created row.
-        Spark.post("/posts", (request, response) -> {
+        Spark.post("/ideas", (request, response) -> {
             // NB: if gson.Json fails, Spark will reply with status 500 Internal 
             // Server Error
-            SimpleRequest req = gson.fromJson(request.body(), SimpleRequest.class);
+            IdeaRequest req = gson.fromJson(request.body(), IdeaRequest.class);
             // ensure status 200 OK, with a MIME type of JSON
             // NB: even on error, we return 200, but with a JSON object that
             //     describes the error.
             response.status(200);
             response.type("application/json");
-            int rowsInserted = db.insertRow(req.mTitle, req.mContent);
+            int rowsInserted = db.insertRow(req.mContent);
             if (rowsInserted <= 0) {
-                return gson.toJson(new StructuredResponse("error", "error creating post", null));
+                return gson.toJson(new StructuredResponse("error", "error creating idea", null));
             } else {
-                return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + " post(s)", null));
+                return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + " idea(s)", null));
             }
         });
 
-        // PUT route for modifying a likeCount of a post. This is almost 
+        // PUT route for modifying a likeCount of an idea. This is almost 
         // exactly the same as POST
-        Spark.put("/posts/:id", (request, response) -> {
+        Spark.put("/ideas/:id", (request, response) -> {
             // If we can't get an ID or can't parse the JSON, Spark will send
             // a status 500
             int idx = Integer.parseInt(request.params("id"));
             // int likeModifier = Integer.parseInt(request.params("likeChange")); // want to get integer directly, but this doesn't follow formatting/protocol?
-            SimpleRequest req = gson.fromJson(request.body(), SimpleRequest.class);
+            IdeaRequest req = gson.fromJson(request.body(), IdeaRequest.class);
             int likeModifier = Integer.parseInt(req.mContent);
+                //System.out.println("likemodifier="+likeModifier);
             // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
             int rowsUpdated = db.updateOne(idx, likeModifier);
             if (rowsUpdated <= 0) {
-                return gson.toJson(new StructuredResponse("error", "unable to change likes on post #" + idx, null));
+                return gson.toJson(new StructuredResponse("error", "unable to change likes on idea #" + idx, null));
             } else {
                 return gson.toJson(new StructuredResponse("ok", null, null));
             }
         });
 
-        /**
-         * DELETE not yet decided on in phase 1
-         */
-        // // DELETE route for removing a row from the Database.
-        // Spark.delete("/messages/:id", (request, response) -> {
-        //     // If we can't get an ID, Spark will send a status 500
-        //     int idx = Integer.parseInt(request.params("id"));
+        
+        // DELETE route for removing an idea from the Database.
+        Spark.delete("/messages/:id", (request, response) -> {
+            // If we can't get an ID, Spark will send a status 500
+            int idx = Integer.parseInt(request.params("id"));
 
-        //     // ensure status 200 OK, with a MIME type of JSON
-        //     response.status(200);
-        //     response.type("application/json");
-        //     // NB: we won't concern ourselves too much with the quality of the 
-        //     //     message sent on a successful delete
-        //     int rowsDeleted = db.deleteRow(idx);
-        //     if (rowsDeleted <= 0) {
-        //         return gson.toJson(new StructuredResponse("error", "unable to delete row " + idx, null));
-        //     } else {
-        //         return gson.toJson(new StructuredResponse("ok", null, null));
-        //     }
-        // });
+            // ensure status 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            // NB: we won't concern ourselves too much with the quality of the 
+            //     message sent on a successful delete
+            int rowsDeleted = db.deleteRow(idx);
+            if (rowsDeleted <= 0) {
+                return gson.toJson(new StructuredResponse("error", "unable to delete idea #" + idx, null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", null, null));
+            }
+        });
 
     }
 

@@ -10,8 +10,6 @@ import java.sql.SQLException;
 
 import java.util.ArrayList;
 
-import edu.lehigh.cse216.tjp225.backend.PostDataRow;
-
 public class Database {
     /**
      * The connection to the database.  When there is no connection, it should
@@ -80,16 +78,16 @@ public class Database {
             // Note: no "IF NOT EXISTS" or "IF EXISTS" checks on table 
             // creation/deletion, so multiple executions will cause an exception
             this.mCreateTable = this.mConnection.prepareStatement(
-                    "CREATE TABLE posts (id SERIAL PRIMARY KEY, title VARCHAR(50) "
-                    + "NOT NULL, content VARCHAR(500) NOT NULL, likeCount INT)");
-            this.mDropTable = this.mConnection.prepareStatement("DROP TABLE tblData");
+                    "CREATE TABLE ideas (id SERIAL PRIMARY KEY, content VARCHAR(2048) NOT NULL, likeCount INT)");
+            // tjp Note: should we use 'id' or 'ID'
+            this.mDropTable = this.mConnection.prepareStatement("DROP TABLE ideas");
 
             // Standard CRUD operations
-            this.mDeleteOne = this.mConnection.prepareStatement("DELETE FROM posts WHERE id = ?"); // Not implemented in Phase 1
-            this.mInsertOne = this.mConnection.prepareStatement("INSERT INTO posts VALUES (default, ?, ?, 0)");
-            this.mSelectAll = this.mConnection.prepareStatement("SELECT id, title, content, likeCount FROM posts");
-            this.mSelectOne = this.mConnection.prepareStatement("SELECT * from posts WHERE id=?");
-            this.mUpdateOne = this.mConnection.prepareStatement("UPDATE posts SET likeCount = likeCount + ? WHERE id = ?");
+            this.mDeleteOne = this.mConnection.prepareStatement("DELETE FROM ideas WHERE id = ?"); // Not implemented in Phase 1?
+            this.mInsertOne = this.mConnection.prepareStatement("INSERT INTO ideas VALUES (default, ?, 0)");
+            this.mSelectAll = this.mConnection.prepareStatement("SELECT id, content, likeCount FROM ideas");
+            this.mSelectOne = this.mConnection.prepareStatement("SELECT * from ideas WHERE id=?");
+            this.mUpdateOne = this.mConnection.prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE id = ?");
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
             e.printStackTrace();
@@ -190,16 +188,14 @@ public class Database {
     /**
      * Insert a row into the database
      * 
-     * @param title The title for this new row
-     * @param content The content body for this new row
+     * @param content The content body for this new idea
      * 
      * @return The number of rows that were inserted
      */
-    int insertRow(String title, String content) {
+    int insertRow(String content) {
         int count = 0;
         try {
-            mInsertOne.setString(1, title);
-            mInsertOne.setString(2, content);
+            mInsertOne.setString(1, content);
             // likeCount will automatically be set to 0
             count += mInsertOne.executeUpdate();
         } catch (SQLException e) {
@@ -209,17 +205,16 @@ public class Database {
     }
 
     /**
-     * Query the database for a list of posts with their ids, titles, content, and likeCounts
+     * Query the database for a list of posts with their ids, content, and likeCounts
      * 
      * @return All rows, as an ArrayList
      */
-    ArrayList<PostDataRow> selectAll() {
-        ArrayList<PostDataRow> res = new ArrayList<PostDataRow>();
+    ArrayList<Idea> selectAll() {
+        ArrayList<Idea> res = new ArrayList<Idea>();
         try {
             ResultSet rs = mSelectAll.executeQuery();
             while (rs.next()) {
-                res.add(new PostDataRow(rs.getInt("id"), rs.getString("title"),
-                                    rs.getString("content"), rs.getInt("likeCount")));
+                res.add(new Idea(rs.getInt("id"), rs.getString("content")));
             }
             rs.close();
             return res;
@@ -229,61 +224,60 @@ public class Database {
         }
     }
 
-    // Not yet aded in Phase 1
-    // /**
-    //  * Get all data for a specific row, by ID
-    //  * 
-    //  * @param id The id of the row being requested
-    //  * 
-    //  * @return The data for the requested row, or null if the ID was invalid
-    //  */
-    // DataRow selectOne(int id) {
-    //     DataRow res = null;
-    //     try {
-    //         mSelectOne.setInt(1, id);
-    //         ResultSet rs = mSelectOne.executeQuery();
-    //         if (rs.next()) {
-    //             res = new DataRow(rs.getInt("id"), rs.getString("subject"), rs.getString("message"));
-    //         }
-    //     } catch (SQLException e) {
-    //         e.printStackTrace();
-    //     }
-    //     return res;
-    // }
+    // Not yet aded in Phase 1?
+    /**
+     * Get all data for a specific row, by ID
+     * 
+     * @param id The id of the row being requested
+     * 
+     * @return The data for the requested row, or null if the ID was invalid
+     */
+    Idea selectOne(int id) {
+        Idea res = null;
+        try {
+            mSelectOne.setInt(1, id);
+            ResultSet rs = mSelectOne.executeQuery();
+            if (rs.next()) {
+                res = new Idea(rs.getInt("id"), rs.getString("content"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
 
-    // Not yet added in Phase 1
-    // /**
-    //  * Delete a row by ID
-    //  * 
-    //  * @param id The id of the row to delete
-    //  * 
-    //  * @return The number of rows that were deleted.  -1 indicates an error.
-    //  */
-    // int deleteRow(int id) {
-    //     int res = -1;
-    //     try {
-    //         mDeleteOne.setInt(1, id);
-    //         res = mDeleteOne.executeUpdate();
-    //     } catch (SQLException e) {
-    //         e.printStackTrace();
-    //     }
-    //     return res;
-    // }
+    /**
+     * Delete a row by ID
+     * 
+     * @param id The id of the row to delete
+     * 
+     * @return The number of rows that were deleted.  -1 indicates an error.
+     */
+    int deleteRow(int id) {
+        int res = -1;
+        try {
+            mDeleteOne.setInt(1, id);
+            res = mDeleteOne.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
 
     /**
      * Update the message for a row in the database
      * 
      * @param id The id of the row to update
-     * @param likeChange the requested amount to change likes by - must be 1 or -1 to be successful
+     * @param likeDelta the requested amount to change likes by; must be 1 or -1 to be successful
      * 
      * @return The amount of posts affected by the given likeCountged.  -1 indicates an error.
      */
-    int updateOne(int id, int likeChange) {
+    int updateOne(int id, int likeDelta) {
         // tjp: open to changing what the return value should be, e.g. differentiating between a dislike and like
         int res = -1;
         try {
-            if(likeChange == 1 || likeChange == -1){
-                mUpdateOne.setInt(1, likeChange);
+            if(likeDelta == 1 || likeDelta == -1){
+                mUpdateOne.setInt(1, likeDelta);
                 mUpdateOne.setInt(2, id);
                 res = mUpdateOne.executeUpdate();
             }
