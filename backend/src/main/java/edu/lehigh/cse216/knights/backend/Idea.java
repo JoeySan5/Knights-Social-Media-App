@@ -4,7 +4,7 @@ package edu.lehigh.cse216.knights.backend;
 
 /**
  * Idea holds a row of information.  A row of information consists of
- * an identifier, strings for a "title" and "content", and a creation date.
+ * an identifier, a string for "content", and an integer for likeCount.
  * 
  * Because we will ultimately be converting instances of this object into JSON
  * directly, we need to make the fields public.  That being the case, we will
@@ -55,7 +55,7 @@ public class Idea {
 
     /**
      * Copy constructor to create one Idea from another.
-     * Not currently used for Phase 1 implementation
+     * Currently not used in production code, just in the MockDatabase.
      */
     Idea(Idea idea) {
         mId = idea.mId;

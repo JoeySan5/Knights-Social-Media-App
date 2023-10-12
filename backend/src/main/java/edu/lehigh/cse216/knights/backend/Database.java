@@ -275,7 +275,7 @@ public class Database {
      * @return The amount of posts affected by the given likeCountged.  -1 indicates an error.
      */
     int updateIdeaLikeCount(int id, int likeDelta) {
-        // tjp: open to changing what the return value should be, e.g. differentiating between a dislike and like
+        // tjp: I'm open to changing what the return value should be, e.g. differentiating between a dislike and like
         int res = -1;
         try {
             if(likeDelta == 1 || likeDelta == -1){
