@@ -35,6 +35,20 @@ public class Idea {
     // public final Date mCreated;
 
     /**
+     * Create a new Idea with the id and content provided.
+     * Sets the mLikeCount to 0.
+     * 
+     * @param id The id to associate with the Idea in this row.  Assumed to be unique 
+     *           throughout the whole program.
+     * @param content The content string for this Idea
+     */
+    public Idea(int id, String content) {
+        mId = id;
+        mContent = content;
+        mLikeCount = 0;
+    }
+
+    /**
      * Create a new Idea with the id, content, and likeCount provided.
      * Should not be used for creating a new ID
      * 
