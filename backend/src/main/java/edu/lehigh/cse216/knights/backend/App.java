@@ -44,6 +44,9 @@ public class App
         }
 
         // Set up a route for serving the main page
+        // tjp: this 'main page' of 'index.html' is just a placeholder. It also leads
+        //      to a 404 error since the page doesn't exist. Maybe in future phases we should
+        //      go to some specific page.
         Spark.get("/", (req, res) -> {
             res.redirect("/index.html");
             return "";
