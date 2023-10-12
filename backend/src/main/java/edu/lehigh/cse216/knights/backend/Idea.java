@@ -54,7 +54,8 @@ public class Idea {
     }
 
     /**
-     * Copy constructor to create one Idea from another
+     * Copy constructor to create one Idea from another.
+     * Not currently used for Phase 1 implementation
      */
     Idea(Idea idea) {
         mId = idea.mId;
