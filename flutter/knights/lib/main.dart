@@ -4,18 +4,23 @@ import 'package:flutter/material.dart';
 //everytime like button is cliked it should be a new request, that either 
 //increments or decrements like counter
 void main() {
-  runApp(const MyHomePage());
+  runApp(const MyApp());
 }
 
-class myApp extends StatelessWidget{
+class MyApp extends StatelessWidget{
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return  MaterialApp(
       title: 'Knights App',
-      // theme: ThemeData(
-      //   primarySwatch: Colors.blue,
-      // ),
-      home: MyHomePage(),
+      theme: ThemeData(
+        scaffoldBackgroundColor: const Color.fromARGB(255, 5, 5, 5),
+      ),
+      home:  const Directionality(
+        textDirection: TextDirection.ltr, 
+        child: MyHomePage(),
+        ),
+        
     );
   }
 }
@@ -27,14 +32,17 @@ class MyHomePage extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     
-    return const Column(
+    return  const Scaffold(
+      body:Center(
+        child: Column(
         
           children: <Widget>[
             Padding(padding: EdgeInsets.only(top: 40.0),
             child: Text(
               'Knights',
-              textDirection: TextDirection.ltr,
+              
               style: TextStyle(
+              
                 fontSize: 40,
                 color: Color.fromARGB(221, 255, 255, 255),
                 fontFamily: 'roboto'
@@ -54,7 +62,9 @@ class MyHomePage extends StatelessWidget{
             ),
             Idea(),
           ],
-        );
+        )
+      )
+    );
       }
     }
 
@@ -63,21 +73,19 @@ class MyHomePage extends StatelessWidget{
       const Idea({super.key});
 
       @override
-    Widget build(BuildContext context) {
-      return(
-        const Material(
-          child: Padding(
-          padding: EdgeInsets.only(top: 10.0),
-          child: TextField(decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            hintText: 'Please write your idea here...',
-            hintStyle: TextStyle(color: Colors.green),
-          ),
-          ),
-          ),
-        )
-      );
-    }
+      Widget build(BuildContext context) {
+        return(
+            const Padding(
+            padding: EdgeInsets.only(top: 10.0),
+            child: TextField(decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Please write your idea here...',
+              hintStyle: TextStyle(color: Colors.green),
+            ),
+            ),
+            )
+        );
+      }
 
     }
 
