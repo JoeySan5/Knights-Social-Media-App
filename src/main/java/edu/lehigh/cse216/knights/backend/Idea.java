@@ -35,22 +35,18 @@ public class Idea {
     // public final Date mCreated;
 
     /**
-     * Create a new Idea with the provided id and title/content, and a 
-     * creation date based on the system clock at the time the constructor was
-     * called. Like count always starts at 0.
+     * Create a new Idea with the id, content, and likeCount provided.
+     * Should not be used for creating a new ID
      * 
-     * @param id The id to associate with this row.  Assumed to be unique 
+     * @param id The id to associate with the Idea in this row.  Assumed to be unique 
      *           throughout the whole program.
-     * 
-     * @param title The title string for this row of idea
-     * 
-     * @param content The content string for this row of idea
+     * @param content The content string for this Idea
+     * @param likeCount The number of likes this Idea has
      */
-    public Idea(int id, String content) {
+    public Idea(int id, String content, int likeCount) {
         mId = id;
         mContent = content;
-        mLikeCount = 0;
-        // mCreated = new Date();
+        mLikeCount = likeCount;
     }
 
     /**
@@ -62,6 +58,5 @@ public class Idea {
         // NB: Strings and Dates are immutable, so copy-by-reference is safe
         mContent = idea.mContent;
         mLikeCount = idea.mLikeCount;
-        // mCreated = idea.mCreated;
     }
 }

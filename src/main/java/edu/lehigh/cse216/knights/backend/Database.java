@@ -198,7 +198,7 @@ public class Database {
         int count = 0;
         try {
             mInsertOneIdea.setString(1, content);
-            // likeCount will automatically be set to 0
+            // likeCount will automatically be set to 0; it is written into the preparedStatement
             count += mInsertOneIdea.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -217,7 +217,7 @@ public class Database {
         try {
             ResultSet rs = mSelectAllIdeas.executeQuery();
             while (rs.next()) {
-                res.add(new Idea(rs.getInt("id"), rs.getString("content")));
+                res.add(new Idea(rs.getInt("id"), rs.getString("content"), rs.getInt("likeCount")));
             }
             rs.close();
             return res;
@@ -240,7 +240,7 @@ public class Database {
             mSelectOneIdea.setInt(1, id);
             ResultSet rs = mSelectOneIdea.executeQuery();
             if (rs.next()) {
-                res = new Idea(rs.getInt("id"), rs.getString("content"));
+                res = new Idea(rs.getInt("id"), rs.getString("content"), rs.getInt("likeCount"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
