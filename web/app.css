@@ -2,16 +2,21 @@ body {
     background-color: black;
 }
 
-h1{
+#teamName{
     text-align: center;
     padding: 10px;
     font-size: 70px;
     color: white;
 }
 
-h3{
+#tagline{
     text-align: center;
-    
     font-size: 20px;
     color: white;
+}
+
+#addElement, #editElement, #showElements{
+    text-align: center;
+    color: #CFFA7C;
+
 }
