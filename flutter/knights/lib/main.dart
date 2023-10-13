@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:like_button/like_button.dart';
 
 
 //everytime like button is cliked it should be a new request, that either 
@@ -55,12 +56,13 @@ class MyHomePage extends StatelessWidget{
             textDirection: TextDirection.ltr,
               style: TextStyle(
                 fontSize: 20,
-                color: Color.fromARGB(221, 255, 255, 255),
-                fontFamily: 'roboto'
+                color: Colors.white,
+                fontFamily: 'roboto',
+              
               ),
               ),
             ),
-            Idea(),
+            IdeaFormat(),
           ],
         )
       )
@@ -68,111 +70,88 @@ class MyHomePage extends StatelessWidget{
       }
     }
 
-    // This class is for an "idea", with a message, like counter, like button (increment counter), and dislike button (decrement counter)
-    class Idea extends StatelessWidget {
-      const Idea({super.key});
-
+    //This class is the format to display an idea,
+    //includes like counter, like button (increment counter), and dislike button (decrement counter)
+    class IdeaFormat extends StatelessWidget{
+      const IdeaFormat({super.key});
+        
       @override
       Widget build(BuildContext context) {
-        return(
-            const Padding(
-            padding: EdgeInsets.only(top: 10.0),
-            child: TextField(decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: 'Please write your idea here...',
-              hintStyle: TextStyle(color: Colors.green),
+        return Container(
+          margin: const EdgeInsets.all(15),
+          //decoration is to make borders look different
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Colors.green,
+              width: 1.5,
+              
+              ),
+              borderRadius: const BorderRadius.all(
+                Radius.circular(10)
+              ),
             ),
-            ),
-            )
+          
+          height: 50,
+          child:  Column(
+            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              const Text(
+              'Random Message',
+              style: TextStyle(color: Colors.white),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  const Text('0',
+                  style: TextStyle(color: Colors.white),
+                  ),
+                  LikeButton(
+                    likeBuilder:(bool isLiked){
+                      return const Icon(
+                          Icons.thumb_up,
+                          color: Colors.white
+                      );
+                    },
+                  ),
+                  LikeButton(
+                    likeBuilder:(bool isLiked){
+                      return const Icon(
+                          Icons.thumb_down,
+                          color: Colors.white
+                      );
+                    },
+                  ),
+              
+                ],
+              )
+            ],
+          )
         );
+
       }
 
     }
 
-// class MyHomePage extends StatefulWidget {
-//   const MyHomePage({super.key, required this.title});
+    // This class is for writing an "idea", with a message
+    // class Idea extends StatelessWidget {
+    //   const Idea({super.key});
 
-//   // This widget is the home page of your application. It is stateful, meaning
-//   // that it has a State object (defined below) that contains fields that affect
-//   // how it looks.
+    //   @override
+    //   Widget build(BuildContext context) {
+    //     return(
+    //         const Padding(
+    //         padding: EdgeInsets.only(top: 10.0),
+    //         child: TextField(
+    //           decoration: InputDecoration(
+    //           border: OutlineInputBorder(),
+    //           hintText: 'Please write your idea here...',
+    //           hintStyle: TextStyle(color: Colors.green),
+    //         ),
+    //         style: TextStyle(color: Colors.white),
+    //         ),
+    //         )
+    //     );
+    //   }
 
-//   // This class is the configuration for the state. It holds the values (in this
-//   // case the title) provided by the parent (in this case the App widget) and
-//   // used by the build method of the State. Fields in a Widget subclass are
-//   // always marked "final".
+    // }
 
-//   final String title;
-
-//   @override
-//   State<MyHomePage> createState() => _MyHomePageState();
-// }
-
-// class _MyHomePageState extends State<MyHomePage> {
-//   int _counter = 0;
-
-//   void _incrementCounter() {
-//     setState(() {
-//       // This call to setState tells the Flutter framework that something has
-//       // changed in this State, which causes it to rerun the build method below
-//       // so that the display can reflect the updated values. If we changed
-//       // _counter without calling setState(), then the build method would not be
-//       // called again, and so nothing would appear to happen.
-//       _counter++;
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     // This method is rerun every time setState is called, for instance as done
-//     // by the _incrementCounter method above.
-//     //
-//     // The Flutter framework has been optimized to make rerunning build methods
-//     // fast, so that you can just rebuild anything that needs updating rather
-//     // than having to individually change instances of widgets.
-//     return Scaffold(
-//       appBar: AppBar(
-//         // TRY THIS: Try changing the color here to a specific color (to
-//         // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-//         // change color while the other colors stay the same.
-//         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-//         // Here we take the value from the MyHomePage object that was created by
-//         // the App.build method, and use it to set our appbar title.
-//         title: Text(widget.title),
-//       ),
-//       body: Center(
-//         // Center is a layout widget. It takes a single child and positions it
-//         // in the middle of the parent.
-//         child: Column(
-//           // Column is also a layout widget. It takes a list of children and
-//           // arranges them vertically. By default, it sizes itself to fit its
-//           // children horizontally, and tries to be as tall as its parent.
-//           //
-//           // Column has various properties to control how it sizes itself and
-//           // how it positions its children. Here we use mainAxisAlignment to
-//           // center the children vertically; the main axis here is the vertical
-//           // axis because Columns are vertical (the cross axis would be
-//           // horizontal).
-//           //
-//           // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-//           // action in the IDE, or press "p" in the console), to see the
-//           // wireframe for each widget.
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: <Widget>[
-//             const Text(
-//               'You have pushed the button this many times:',
-//             ),
-//             Text(
-//               '$_counter',
-//               style: Theme.of(context).textTheme.headlineMedium,
-//             ),
-//           ],
-//         ),
-//       ),
-//       floatingActionButton: FloatingActionButton(
-//         onPressed: _incrementCounter,
-//         tooltip: 'Increment',
-//         child: const Icon(Icons.add),
-//       ), // This trailing comma makes auto-formatting nicer for build methods.
-//     );
-//   }
-// }
