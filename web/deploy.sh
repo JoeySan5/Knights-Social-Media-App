@@ -28,6 +28,12 @@ cp app.css $TARGETFOLDER
 echo "Compiling app.ts"
 node_modules/typescript/bin/tsc app.ts --lib "es2015","dom" --target es5 --strict --outFile $TARGETFOLDER/app.js
 
+# step 5: set up Jasmine
+node_modules/typescript/bin/tsc apptest.ts --strict --outFile $TARGETFOLDER/$WEBFOLDERNAME/apptest.js
+cp spec_runner.html $TARGETFOLDER/$WEBFOLDERNAME
+cp node_modules/jasmine-core/lib/jasmine-core/*.css $TARGETFOLDER/$WEBFOLDERNAME
+cp node_modules/jasmine-core/lib/jasmine-core/*.js $TARGETFOLDER/$WEBFOLDERNAME
+
 # step final: launch the server.  Be sure to disable caching
 # (Note: we don't currently use -s for silent operation)
 echo "Starting local webserver at $TARGETFOLDER"
