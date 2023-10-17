@@ -67,6 +67,29 @@ Future<bool> onDislikeButtonTapped(int id) async{
     return !isLiked;
   }
 
+    Future<String> postIdeas(String userText) async{
+      developer.log('Making web request...');
+      var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas');
+      var headers = {"Accept": "application/json"};
+      var body = {'mContent': userText};
+
+      var response = await http.post(url, headers: headers, body: jsonEncode(body));
+
+      if (response.statusCode == 200){
+        developer.log('response headers: ${response.headers}');
+        developer.log('response body: ${response.body}');
+
+      return userText;
+        
+      }
+      else{
+        // If the server did not return a 200 OK response,
+        // then throw an exception.
+        throw Exception('Did not receive success status(200) code from request.');
+      }
+    }
+
+
     //this method fetches the json from dokku, and then 
     //seperates each json object into an Idea(.dart) object
     Future<List<Idea>> fetchIdeas() async{

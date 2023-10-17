@@ -110,18 +110,12 @@ class _IdeasForm extends State<IdeasForm>{
             ),
             
         ElevatedButton(
-              style: ButtonStyle(
+              style: const ButtonStyle(
                   backgroundColor: MaterialStatePropertyAll(Colors.green),
                 ),
-              onPressed: () {
-                showDialog(context: context,
-                 builder: (context){
-                  return AlertDialog(
-                    content: Text(myController.text)
-                  );
-                 }
-                 );
-              },
+                //the arrow function ()=> allows for postIdeas to return a future
+                //this is done because onPressed accepts only voids, not future
+              onPressed:() => postIdeas(myController.text),
               child: const Text('Submit')
               ),
       ],
