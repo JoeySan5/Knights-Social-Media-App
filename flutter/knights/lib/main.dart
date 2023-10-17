@@ -73,7 +73,7 @@ class MyHomePage extends StatelessWidget{
                 ),
                 ),
               ),
-              IdeaList(),
+              IdeaFormat(mId: 3, mContent: 'this is my first example', mLikeCount: 2),
             ],
           )
         )
@@ -82,6 +82,7 @@ class MyHomePage extends StatelessWidget{
   }
 
   class IdeaList extends StatefulWidget{
+    
     const IdeaList({super.key});
 
       @override
@@ -103,7 +104,7 @@ class MyHomePage extends StatelessWidget{
         itemBuilder: (context, index) {
           developer.log('building with context & $index');
 
-          return IdeaFormat();
+          return IdeaFormat(mId: _ideas[1].mId, mContent:_ideas[1].mContent, mLikeCount: _ideas[1].mLikeCount);
         },
         );
     } 
@@ -112,7 +113,10 @@ class MyHomePage extends StatelessWidget{
     //This class is the format to display an idea,
     //includes user massage, like counter, like button (increment counter), and dislike button (decrement counter)
   class IdeaFormat extends StatefulWidget{
-      const IdeaFormat({super.key});
+      final int mId;
+      final String mContent;
+      final int mLikeCount;
+      const IdeaFormat({super.key, required this.mId, required this.mContent, required this.mLikeCount});
 
       @override
       State<IdeaFormat> createState() => _IdeaFormat();
@@ -140,15 +144,16 @@ class MyHomePage extends StatelessWidget{
           child:  Column(
             // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              const Text(
-              'Random Message',
-              style: TextStyle(color: Colors.white),
+               Text(
+              widget.mContent,
+              style: const TextStyle(color: Colors.white),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  const Text('0',
-                  style: TextStyle(color: Colors.white),
+                  Text(
+                  widget.mLikeCount.toString(),
+                  style: const TextStyle(color: Colors.white),
                   ),
                   //this is thumbs-up icon
                   LikeButton(
