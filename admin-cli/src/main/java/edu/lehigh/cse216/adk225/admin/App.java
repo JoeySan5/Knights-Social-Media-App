@@ -1,4 +1,4 @@
-package edu.lehigh.cse216.adk225.admin;
+package edu.lehigh.cse216.knights.admin;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

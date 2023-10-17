@@ -1,4 +1,4 @@
-package edu.lehigh.cse216.adk225.admin;
+package edu.lehigh.cse216.knights.admin;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
