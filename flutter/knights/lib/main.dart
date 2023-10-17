@@ -41,59 +41,85 @@ class MyApp extends StatelessWidget{
 class MyHomePage extends StatelessWidget{
   const MyHomePage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    
-    return  const Scaffold(
-      body:Center(
-        child: Column(
-        
-          children: <Widget>[
-            Padding(padding: EdgeInsets.only(top: 40.0),
-            child: Text(
-              'Knights',
-              
-              style: TextStyle(
-              
-                fontSize: 40,
-                color: Color.fromARGB(221, 255, 255, 255),
-                fontFamily: 'roboto'
+    @override
+    Widget build(BuildContext context) {
+      
+      return  const Scaffold(
+        body:Center(
+          child: Column(
+          
+            children: <Widget>[
+              Padding(padding: EdgeInsets.only(top: 40.0),
+              child: Text(
+                'Knights',
+                
+                style: TextStyle(
+                
+                  fontSize: 40,
+                  color: Color.fromARGB(221, 255, 255, 255),
+                  fontFamily: 'roboto'
+                ),
+              )
               ),
-            )
-            ),
 
-            Padding( padding: EdgeInsets.only(top: 30.0),
-            child: Text('Here\'s what people have been saying:',
-            textDirection: TextDirection.ltr,
-              style: TextStyle(
-                fontSize: 20,
-                color: Colors.white,
-                fontFamily: 'roboto',
-              
+              Padding( padding: EdgeInsets.only(top: 30.0),
+              child: Text('Here\'s what people have been saying:',
+              textDirection: TextDirection.ltr,
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.white,
+                  fontFamily: 'roboto',
+                
+                ),
+                ),
               ),
-              ),
-            ),
-            IdeaFormat(),
-          ],
+              IdeaList(),
+            ],
+          )
         )
-      )
-    );
-      }
+      );
     }
+  }
+
+  class IdeaList extends StatefulWidget{
+    const IdeaList({super.key});
+
+      @override
+      State<IdeaList> createState() => _IdeaList();
+  }
+
+  class _IdeaList extends State<IdeaList>{
+    final List<Idea> _ideas = [
+      Idea(mId: 4, mContent: 'helloworld', mLikeCount: 4),
+      Idea(mId: 5, mContent: 'byeworld', mLikeCount: -7),
+    ];
+
+    @override
+    Widget build(BuildContext context) {
+      return ListView.builder(
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        itemCount: _ideas.length,
+        itemBuilder: (context, index) {
+          developer.log('building with context & $index');
+
+          return IdeaFormat();
+        },
+        );
+    } 
+  }
 
     //This class is the format to display an idea,
     //includes user massage, like counter, like button (increment counter), and dislike button (decrement counter)
-    class IdeaFormat extends StatefulWidget{
+  class IdeaFormat extends StatefulWidget{
       const IdeaFormat({super.key});
 
       @override
       State<IdeaFormat> createState() => _IdeaFormat();
 
-    }
+  }
 
-    class _IdeaFormat extends State<IdeaFormat> {
-      
-      
+  class _IdeaFormat extends State<IdeaFormat> {
       @override
       Widget build(BuildContext context) {
         return Container(
@@ -152,7 +178,7 @@ class MyHomePage extends StatelessWidget{
         );
 
       }
-    }
+  }
 
     //this method fetches the json from dokku, and then 
     //seperates each json object into an Idea(.dart) object
@@ -193,8 +219,6 @@ class MyHomePage extends StatelessWidget{
     }
 
     Future<bool> onDislikeButtonTapped(bool isLiked) async{
-    
-    
     /// send your request here
     // final bool success= await sendRequest();
 
