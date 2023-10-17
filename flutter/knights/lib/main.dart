@@ -45,6 +45,7 @@ class MyHomePage extends StatelessWidget{
     Widget build(BuildContext context) {
       
       return  const Scaffold(
+        
         body:Center(
           child: Column(
           
@@ -62,7 +63,7 @@ class MyHomePage extends StatelessWidget{
               )
               ),
 
-              Padding( padding: EdgeInsets.only(top: 30.0),
+              Padding( padding: EdgeInsets.only(top: 30.0, bottom: 30.0),
               child: Text('Here\'s what people have been saying:',
               textDirection: TextDirection.ltr,
                 style: TextStyle(
@@ -73,7 +74,8 @@ class MyHomePage extends StatelessWidget{
                 ),
                 ),
               ),
-              IdeaList(),
+              SizedBox(height: 400,
+              child: IdeaList(),),
             ],
           )
         )
@@ -125,7 +127,7 @@ class MyHomePage extends StatelessWidget{
 
             child = ListView.builder(
             
-            padding:  const EdgeInsets.all(16.0),
+            
             scrollDirection: Axis.vertical,
             shrinkWrap: true,
             itemCount: snapshot.data!.length,
