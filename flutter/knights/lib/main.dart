@@ -47,14 +47,12 @@ class MessagePage extends StatelessWidget{
       body:Center(
         child: Column(
           children: <Widget>[
-            ElevatedButton(
-              onPressed: (){
-                
-              },
-              child: Text('Submit')
-              ),
+            IdeasForm(),
             
             ElevatedButton(
+              style: ButtonStyle(
+                  backgroundColor: MaterialStatePropertyAll(Colors.green),
+                ),
               onPressed: (){
                 Navigator.pop(context);
               },
@@ -64,6 +62,69 @@ class MessagePage extends StatelessWidget{
           ],
         ),
       )
+    );
+  }
+}
+
+class IdeasForm extends StatefulWidget{
+  const IdeasForm({super.key});
+
+  @override
+  State<IdeasForm> createState() => _IdeasForm();
+}
+
+class _IdeasForm extends State<IdeasForm>{
+  //text controller used to retreive current value of the TextField
+  final myController = TextEditingController();
+
+  @override
+  void dispose(){
+    //clean up controller when the widget is disposed
+    myController.dispose();
+    super.dispose();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+            
+            Padding(
+              padding: EdgeInsets.only(top: 30),
+              child: SizedBox( 
+              width: 300,
+              height: 300,
+              child: TextField(
+                maxLines: null,
+                expands: true,
+              
+              controller: myController,
+              decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Please write your idea here...',
+              hintStyle: TextStyle(color: Colors.white),
+              contentPadding: EdgeInsets.all(10)
+            ),
+            style: TextStyle(color: Colors.white),
+            )
+            )
+            ),
+            
+        ElevatedButton(
+              style: ButtonStyle(
+                  backgroundColor: MaterialStatePropertyAll(Colors.green),
+                ),
+              onPressed: () {
+                showDialog(context: context,
+                 builder: (context){
+                  return AlertDialog(
+                    content: Text(myController.text)
+                  );
+                 }
+                 );
+              },
+              child: const Text('Submit')
+              ),
+      ],
     );
   }
 }
@@ -139,26 +200,26 @@ class MyHomePage extends StatelessWidget{
 
 
 
-    // This class is for writing an "idea", with a message
-    // class Idea extends StatelessWidget {
-    //   const Idea({super.key});
+    //This class is for writing an "idea", with a message
+    class Idea extends StatelessWidget {
+      const Idea({super.key});
 
-    //   @override
-    //   Widget build(BuildContext context) {
-    //     return(
-    //         const Padding(
-    //         padding: EdgeInsets.only(top: 10.0),
-    //         child: TextField(
-    //           decoration: InputDecoration(
-    //           border: OutlineInputBorder(),
-    //           hintText: 'Please write your idea here...',
-    //           hintStyle: TextStyle(color: Colors.green),
-    //         ),
-    //         style: TextStyle(color: Colors.white),
-    //         ),
-    //         )
-    //     );
-    //   }
+      @override
+      Widget build(BuildContext context) {
+        return(
+            const Padding(
+            padding: EdgeInsets.only(top: 10.0),
+            child: TextField(
+              decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Please write your idea here...',
+              hintStyle: TextStyle(color: Colors.green),
+            ),
+            style: TextStyle(color: Colors.white),
+            ),
+            )
+        );
+      }
 
-    // }
+    }
 
