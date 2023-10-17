@@ -73,7 +73,7 @@ class MyHomePage extends StatelessWidget{
                 ),
                 ),
               ),
-              IdeaFormat(mId: 3, mContent: 'this is my first example', mLikeCount: 2),
+              IdeaList(),
             ],
           )
         )
@@ -89,25 +89,67 @@ class MyHomePage extends StatelessWidget{
       State<IdeaList> createState() => _IdeaList();
   }
 
+
+  //now we want to read in data from dokku using get (fetchdata()), and then parse the data into idea objects.
+  //with the idea object we will get a list similar to below, 
   class _IdeaList extends State<IdeaList>{
     final List<Idea> _ideas = [
       Idea(mId: 4, mContent: 'helloworld', mLikeCount: 4),
       Idea(mId: 5, mContent: 'byeworld', mLikeCount: -7),
     ];
+    late Future<List<Idea>> _future_list_ideas;
+
+    //initState called to initialize data that depends on a build
+    //once the widget is inserted inside the widget tree
+    @override
+    void initState(){
+      _future_list_ideas = fetchIdeas();
+    }
+
+    void retry(){
+      setState(() {
+        _future_list_ideas = fetchIdeas();
+      });
+    }
+
 
     @override
     Widget build(BuildContext context) {
-      return ListView.builder(
-        scrollDirection: Axis.vertical,
-        shrinkWrap: true,
-        itemCount: _ideas.length,
-        itemBuilder: (context, index) {
-          developer.log('building with context & $index');
+        var fb = FutureBuilder<List<Idea>>(
+        future: _future_list_ideas, 
+        //context keeps track of each widget in the widgetTree
+        builder: (BuildContext context, AsyncSnapshot<List<Idea>> snapshot){
+          Widget child;
+          
+          if (snapshot.hasData){
 
-          return IdeaFormat(mId: _ideas[1].mId, mContent:_ideas[1].mContent, mLikeCount: _ideas[1].mLikeCount);
+            child = ListView.builder(
+            
+            padding:  const EdgeInsets.all(16.0),
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            itemCount: snapshot.data!.length,
+            itemBuilder: (context, index) {
+              developer.log('building with context & $index');
+
+              return IdeaFormat(mId: snapshot.data![index].mId, mContent:snapshot.data![index].mContent, mLikeCount: snapshot.data![index].mLikeCount);
+            },
+            );
+          }
+          else if(snapshot.hasError){
+            child = Text('${snapshot.error}');
+          } else{
+            //this awaits snapshot data, displaying a loading spinner
+            child = const CircularProgressIndicator();
+          }
+          return child; 
         },
-        );
-    } 
+      );
+
+      return fb;
+    }
+      
+    
   }
 
     //This class is the format to display an idea,
@@ -189,7 +231,7 @@ class MyHomePage extends StatelessWidget{
     //seperates each json object into an Idea(.dart) object
     Future<List<Idea>> fetchIdeas() async{
       developer.log('Making web request...');
-      var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/7');
+      var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas');
       var headers = {"Accept": "application/json"};
 
       var response = await http.get(url, headers: headers);
@@ -200,13 +242,15 @@ class MyHomePage extends StatelessWidget{
         final List<Idea> returnData;
         
         var res = jsonDecode(response.body);
+        print('json decode: $res');
+        print('resmdata: ${res['mData']}');
         
         if(res['mData'] is List){
           //dynamic allows for a types to be inferred during runtime, and can be changed to different types
-          returnData = (res as List<dynamic>).map((x) => Idea.fromJson(x)).toList();
+          returnData = (res['mData'] as List<dynamic>).map((x) => Idea.fromJson(x)).toList();
         }
         else if(res is Map){
-          returnData = <Idea>[Idea.fromJson(res as Map<String,dynamic>)];
+          returnData = <Idea>[Idea.fromJson(res['mData'] as Map<String,dynamic>)];
         }else{
           developer.log('ERROR: Unexpected json response type (was not a List or Map).');
           returnData = List.empty();

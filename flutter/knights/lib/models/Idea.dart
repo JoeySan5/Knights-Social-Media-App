@@ -13,9 +13,9 @@ class Idea{
   // from json
   factory Idea.fromJson(Map<String, dynamic> json){
     return Idea(
-      mId: json['mData']['mId'],
-      mContent: json['mData']['mContent'],
-      mLikeCount: json['mData']['mLikeCount']
+      mId: json['mId'],
+      mContent: json['mContent'],
+      mLikeCount: json['mLikeCount']
     );
   }
 
