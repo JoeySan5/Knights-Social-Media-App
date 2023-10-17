@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:developer' as developer;
-import 'package:knights/components/IdeaFormat.dart';
+
 import 'package:knights/models/Idea.dart';
 
 Future<bool> onDislikeButtonTapped(int id) async{
