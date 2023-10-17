@@ -51,7 +51,10 @@ import 'package:knights/net/webRequests.dart';
                   ),
                   //this is thumbs-up icon
                   LikeButton(
-                    onTap: onLikeButtonTapped,
+                    //likeCount: widget.mLikeCount,
+                    onTap: (isLiked) {
+                      return onLikeButtonTapped(widget.mId);
+                    },
                     likeBuilder:(bool isLiked){
                       return const Icon(
                           Icons.thumb_up,
@@ -61,7 +64,9 @@ import 'package:knights/net/webRequests.dart';
                   ),
                   //this is thumbs-down icon
                   LikeButton(
-                    onTap: onDislikeButtonTapped,
+                    onTap: (isLiked) {
+                      return onDislikeButtonTapped(widget.mId);
+                    },
                     likeBuilder:(bool isLiked){
                       return const Icon(
                           Icons.thumb_down,

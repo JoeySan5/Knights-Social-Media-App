@@ -38,6 +38,36 @@ class MyApp extends StatelessWidget{
   }
 }
 
+class MessagePage extends StatelessWidget{
+  const MessagePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return  Scaffold(
+      body:Center(
+        child: Column(
+          children: <Widget>[
+            ElevatedButton(
+              onPressed: (){
+                
+              },
+              child: Text('Submit')
+              ),
+            
+            ElevatedButton(
+              onPressed: (){
+                Navigator.pop(context);
+              },
+              child: Text('Go Back Home')
+              ),
+             
+          ],
+        ),
+      )
+    );
+  }
+}
+
 
 class MyHomePage extends StatelessWidget{
   const MyHomePage({super.key});
@@ -45,7 +75,7 @@ class MyHomePage extends StatelessWidget{
     @override
     Widget build(BuildContext context) {
       
-      return  const Scaffold(
+      return   Scaffold(
         
         body:Center(
           child: Column(
@@ -75,8 +105,27 @@ class MyHomePage extends StatelessWidget{
                 ),
                 ),
               ),
-              SizedBox(height: 400,
-              child: IdeaList(),),
+              SizedBox(
+                height: 400,
+                child: IdeaList(),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 35.0),
+                child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStatePropertyAll(Colors.green),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(
+                      builder: (context) => const MessagePage()
+                      )
+                  );
+                }, 
+                child: Text('Say your Piece')
+                )
+              )
             ],
           )
         )

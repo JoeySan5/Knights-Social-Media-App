@@ -16,7 +16,7 @@ class IdeaList extends StatefulWidget{
   }
 
 
-//now we want to read in data from dokku using get (fetchdata()), and then parse the data into idea objects.
+  //now we want to read in data from dokku using get (fetchdata()), and then parse the data into idea objects.
   //with the idea object we will get a list similar to below, 
   class _IdeaList extends State<IdeaList>{
     // final List<Idea> _ideas = [
@@ -44,6 +44,7 @@ class IdeaList extends StatefulWidget{
         var fb = FutureBuilder<List<Idea>>(
         future: _future_list_ideas, 
         //context keeps track of each widget in the widgetTree
+        //snapshot is what is currently available 
         builder: (BuildContext context, AsyncSnapshot<List<Idea>> snapshot){
           Widget child;
           

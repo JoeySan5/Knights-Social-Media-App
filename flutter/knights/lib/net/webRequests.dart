@@ -4,7 +4,8 @@ import 'dart:developer' as developer;
 import 'package:knights/components/IdeaFormat.dart';
 import 'package:knights/models/Idea.dart';
 
-Future<bool> onDislikeButtonTapped(bool isLiked) async{
+Future<bool> onDislikeButtonTapped(int id) async{
+  bool isLiked = true;
     /// send your request here
     // final bool success= await sendRequest();
 
@@ -12,7 +13,7 @@ Future<bool> onDislikeButtonTapped(bool isLiked) async{
     // return success? !isLiked:isLiked;
 
     developer.log('Making web request...');
-    var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/7');
+    var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/$id');
     var headers = {"Accept": "application/json"};
     var body = {'mLikeIncrement': '-1'};
 
@@ -35,7 +36,9 @@ Future<bool> onDislikeButtonTapped(bool isLiked) async{
 
     //put to url/ideas/2
     //mLikeIncrement: +1 or -1
-    Future<bool> onLikeButtonTapped(bool isLiked) async{
+    Future<bool> onLikeButtonTapped(int id) async{
+        bool isLiked = true;
+
     /// send your request here
     // final bool success= await sendRequest();
 
@@ -43,7 +46,7 @@ Future<bool> onDislikeButtonTapped(bool isLiked) async{
     // return success? !isLiked:isLiked;
 
     developer.log('Making web request...');
-    var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/7');
+    var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/$id');
     var headers = {"Accept": "application/json"};
     var body = {'mLikeIncrement': '1'};
 
