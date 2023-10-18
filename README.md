@@ -15,7 +15,6 @@
 - **Trello Board**: [https://trello.com/invite/b/EnJtgGYY/ATTI0772a2683b64851fa36b0f707982fa087EC7746E/cse216](https://trello.com/invite/b/EnJtgGYY/ATTI0772a2683b64851fa36b0f707982fa087EC7746E/cse216)
 - **Elephant SQL**: [https://api.elephantsql.com/console/8ce5b366-8e87-4040-afec-37897ecb4725/details] (https://api.elephantsql.com/console/8ce5b366-8e87-4040-afec-37897ecb4725/details)
 - **Backend URL**: [https://team-knights.dokku.cse.lehigh.edu/](https://team-knights.dokku.cse.lehigh.edu/)
->>>>>>> a131c61dbcef698e46a135f65153b6cabddf1330
 
 ## Release Description
 
@@ -24,15 +23,6 @@
 - README file has been created and updated with team information, key URLs, and initial project description.
 <<<<<<< HEAD
 
-## Admin Build & Run Instructions
-- compile java code through mvn package and then run the POSTGRES command with the environment variables
-- test out different CRUD operations like create table, drop table, add row, delete row
-- verify your expected output on elephant sql 
-
-
-
-=======
-- No core functionalities have been implemented yet. Future updates and functionalities will be documented in the subsequent releases.
 
 ### Tagged Release
 1. mobile_v1 (sprint 6):
@@ -81,4 +71,8 @@
     * The address is `https://team-knights.dokku.cse.lehigh.edu/`
 4. To see continuous logs, run the following after starting:
     * `ssh -i ~/.ssh/id_ed25519 -t dokku@dokku.cse.lehigh.edu 'logs team-knights -t'`
->>>>>>> a131c61dbcef698e46a135f65153b6cabddf1330
+
+### Admin Build & Run Instructions
+- compile java code through mvn package and then run the POSTGRES command with the environment variables
+- test out different CRUD operations like create table, drop table, add row, delete row
+- verify your expected output on elephant sql 
