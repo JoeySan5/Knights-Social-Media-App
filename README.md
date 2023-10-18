@@ -21,7 +21,7 @@
 - Repository has been set up with the essential directories and branches.
 - README file has been created and updated with team information, key URLs, and initial project description.
 
-## Database Build & Run Instructions
+## Admin Build & Run Instructions
 - compile java code through mvn package and then run the POSTGRES command with the environment variables
 - test out different CRUD operations like create table, drop table, add row, delete row
 - verify your expected output on elephant sql 
