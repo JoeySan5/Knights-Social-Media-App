@@ -29,6 +29,7 @@
     The app does not allow the user to refresh without doing hot reload or closing the app.
 
 ## Build & Run Instructions
+
 ### Mobile
 1. The mobile app can currently only be ran locally through an emulator. Therefore, the initial step is to have an Android Emulator (API 33 and above) set up 
 2. Open up the source code on an IDE and open flutter/knights/lib/main.dart
@@ -36,6 +37,22 @@
 4. Wait until the app loads onto your emulator
 5. Once app is loaded you can proceed to try out all the features explained in the tagged release!
 
+### Web
+### to deploy UI
+    * ensure that CORS is enabled through dokku
+    * once this is checked, navigate to Web/ directory
+    * run the command: sh deploy.sh
+        * this compiles, runs, and creates the necessary folders to run
+    * once loaded, navigate to the correct https location, there should be 3 different ones
+
+### to run unit tests
+    * navigate to Web/ directory
+    * run command: sh deploy.sh
+    * once this compiles, select one of the three http locations provided
+    * navigate to that url but add '/spec_runner.html' to the end of the url
+    * verify that tests work
+
+### Backend
 
 ### Locally
 1. From the backend maven project root, run mvn exec:java with the `PORT` and `DATABASE_URL` environment variables specified
