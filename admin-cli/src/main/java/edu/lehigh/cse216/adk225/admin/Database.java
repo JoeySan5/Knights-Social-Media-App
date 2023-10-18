@@ -124,23 +124,23 @@ public class Database {
         // fail, the whole getDatabase() call should fail
         try {
             // NB: we can easily get ourselves in trouble here by typing the
-            //     SQL incorrectly.  We really should have things like "idea"
+            //     SQL incorrectly.  We really should have things like "ideas"
             //     as constants, and then build the strings for the statements
             //     from those constants.
 
             // Note: no "IF NOT EXISTS" or "IF EXISTS" checks on table 
             // creation/deletion, so multiple executions will cause an exception
             db.mCreateTable = db.mConnection.prepareStatement(
-                    "CREATE TABLE idea (id SERIAL PRIMARY KEY, content VARCHAR(50) "
+                    "CREATE TABLE ideas (id SERIAL PRIMARY KEY, content VARCHAR(50) "
                     + "NOT NULL, likeCount integer DEFAULT 0 NOT NULL)");
-            db.mDropTable = db.mConnection.prepareStatement("DROP TABLE idea");
+            db.mDropTable = db.mConnection.prepareStatement("DROP TABLE ideas");
 
             // Standard CRUD operations
-            db.mDeleteOne = db.mConnection.prepareStatement("DELETE FROM idea WHERE id = ?");
-            db.mInsertOne = db.mConnection.prepareStatement("INSERT INTO idea VALUES (default, ?, ?)");
-            db.mSelectAll = db.mConnection.prepareStatement("SELECT id, content, likeCount FROM idea");
-            db.mSelectOne = db.mConnection.prepareStatement("SELECT * from idea WHERE id=?");
-            // db.mUpdateOne = db.mConnection.prepareStatement("UPDATE idea SET message = ? WHERE id = ?");
+            db.mDeleteOne = db.mConnection.prepareStatement("DELETE FROM ideas WHERE id = ?");
+            db.mInsertOne = db.mConnection.prepareStatement("INSERT INTO ideas VALUES (default, ?, ?)");
+            db.mSelectAll = db.mConnection.prepareStatement("SELECT id, content, likeCount FROM ideas");
+            db.mSelectOne = db.mConnection.prepareStatement("SELECT * from ideas WHERE id=?");
+            // db.mUpdateOne = db.mConnection.prepareStatement("UPDATE ideas SET message = ? WHERE id = ?");
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
             e.printStackTrace();
@@ -275,7 +275,7 @@ public class Database {
     // }
 
     /**
-     * Create idea.  If it already exists, this will print an error
+     * Create ideas.  If it already exists, this will print an error
      */
     void createTable() {
         try {
@@ -286,7 +286,7 @@ public class Database {
     }
 
     /**
-     * Remove idea from the database.  If it does not exist, this will print
+     * Remove ideas from the database.  If it does not exist, this will print
      * an error.
      */
     void dropTable() {

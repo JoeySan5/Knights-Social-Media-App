@@ -18,8 +18,8 @@ public class App {
      */
     static void menu() {
         System.out.println("Main Menu");
-        System.out.println("  [T] Create idea");
-        System.out.println("  [D] Drop idea");
+        System.out.println("  [T] Create ideas");
+        System.out.println("  [D] Drop ideas");
         System.out.println("  [1] Query for a specific row");
         System.out.println("  [*] Query for all rows");
         System.out.println("  [-] Delete a row");
