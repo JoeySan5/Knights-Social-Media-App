@@ -170,18 +170,6 @@ class ElementList {
             let fragment = document.createDocumentFragment();
             let table = document.createElement('table');
             table.setAttribute('id', 'ideaTable')
-            // creating header for table and adding it
-            let tr_th = document.createElement('tr');
-            let th_id = document.createElement('th');
-            let th_message = document.createElement('th');
-            let th_likeCount = document.createElement('th');
-            th_id.innerHTML = "id";
-            th_message.innerHTML = "messages";
-            th_likeCount.innerHTML = "likes";
-            tr_th.appendChild(th_id);
-            tr_th.appendChild(th_message);
-            tr_th.appendChild(th_likeCount);
-            table.appendChild(tr_th);
             for (let i = 0; i < data.mData.length; ++i) {
                 let tr = document.createElement('tr');
                 let td_message = document.createElement('td');
@@ -216,10 +204,10 @@ class ElementList {
             all_likebtns[i].addEventListener("click", (e) => { mainList.addLike(e); });
         }
 
-        const all_dislikebtns = (<HTMLCollectionOf<HTMLInputElement>>document.getElementsByClassName("likebtn"));
-        for (let i = 0; i < all_likebtns.length; ++i) {
+        const all_dislikebtns = (<HTMLCollectionOf<HTMLInputElement>>document.getElementsByClassName("dislikebtn"));
+        for (let i = 0; i < all_dislikebtns.length; ++i) {
             all_dislikebtns[i].setAttribute('id', 'dislikeId');
-            all_dislikebtns[i].addEventListener("click", (e) => { mainList.addLike(e); });
+            all_dislikebtns[i].addEventListener("click", (e) => { mainList.addDisLike(e); });
         }
     }
 
@@ -267,7 +255,10 @@ class ElementList {
         // Issue an AJAX GET and then pass the result to editEntryForm.init()
         const doAjax = async () => {
             await fetch(`${backendUrl}/ideas/${id}`, {
-                method: 'GET',
+                method: 'PUT',
+                body: JSON.stringify({
+                    mLikeIncrement: 1
+                }),
                 headers: {
                     'Content-type': 'application/json; charset=UTF-8'
                 }
@@ -280,7 +271,8 @@ class ElementList {
                 }
                 return Promise.reject(response);
             }).then((data) => {
-                editEntryForm.init(data);
+                //editEntryForm.init(data);
+                //mainList.refresh();
                 console.log(data);
             }).catch((error) => {
                 console.warn('Something went wrong.', error);
@@ -290,17 +282,21 @@ class ElementList {
 
         // make the AJAX post and output value or error message to console
         doAjax().then(console.log).catch(console.log);
+        
     }
 
     //  adding dislike functionality
     private addDisLike(e: Event) {
-        console.log("addLike");
+        console.log("disLike");
         // as in clickDelete, we need the ID of the row
         const id = (<HTMLElement>e.target).getAttribute("data-value");
         // Issue an AJAX GET and then pass the result to editEntryForm.init()
         const doAjax = async () => {
             await fetch(`${backendUrl}/ideas/${id}`, {
-                method: 'GET',
+                method: 'PUT',
+                body: JSON.stringify({
+                    mLikeIncrement: -1
+                }),
                 headers: {
                     'Content-type': 'application/json; charset=UTF-8'
                 }
@@ -313,7 +309,6 @@ class ElementList {
                 }
                 return Promise.reject(response);
             }).then((data) => {
-                editEntryForm.init(data);
                 console.log(data);
             }).catch((error) => {
                 console.warn('Something went wrong.', error);
@@ -385,7 +380,7 @@ class EditEntryForm {
      * run in response to each of the form's buttons being clicked.
      */
     constructor() {
-        document.getElementById("likeId")?.addEventListener("click", (e) => { newEntryForm.submitForm(); });
+        document.getElementById("likeId")?.addEventListener("click", (e) => { editEntryForm.submitForm(); });
     }
 
     /**
@@ -423,7 +418,7 @@ class EditEntryForm {
         let id = "" + (<HTMLInputElement>document.getElementById("id_val")).value;
         let  prevLike = (<HTMLInputElement>document.getElementById("likeId")).value;
         console.log(prevLike);
-        let like = (<HTMLInputElement>document.getElementById("likeId")).value +1;
+        let like = 1;
         console.log("like button clicked, new like count = "+like);
         console.log(idea);
         if (likeClicked != true) {
