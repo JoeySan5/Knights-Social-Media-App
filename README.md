@@ -23,9 +23,19 @@
 - No core functionalities have been implemented yet. Future updates and functionalities will be documented in the subsequent releases.
 
 ### Tagged Release
-
+1. mobile_v1 (sprint 6):
+    * The mobile app features two main pages, the Home Page and Idea Submission Page. The Home Page consists of a title, a small description, a list view of Idea formats, and a 'say your piece' button. Idea formats are ideas that are collected from the database and formatted so that it contains the content, like count, and two buttons to either like or dislike. The 'say your piece' buttons, if tapped, brings you to the Idea Submission Page. This page consists of a text field, a 'submit' button, and a 'go back home' button. Users can write their idea into the text field and when ready to submit and share with the world, they click the submit button to post their data onto the database. Lastly, the 'go back home' button naturally sends the user back to the Home Page.
+    * The app currently does not allow the user to effectively see their like/dislike be updated on a certain post without having to refresh. 
+    The app does not allow the user to refresh without doing hot reload or closing the app.
 
 ## Build & Run Instructions
+### Mobile
+1. The mobile app can currently only be ran locally through an emulator. Therefore, the initial step is to have an Android Emulator (API 33 and above) set up 
+2. Open up the source code on an IDE and open flutter/knights/lib/main.dart
+3. Ensure the emulator is up and running, and then proceed to click **run and debug** (or f5) on your IDE (in main.dart)
+4. Wait until the app loads onto your emulator
+5. Once app is loaded you can proceed to try out all the features explained in the tagged release!
+
 
 ### Locally
 1. From the backend maven project root, run mvn exec:java with the `PORT` and `DATABASE_URL` environment variables specified

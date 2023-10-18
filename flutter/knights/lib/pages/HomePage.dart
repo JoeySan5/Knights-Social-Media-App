@@ -11,7 +11,10 @@ class MyHomePage extends StatelessWidget{
       return   Scaffold(
         
         body:Center(
-          child: Column(
+          
+          child: SingleChildScrollView(
+            child: Column(
+            
           
             children: <Widget>[
               const Padding(padding: EdgeInsets.only(top: 40.0),
@@ -61,6 +64,7 @@ class MyHomePage extends StatelessWidget{
               )
             ],
           )
+        )
         )
       );
     }
