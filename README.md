@@ -1,45 +1,44 @@
-**Edit a file, create a new file, and clone from Bitbucket in under 2 minutes**
+# Team 25 - Knights
 
-When you're done, you can delete the content in this README and update the file with details for others getting started with your repository.
+## Team Information
+- **Team Number**: 25
+- **Team Name**: Knights
+- **Members**:
+  - Tommy Parisi - Backend Developer - Contact Email: tjp225@lehigh.edu
+  - Joseph Sanchez - Mobile Developer - Contact Email: jrs225@lehigh.edu
+  - Adivi Karawat - Admin Developer - Contact Email: adk225@lehigh.edu
+  - Eric Osterman - Web Developer - Contact Email: ejo223@lehigh.edu
+  - Sehyoun Jang - Project Manager - Contact Email: sej324@lehigh.edu
 
-*We recommend that you open this README in another tab as you perform the tasks below. You can [watch our video](https://youtu.be/0ocf7u76WSo) for a full demo of all the steps in this tutorial. Open the video in a new tab to avoid leaving Bitbucket.*
+## URLs
+- **Git Repository**: [https://bitbucket.org/cse216-2023fa-team-25/cse216-2023fa-team-25/src/master/](https://bitbucket.org/cse216-2023fa-team-25/cse216-2023fa-team-25/src/master/)
+- **Trello Board**: [https://trello.com/invite/b/EnJtgGYY/ATTI0772a2683b64851fa36b0f707982fa087EC7746E/cse216](https://trello.com/invite/b/EnJtgGYY/ATTI0772a2683b64851fa36b0f707982fa087EC7746E/cse216)
+- **Backend URL**: [https://team-knights.dokku.cse.lehigh.edu/](https://team-knights.dokku.cse.lehigh.edu/)
 
----
+## Release Description
 
-## Edit a file
+### Initial Setup (Version 0.1.0)
+- Repository has been set up with the essential directories and branches.
+- README file has been created and updated with team information, key URLs, and initial project description.
+- No core functionalities have been implemented yet. Future updates and functionalities will be documented in the subsequent releases.
 
-You’ll start by editing this README file to learn how to edit a file in Bitbucket.
+### Tagged Release
 
-1. Click **Source** on the left side.
-2. Click the README.md link from the list of files.
-3. Click the **Edit** button.
-4. Delete the following text: *Delete this line to make a change to the README from Bitbucket.*
-5. After making your change, click **Commit** and then **Commit** again in the dialog. The commit page will open and you’ll see the change you just made.
-6. Go back to the **Source** page.
 
----
+## Build & Run Instructions
 
-## Create a file
+### Locally
+1. From the backend maven project root, run mvn exec:java with the `PORT` and `DATABASE_URL` environment variables specified
+    * `PORT=8998 DATABASE_URL=postgres://pfdcoetq:VMXXrjrJtMXqzP6JwpjnapwpOVpk6e9o@peanut.db.elephantsql.com/pfdcoetq mvn exec:java`
+    * The address is `http://localhost:PORT/`
 
-Next, you’ll add a new file to this repository.
-
-1. Click the **New file** button at the top of the **Source** page.
-2. Give the file a filename of **contributors.txt**.
-3. Enter your name in the empty file space.
-4. Click **Commit** and then **Commit** again in the dialog.
-5. Go back to the **Source** page.
-
-Before you move on, go ahead and explore the repository. You've already seen the **Source** page, but check out the **Commits**, **Branches**, and **Settings** pages.
-
----
-
-## Clone a repository
-
-Use these steps to clone from SourceTree, our client for using the repository command-line free. Cloning allows you to work on your files locally. If you don't yet have SourceTree, [download and install first](https://www.sourcetreeapp.com/). If you prefer to clone from the command line, see [Clone a repository](https://confluence.atlassian.com/x/4whODQ).
-
-1. You’ll see the clone button under the **Source** heading. Click that button.
-2. Now click **Check out in SourceTree**. You may need to create a SourceTree account or log in.
-3. When you see the **Clone New** dialog in SourceTree, update the destination path and name if you’d like to and then click **Clone**.
-4. Open the directory you just created to see your repository’s files.
-
-Now that you're more familiar with your Bitbucket repository, go ahead and add a new file locally. You can [push your change back to Bitbucket with SourceTree](https://confluence.atlassian.com/x/iqyBMg), or you can [add, commit,](https://confluence.atlassian.com/x/8QhODQ) and [push from the command line](https://confluence.atlassian.com/x/NQ0zDQ).
+### On Dokku
+1. Ensure your ssh key is set up on Dokku
+2. Use `config:set` to edit and setup the environment variables
+    * For example, `ssh -i ~/.ssh/id_ed25519 -t dokku@dokku.cse.lehigh.edu 'config:set team-knights CORS_ENABLED=false'`
+    * `config:export` will show the environment variables
+3. From the *local* machine (not on dokku), run the following to use `ps:start`:
+    * `ssh -i ~/.ssh/id_ed25519 -t dokku@dokku.cse.lehigh.edu 'ps:start team-knights'`
+    * The address is `https://team-knights.dokku.cse.lehigh.edu/`
+4. To see continuous logs, run the following after starting:
+    * `ssh -i ~/.ssh/id_ed25519 -t dokku@dokku.cse.lehigh.edu 'logs team-knights -t'`
