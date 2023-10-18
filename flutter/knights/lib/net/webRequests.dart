@@ -129,3 +129,43 @@ Future<bool> onDislikeButtonTapped(int id) async{
       }
 
     }
+
+    //this method fetches the json from dokku, and then 
+    //seperates each json object into an Idea(.dart) object
+    Future<List<Idea>> fetchIdeasTest(http.Client client) async{
+      developer.log('Making web request...');
+      var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas');
+      var headers = {"Accept": "application/json"};
+
+      var response = await client.get(url, headers: headers);
+
+      
+
+      if (response.statusCode == 200){
+        final List<Idea> returnData;
+        
+        var res = jsonDecode(response.body);
+        print('json decode: $res');
+        print('resmdata: ${res['mData']}');
+        
+        if(res['mData'] is List){
+          //dynamic allows for a types to be inferred during runtime, and can be changed to different types
+          returnData = (res['mData'] as List<dynamic>).map((x) => Idea.fromJson(x)).toList();
+        }
+        else if(res is Map){
+          returnData = <Idea>[Idea.fromJson(res['mData'] as Map<String,dynamic>)];
+        }else{
+          developer.log('ERROR: Unexpected json response type (was not a List or Map).');
+          returnData = List.empty();
+        }
+
+        print(returnData);
+        return returnData;
+      } 
+      else{
+        // If the server did not return a 200 OK response,
+        // then throw an exception.
+        throw Exception('Did not receive success status code from request.');
+      }
+
+    }
