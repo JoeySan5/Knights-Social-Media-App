@@ -170,18 +170,6 @@ class ElementList {
             let fragment = document.createDocumentFragment();
             let table = document.createElement('table');
             table.setAttribute('id', 'ideaTable')
-            // creating header for table and adding it
-            let tr_th = document.createElement('tr');
-            let th_id = document.createElement('th');
-            let th_message = document.createElement('th');
-            let th_likeCount = document.createElement('th');
-            th_id.innerHTML = "id";
-            th_message.innerHTML = "messages";
-            th_likeCount.innerHTML = "likes";
-            tr_th.appendChild(th_id);
-            tr_th.appendChild(th_message);
-            tr_th.appendChild(th_likeCount);
-            table.appendChild(tr_th);
             for (let i = 0; i < data.mData.length; ++i) {
                 let tr = document.createElement('tr');
                 let td_message = document.createElement('td');
@@ -415,7 +403,7 @@ class EditEntryForm {
      * Check if the input fields are both valid, and if so, do an AJAX call.
      */
     submitForm() {
-        window.alert("Submit edit form called.");
+        //window.alert("Submit edit form called.");
         // get the values of the two fields, force them to be strings, and check
         // that neither is empty
         let idea = "" + (<HTMLInputElement>document.getElementById("editMessage")).value;
