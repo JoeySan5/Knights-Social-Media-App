@@ -13,7 +13,7 @@ import edu.lehigh.cse216.knights.backend.Idea;
 import edu.lehigh.cse216.knights.backend.IdeaRequest;
 
 /**
- * For now, our app creates an HTTP server that can only get and add data.
+ * App creates an HTTP server capable of interacting with the Database.
  */
 public class App 
 {

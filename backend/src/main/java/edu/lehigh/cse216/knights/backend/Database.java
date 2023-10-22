@@ -10,6 +10,10 @@ import java.sql.SQLException;
 
 import java.util.ArrayList;
 
+/**
+ * Database interacts with the ElephantSQL database through a set of preparedStatements
+ * and returns the appropriate result to the HTTP server App
+ */
 public class Database {
     /**
      * The connection to the database.  When there is no connection, it should
