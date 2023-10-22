@@ -1,6 +1,6 @@
 package edu.lehigh.cse216.knights.backend;
 
-// import java.util.Date;
+// import java.util.Date; // should use something like java.sql.Date instead
 
 /**
  * Idea holds a row of information.  A row of information consists of
@@ -35,7 +35,7 @@ public class Idea {
     // public final Date mCreated;
 
     /**
-     * Create a new Idea with the id and content provided.
+     * Constructor with the id and content specified.
      * Sets the mLikeCount to 0.
      * 
      * @param id The id to associate with the Idea in this row.  Assumed to be unique 
@@ -49,7 +49,8 @@ public class Idea {
     }
 
     /**
-     * Create a new Idea with the id, content, and likeCount provided.
+     * Constructor with the id, content, and likeCount specified.
+     * Should not be used for creating a new ID
      * 
      * @param id The id to associate with the Idea in this row.  Assumed to be unique 
      *           throughout the whole program.

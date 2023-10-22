@@ -5,6 +5,10 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import java.util.ArrayList;
 
+/**
+ * DatabaseTest provides unit tests for the database of Ideas, 
+ * using a MockDatabase.
+ */
 public class DatabaseTest extends TestCase {
     
     /**

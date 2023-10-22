@@ -10,6 +10,10 @@ import java.sql.SQLException;
 
 import java.util.ArrayList;
 
+/**
+ * Database interacts with the ElephantSQL database through a set of preparedStatements
+ * and returns the appropriate result to the HTTP server App
+ */
 public class Database {
     /**
      * The connection to the database.  When there is no connection, it should
@@ -70,10 +74,8 @@ public class Database {
         // Attempt to create all of our prepared statements.  If any of these 
         // fail, the whole getDatabase() call should fail
         try {
-            // NB: we can easily get ourselves in trouble here by typing the
-            //     SQL incorrectly.  We really should have things like "tblData"
-            //     as constants, and then build the strings for the statements
-            //     from those constants.
+            // NB: the SQL fields must exactly match with the SQL specified by the Admin CLI.
+            // We have "ideas" as the table name for example - this must be consistent across the Admin and Backend components
 
             // Note: no "IF NOT EXISTS" or "IF EXISTS" checks on table 
             // creation/deletion, so multiple executions will cause an exception
@@ -86,7 +88,7 @@ public class Database {
             // tjp: these SQL prepared statement are essential for understanding exactly what the backend is asking the database
             this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE id = ?"); // Not implemented in Phase 1?
             this.mInsertOneIdea = this.mConnection.prepareStatement("INSERT INTO ideas VALUES (default, ?, 0)");
-            this.mSelectAllIdeas = this.mConnection.prepareStatement("SELECT id, content, likeCount FROM ideas");
+            this.mSelectAllIdeas = this.mConnection.prepareStatement("SELECT id, content, likeCount FROM ideas ORDER BY id DESC");
             this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE id=?");
             this.mUpdateIdeaLikeCount = this.mConnection.prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE id = ?");
         } catch (SQLException e) {

@@ -29,7 +29,7 @@ public class AppTest
     }
 
     /**
-     * Rigourous Test :-)
+     * Trivial test demonstarting how assert statements should be used.
      */
     public void testApp()
     {
