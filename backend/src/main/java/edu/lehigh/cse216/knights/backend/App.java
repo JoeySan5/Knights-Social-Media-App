@@ -16,7 +16,11 @@ import edu.lehigh.cse216.knights.backend.IdeaRequest;
  * App creates an HTTP server capable of interacting with the Database.
  */
 public class App 
-{
+{   
+    /**
+     * Sets up the database and server ports.
+     * @param args The command line arguments, (unused)
+     */
     public static void main( String[] args )
     {
         // Get a fully-configured connection to the database, or exit immediately
