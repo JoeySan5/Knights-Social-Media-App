@@ -1,3 +1,6 @@
+// a lot of code and comments was taken from tutorials like both web fornt ends as well as CORS tutorial
+
+
 // Prevent compiler errors when using jQuery.  "$" will be given a type of 
 // "any", so that we can use it anywhere, and assume it has any fields or
 // methods, without the compiler producing an error.
@@ -14,9 +17,6 @@ var newEntryForm: NewEntryForm;
 var mainList: ElementList;
 
 
-// a global for the EditEntryForm of the program.  See newEntryForm for explanation
-var editEntryForm: EditEntryForm;
-
 // variable to keep track of if like was clicked
 var likeClicked = false;
 
@@ -32,6 +32,8 @@ class NewEntryForm {
      * run in response to each of the form's buttons being clicked.
      */
     constructor() {
+        // event listeners for adding a post and canceling
+        document.getElementById("addCancel")?.addEventListener("click", (e) => { newEntryForm.clearForm(); });
         document.getElementById("addButton")?.addEventListener("click", (e) => { newEntryForm.submitForm(); });
 
     }
@@ -42,17 +44,15 @@ class NewEntryForm {
     clearForm() {
         (<HTMLInputElement>document.getElementById("newIdea")).value = "";
 
-                // reset the UI
-                //(<HTMLElement>document.getElementById("editElement")).style.display = "none";
-                (<HTMLElement>document.getElementById("addElement")).style.display = "none";
-                (<HTMLElement>document.getElementById("showElements")).style.display = "block";
+        // reset the UI
+        (<HTMLElement>document.getElementById("addElement")).style.display = "none";
+        (<HTMLElement>document.getElementById("ideaList")).style.display = "block";
     }
 
     /**
      * Check if the input fields are both valid, and if so, do an AJAX call.
      */
     submitForm() {
-        //window.alert("Submit form called.");
         // get the values of the idea field, force them to be strings, and check 
         // that neither is empty
         let idea = "" + (<HTMLInputElement>document.getElementById("newIdea")).value;
@@ -166,20 +166,16 @@ class ElementList {
 
         if (elem_ideaList !== null) {
             elem_ideaList.innerHTML = "";
-
+            // table that contains all of the ideas
             let fragment = document.createDocumentFragment();
             let table = document.createElement('table');
-            table.setAttribute('id', 'ideaTable')
+            table.setAttribute('id', 'ideaTable');
             for (let i = 0; i < data.mData.length; ++i) {
                 let tr = document.createElement('tr');
                 let td_message = document.createElement('td');
-                let td_id = document.createElement('td');
-                td_id.setAttribute('id', 'id_val');
                 let td_like = document.createElement('td');
-                td_id.innerHTML = data.mData[i].mId;
                 td_message.innerHTML = data.mData[i].mContent;
                 td_like.innerHTML = data.mData[i].mLikeCount;
-                tr.appendChild(td_id);
                 tr.appendChild(td_message);
                 tr.appendChild(this.likeButtons(data.mData[i].mId));
                 tr.appendChild(td_like);
@@ -194,6 +190,7 @@ class ElementList {
         // Find all of the delete buttons, and set their behavior
         const all_delbtns = (<HTMLCollectionOf<HTMLInputElement>>document.getElementsByClassName("delbtn"));
         for (let i = 0; i < all_delbtns.length; ++i) {
+            all_delbtns[i].setAttribute('id', 'deleteId');
             all_delbtns[i].addEventListener("click", (e) => { mainList.clickDelete(e); });
         }
 
@@ -203,7 +200,7 @@ class ElementList {
             all_likebtns[i].setAttribute('id', 'likeId');
             all_likebtns[i].addEventListener("click", (e) => { mainList.addLike(e); });
         }
-
+        // Find all of the dislike buttons, and set their behavior
         const all_dislikebtns = (<HTMLCollectionOf<HTMLInputElement>>document.getElementsByClassName("dislikebtn"));
         for (let i = 0; i < all_dislikebtns.length; ++i) {
             all_dislikebtns[i].setAttribute('id', 'dislikeId');
@@ -233,6 +230,7 @@ class ElementList {
                 }
                 return Promise.reject(response);
             }).then((data) => {
+                // refresh after each delete
                 mainList.refresh();
                 console.log(data);
             }).catch((error) => {
@@ -245,9 +243,9 @@ class ElementList {
         doAjax().then(console.log).catch(console.log);
     }
 
-/**
- * addLike is the code we run in response to a click of a delete button
- */
+    /**
+     * addLike is the code we run in response to a click of a like button
+     */
     private addLike(e: Event) {
         console.log("addLike");
         // as in clickDelete, we need the ID of the row
@@ -271,9 +269,8 @@ class ElementList {
                 }
                 return Promise.reject(response);
             }).then((data) => {
-                //editEntryForm.init(data);
-                //mainList.refresh();
                 console.log(data);
+                mainList.refresh();
             }).catch((error) => {
                 console.warn('Something went wrong.', error);
                 window.alert("Unspecified error, on click edit");
@@ -282,10 +279,12 @@ class ElementList {
 
         // make the AJAX post and output value or error message to console
         doAjax().then(console.log).catch(console.log);
-        
+
     }
 
-    //  adding dislike functionality
+    /**
+ * addLike is the code we run in response to a click of a like button
+ */
     private addDisLike(e: Event) {
         console.log("disLike");
         // as in clickDelete, we need the ID of the row
@@ -310,6 +309,7 @@ class ElementList {
                 return Promise.reject(response);
             }).then((data) => {
                 console.log(data);
+                mainList.refresh();
             }).catch((error) => {
                 console.warn('Something went wrong.', error);
                 window.alert("Unspecified error, on click edit");
@@ -319,13 +319,13 @@ class ElementList {
         // make the AJAX post and output value or error message to console
         doAjax().then(console.log).catch(console.log);
     }
-    
+
 
 
     /**
      * buttons() adds a button to the HTML for each row
-     *
-     * doesn't do anything yet
+     * adds like and dislike buttons 
+     * gets id of each row 
      */
     private likeButtons(id: string): DocumentFragment {
         let fragment = document.createDocumentFragment();
@@ -370,137 +370,22 @@ class ElementList {
 } // end class ElementList
 
 
-/**
- * EditEntryForm encapsulates all of the code for the form for editing an entry in terms of like & dislike
- */
 
-class EditEntryForm {
-    /**
-     * To initialize the object, we say what method of EditEntryForm should be
-     * run in response to each of the form's buttons being clicked.
-     */
-    constructor() {
-        document.getElementById("likeId")?.addEventListener("click", (e) => { editEntryForm.submitForm(); });
-    }
-
-    /**
-     * init() is called from an AJAX GET, and should populate the form if and 
-     * only if the GET did not have an error
-     */
-    init(data: any) {
-        console.log("init");
-        likeClicked = true;
-        // If we get an "ok" message, fill in the edit form
-        if (data.mStatus === "ok") {
-            console.log("init ok");
-            // show the edit form
-            // increasing like amount
-        }
-        // Handle explicit errors with a detailed popup message
-        else if (data.mStatus === "error") {
-            window.alert("The server replied with an error:\n" + data.mMessage);
-        }
-        // Handle other errors with a less-detailed popup message
-        else {
-            window.alert("Unspecified error, on init method");
-        }
-    }
-
-    /**
-     * Check if the input fields are both valid, and if so, do an AJAX call.
-     */
-    submitForm() {
-        window.alert("Submit edit form called.");
-        // get the values of the two fields, force them to be strings, and check
-        // that neither is empty
-        let idea = "" + (<HTMLInputElement>document.getElementById("editMessage")).value;
-        // NB: we assume that the user didn't modify the value of editId
-        let id = "" + (<HTMLInputElement>document.getElementById("id_val")).value;
-        let  prevLike = (<HTMLInputElement>document.getElementById("likeId")).value;
-        console.log(prevLike);
-        let like = 1;
-        console.log("like button clicked, new like count = "+like);
-        console.log(idea);
-        if (likeClicked != true) {
-            window.alert("Error: message, or id is not valid");
-            return;
-        }
-
-        // set up an AJAX PUT.
-        // When the server replies, the result will go to onSubmitResponse
-        const doAjax = async () => {
-            await fetch(`${backendUrl}/ideas/${id}`, {
-                method: 'PUT',
-                body: JSON.stringify({
-                    mLikeIncrement: like
-                }),
-                headers: {
-                    'Content-type': 'application/json; charset=UTF-8'
-                }
-            }).then((response) => {
-                // If we get an "ok" message, return the json
-                if (response.ok) {
-                    // return response.json();
-                    return Promise.resolve(response.json());
-                }
-                // Otherwise, handle server errors with a detailed popup message
-                else {
-                    window.alert(`The server replied not ok: ${response.status}\n` + response.statusText);
-                }
-                // return response;
-                return Promise.reject(response);
-            }).then((data) => {
-                editEntryForm.onSubmitResponse(data);
-                console.log(data);
-            }).catch((error) => {
-                console.warn('Something went wrong.', error);
-                window.alert("Unspecified error, on Ajax PUT (edit)");
-            });
-        }
-        // resetting flag
-        likeClicked = false;
-        // make the AJAX post and output value or error message to console
-        doAjax().then(console.log).catch(console.log);
-    }
-
-    /**
-     * onSubmitResponse runs when the AJAX call in submitForm() returns a 
-     * result.
-     * 
-     * @param data The object returned by the server
-     */
-    private onSubmitResponse(data: any) {
-        // If we get an "ok" message, clear the form and refresh the main 
-        // listing of messages
-        if (data.mStatus === "ok") {
-            //editEntryForm.clearForm();
-            mainList.refresh();
-        }
-        // Handle explicit errors with a detailed popup message
-        else if (data.mStatus === "error") {
-            window.alert("The server replied with an error:\n" + data.mMessage);
-        }
-        // Handle other errors with a less-detailed popup message
-        else {
-            window.alert("Unspecified error, on submit response (edit)");
-        }
-    }
-} // end class EditEntryForm
 
 // Run some configuration code when the web page loads
 document.addEventListener('DOMContentLoaded', () => {
+    // display idea lists, block add element
     (<HTMLElement>document.getElementById("addElement")).style.display = "none";
-    (<HTMLElement>document.getElementById("showElements")).style.display = "block";
-    // having add show when clicked
-    document.getElementById("addButtonFooter")?.addEventListener("click", (e) =>{
+    (<HTMLElement>document.getElementById("ideaList")).style.display = "block";
+    // having add feature show when clicked, block all ideas list
+    document.getElementById("addButtonFooter")?.addEventListener("click", (e) => {
         (<HTMLElement>document.getElementById("addElement")).style.display = "block";
-        (<HTMLElement>document.getElementById("showElements")).style.display = "none";
+        (<HTMLElement>document.getElementById("ideaList")).style.display = "none";
     });
     // Create the object that controls the "New Entry" form
     newEntryForm = new NewEntryForm();
     // Create the object for the main data list, and populate it with data from the server
     mainList = new ElementList();
     // Create the object that controls the "Edit Entry" form
-    editEntryForm = new EditEntryForm();
     mainList.refresh();
 }, false);

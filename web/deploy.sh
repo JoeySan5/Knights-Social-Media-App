@@ -28,7 +28,7 @@ cp app.css $TARGETFOLDER
 echo "Compiling app.ts"
 node_modules/typescript/bin/tsc app.ts --lib "es2015","dom" --target es5 --strict --outFile $TARGETFOLDER/app.js
 
-# step 5: set up Jasmine
+# step 5: set up Jasmine for unit tests
 node_modules/typescript/bin/tsc apptest.ts --strict --outFile $TARGETFOLDER/$WEBFOLDERNAME/apptest.js
 cp spec_runner.html $TARGETFOLDER/$WEBFOLDERNAME
 cp node_modules/jasmine-core/lib/jasmine-core/*.css $TARGETFOLDER/$WEBFOLDERNAME
