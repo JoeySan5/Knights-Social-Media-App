@@ -20,8 +20,20 @@ import 'package:knights/net/web_requests.dart';
   //Set state to increment.
 
   class _IdeaFormat extends State<IdeaFormat> {
+      ///This is to keep track of the like count
+      int likeCount = 0;
+
+      @override
+      void initState(){
+        super.initState();
+        ///likecount is first initialized based on the respective
+        ///idea mLikeCount
+        likeCount = widget.mLikeCount;
+      }
+
       @override
       Widget build(BuildContext context) {
+        
         return Container(
           margin: const EdgeInsets.all(15.0),
           //decoration is to make borders look different
@@ -52,13 +64,16 @@ import 'package:knights/net/web_requests.dart';
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(
-                  widget.mLikeCount.toString(),
+                  likeCount.toString(),
                   style: const TextStyle(color: Colors.white),
                   ),
                   ///Sets up the like button.
                   LikeButton(
                     //likeCount: widget.mLikeCount,
                     onTap: (isLiked) {
+                      setState(() {
+                        likeCount++;
+                      });
                       return onLikeButtonTapped(widget.mId);
                     },
                     likeBuilder:(bool isLiked){
@@ -71,6 +86,9 @@ import 'package:knights/net/web_requests.dart';
                   ///Sets up the dislike button.
                   LikeButton(
                     onTap: (isLiked) {
+                      setState(() {
+                        likeCount--;
+                      });
                       return onDislikeButtonTapped(widget.mId);
                     },
                     likeBuilder:(bool isLiked){

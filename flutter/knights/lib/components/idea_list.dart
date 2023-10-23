@@ -44,6 +44,7 @@ class IdeaList extends StatefulWidget{
 
     @override
     Widget build(BuildContext context) {
+      
         var fb = FutureBuilder<List<Idea>>(
         future: _futureListIdeas, 
         ///Context keeps track of each widget in the widgetTree.
