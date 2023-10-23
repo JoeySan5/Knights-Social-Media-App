@@ -34,6 +34,10 @@ cp spec_runner.html $TARGETFOLDER/$WEBFOLDERNAME
 cp node_modules/jasmine-core/lib/jasmine-core/*.css $TARGETFOLDER/$WEBFOLDERNAME
 cp node_modules/jasmine-core/lib/jasmine-core/*.js $TARGETFOLDER/$WEBFOLDERNAME
 
+# step 6: output JSDocs with compiled app.js
+echo "generating and outputting JSDocs"
+jsdoc $TARGETFOLDER/app.js
+
 # step final: launch the server.  Be sure to disable caching
 # (Note: we don't currently use -s for silent operation)
 echo "Starting local webserver at $TARGETFOLDER"

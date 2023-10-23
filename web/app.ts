@@ -1,19 +1,27 @@
-// a lot of code and comments was taken from tutorials like both web fornt ends as well as CORS tutorial
+/**
+ * a lot of code and comments was taken from tutorials like both web fornt ends as well as CORS tutorial 
+*/ 
 
 
-// Prevent compiler errors when using jQuery.  "$" will be given a type of 
-// "any", so that we can use it anywhere, and assume it has any fields or
-// methods, without the compiler producing an error.
+/**
+ * Prevent compiler errors when using jQuery.  "$" will be given a type of 
+ * "any", so that we can use it anywhere, and assume it has any fields or
+ * methods, without the compiler producing an error.
+*/
 var $: any;
 
-// The 'this' keyword does not behave in JavaScript/TypeScript like it does in
-// Java.  Since there is only one NewEntryForm, we will save it to a global, so
-// that we can reference it from methods of the NewEntryForm in situations where
-// 'this' won't work correctly.
+/**
+ * The 'this' keyword does not behave in JavaScript/TypeScript like it does in
+ * Java.  Since there is only one NewEntryForm, we will save it to a global, so
+ * that we can reference it from methods of the NewEntryForm in situations where
+ * 'this' won't work correctly.
+*/ 
 var newEntryForm: NewEntryForm;
 
-// a global for the main ElementList of the program.  See newEntryForm for 
-// explanation
+/**
+ * a global for the main ElementList of the program.  See newEntryForm for 
+ * explanation
+*/ 
 var mainList: ElementList;
 
 
@@ -149,7 +157,6 @@ class ElementList {
                 return Promise.reject(response);
             }).then((data) => {
                 mainList.update(data);
-                console.log("DATAAA");
                 console.log(data);
             }).catch((error) => {
                 console.warn('Something went wrong with GET.', error);
@@ -161,6 +168,10 @@ class ElementList {
         doAjax().then(console.log).catch(console.log);
     }
 
+    /**
+     * update method that builds the table displaying the list of ideas
+     * @param data the object used to build the table (ideas)
+     */
     private update(data: any) {
         let elem_ideaList = document.getElementById("ideaList");
 
@@ -282,8 +293,8 @@ class ElementList {
 
     }
 
-    /**
- * addLike is the code we run in response to a click of a like button
+/**
+ * addDisLike is the code we run in response to a click of a dislike button
  */
     private addDisLike(e: Event) {
         console.log("disLike");
@@ -323,9 +334,10 @@ class ElementList {
 
 
     /**
-     * buttons() adds a button to the HTML for each row
+     * likeButtons() adds a button to the HTML for each row
      * adds like and dislike buttons 
      * gets id of each row 
+     * @param id is the id of the idea
      */
     private likeButtons(id: string): DocumentFragment {
         let fragment = document.createDocumentFragment();
@@ -350,7 +362,13 @@ class ElementList {
         return fragment;
     }
 
-    // delete buttons
+ 
+    /**
+     * deleteButtons() adds a button to the HTML for each row
+     * adds like and dislike buttons 
+     * gets id of each row 
+     * @param id is the id of the idea
+     */
     private deleteButtons(id: string): DocumentFragment {
         let fragment = document.createDocumentFragment();
         let td = document.createElement('td');
@@ -372,7 +390,11 @@ class ElementList {
 
 
 
-// Run some configuration code when the web page loads
+/**
+ * configurations for when the page loads
+ * initially shows idea list and does not make add element visible
+ * controls when add post6 is clicked reverses intialy configuiration
+ */
 document.addEventListener('DOMContentLoaded', () => {
     // display idea lists, block add element
     (<HTMLElement>document.getElementById("addElement")).style.display = "none";

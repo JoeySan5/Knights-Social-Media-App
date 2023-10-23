@@ -13,3 +13,6 @@
     * once this compiles, select one of the three http locations provided
     * navigate to that url but add '/spec_runner.html' to the end of the url
     * verify that tests work
+
+# Documentation
+    * link to index.html produced from JSDocs [JSDocs html](Web/out/index.html)
