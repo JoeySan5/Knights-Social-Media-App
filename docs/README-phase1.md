@@ -23,6 +23,3 @@
 
 ## Tests Description
 <https://docs.google.com/document/d/1dNcuvbE2koQYN3F-NDsyusxrqZ44D1l4iP6vL5kYpX8/edit?usp=sharing>
-
-## Backend API
-[Backend Javadoc](./backend-apidocs/site/apidocs/index.html)

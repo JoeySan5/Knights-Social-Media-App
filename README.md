@@ -76,3 +76,14 @@
 - compile java code through mvn package and then run the POSTGRES command with the environment variables
 - test out different CRUD operations like create table, drop table, add row, delete row
 - verify your expected output on elephant sql 
+
+## Developer Documentation
+
+### Mobile
+
+### Web
+
+### Backend API
+[Backend Javadoc](docs/backend-apidocs/site/apidocs/index.html)
+
+### Admin
