@@ -2,15 +2,12 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:developer' as developer;
 
-import 'package:knights/models/Idea.dart';
+import 'package:knights/models/idea.dart';
 
+///Web Function to send put request to respective idea ID, and *decrement* mLikeCount
 Future<bool> onDislikeButtonTapped(int id) async{
+  ///Can safely ignore isLiked
   bool isLiked = true;
-    /// send your request here
-    // final bool success= await sendRequest();
-
-    /// if failed, you can do nothing
-    // return success? !isLiked:isLiked;
 
     developer.log('Making web request...');
     var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/$id');
@@ -24,26 +21,14 @@ Future<bool> onDislikeButtonTapped(int id) async{
     developer.log('Response body: ${response.body}');
     developer.log(await http.read(url));
 
-    // var res = jsonDecode(response.body);
-    // developer.log('json decode: $res');
-
-    // var idea = Idea.fromJson(res);
-
-    // developer.log('idea content: ${idea.mContent} ');
 
     return !isLiked;
   }
 
-    //put to url/ideas/2
-    //mLikeIncrement: +1 or -1
-    Future<bool> onLikeButtonTapped(int id) async{
-        bool isLiked = true;
+  ///Web Function to send put request to respective idea ID, and *increment* mLikeCount    
+  Future<bool> onLikeButtonTapped(int id) async{
+    bool isLiked = true;
 
-    /// send your request here
-    // final bool success= await sendRequest();
-
-    /// if failed, you can do nothing
-    // return success? !isLiked:isLiked;
 
     developer.log('Making web request...');
     var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/$id');
@@ -57,17 +42,11 @@ Future<bool> onDislikeButtonTapped(int id) async{
     developer.log('Response body: ${response.body}');
     developer.log(await http.read(url));
 
-    // var res = jsonDecode(response.body);
-    // developer.log('json decode: $res');
-
-    // var idea = Idea.fromJson(res);
-
-    // developer.log('idea content: ${idea.mContent} ');
-
     return !isLiked;
   }
 
-    Future<String> postIdeas(String userText) async{
+  ///Web Function to send post request to dokku backend. Creates idea with userText
+  Future<String> postIdeas(String userText) async{
       developer.log('Making web request...');
       var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas');
       var headers = {"Accept": "application/json"};
@@ -83,15 +62,15 @@ Future<bool> onDislikeButtonTapped(int id) async{
         
       }
       else{
-        // If the server did not return a 200 OK response,
-        // then throw an exception.
+        ///If the server did not return a 200 OK response,
+        ///then throw an exception.
         throw Exception('Did not receive success status(200) code from request.');
       }
-    }
+  }
 
 
-    //this method fetches the json from dokku, and then 
-    //seperates each json object into an Idea(.dart) object
+    ///This web function fetches json data from dokku, and then 
+    ///parses each json object into an idea object(model)
     Future<List<Idea>> fetchIdeas() async{
       developer.log('Making web request...');
       var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas');
@@ -105,8 +84,8 @@ Future<bool> onDislikeButtonTapped(int id) async{
         final List<Idea> returnData;
         
         var res = jsonDecode(response.body);
-        print('json decode: $res');
-        print('resmdata: ${res['mData']}');
+        developer.log('json decode: $res');
+        developer.log('resmdata: ${res['mData']}');
         
         if(res['mData'] is List){
           //dynamic allows for a types to be inferred during runtime, and can be changed to different types
@@ -119,19 +98,20 @@ Future<bool> onDislikeButtonTapped(int id) async{
           returnData = List.empty();
         }
 
-        print(returnData);
+        developer.log('$returnData');
         return returnData;
       } 
       else{
-        // If the server did not return a 200 OK response,
-        // then throw an exception.
+        ///If the server did not return a 200 OK response, then throw an exception.
         throw Exception('Did not receive success status code from request.');
       }
 
     }
 
-    //this method fetches the json from dokku, and then 
-    //seperates each json object into an Idea(.dart) object
+
+    ///This web function is similar to fetchIdeas, except it is modified to
+    ///accept a http.Client as a parameter. This is done so we can test the web function
+    ///with a mock http request as done in message_page_test.dart
     Future<List<Idea>> fetchIdeasTest(http.Client client) async{
       developer.log('Making web request...');
       var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas');
@@ -145,8 +125,8 @@ Future<bool> onDislikeButtonTapped(int id) async{
         final List<Idea> returnData;
         
         var res = jsonDecode(response.body);
-        print('json decode: $res');
-        print('resmdata: ${res['mData']}');
+        developer.log('json decode: $res');
+        developer.log('resmdata: ${res['mData']}');
         
         if(res['mData'] is List){
           //dynamic allows for a types to be inferred during runtime, and can be changed to different types
@@ -159,12 +139,11 @@ Future<bool> onDislikeButtonTapped(int id) async{
           returnData = List.empty();
         }
 
-        print(returnData);
+        developer.log('$returnData');
         return returnData;
       } 
       else{
-        // If the server did not return a 200 OK response,
-        // then throw an exception.
+        ///If the server did not return a 200 OK response,
         throw Exception('Did not receive success status code from request.');
       }
 

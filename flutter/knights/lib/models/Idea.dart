@@ -1,3 +1,6 @@
+///This is the model class for an Idea.
+///
+///Idea's must contain mID, mContent, and mLikeCount.
 class Idea{
   final int mId;
   final String mContent;
@@ -9,8 +12,7 @@ class Idea{
     required this.mLikeCount,
   });
 
-  //this is a factory constructor that creates an idea instance
-  // from json
+  ///This is a factory constructor that creates an idea instance from json objects.
   factory Idea.fromJson(Map<String, dynamic> json){
     return Idea(
       mId: json['mId'],
@@ -19,7 +21,7 @@ class Idea{
     );
   }
 
-  //converts idea object into json object (map)
+  ///Converts idea object into json object (map).
   Map<String, dynamic> toJson() =>{
     'mId' : mId,
     'mContent' : mContent,
