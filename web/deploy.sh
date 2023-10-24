@@ -37,6 +37,14 @@ cp node_modules/jasmine-core/lib/jasmine-core/*.js $TARGETFOLDER/$WEBFOLDERNAME
 # step 6: output JSDocs with compiled app.js
 echo "generating and outputting JSDocs"
 jsdoc $TARGETFOLDER/app.js
+#move to docs foldero docs folder
+echo "moving out folder to docs folder"
+mv out/scripts docs/
+mv out/fonts docs/
+mv out/styles docs/
+mv out/app.js.html docs/
+mv out/global.html docs/
+mv out/index.html docs/
 
 # step final: launch the server.  Be sure to disable caching
 # (Note: we don't currently use -s for silent operation)

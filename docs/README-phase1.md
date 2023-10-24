@@ -24,5 +24,3 @@
 ## Tests Description
 [https://docs.google.com/document/d/1dNcuvbE2koQYN3F-NDsyusxrqZ44D1l4iP6vL5kYpX8/edit?usp=sharing](https://docs.google.com/document/d/1dNcuvbE2koQYN3F-NDsyusxrqZ44D1l4iP6vL5kYpX8/edit?usp=sharing)
 
-## Front-end Documentation
-    * [Front-end JSDocs](../web/out/index.html)
