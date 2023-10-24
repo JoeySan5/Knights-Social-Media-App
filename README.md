@@ -33,11 +33,21 @@
 ## Build & Run Instructions
 
 ### Mobile
+#### To deploy UI
 1. The mobile app can currently only be ran locally through an emulator. Therefore, the initial step is to have an Android Emulator (API 33 and above) set up 
 2. Open up the source code on an IDE and open flutter/knights/lib/main.dart
 3. Ensure the emulator is up and running, and then proceed to click **run and debug** (or f5) on your IDE (in main.dart)
 4. Wait until the app loads onto your emulator
 5. Once app is loaded you can proceed to try out all the features explained in the tagged release!
+
+#### To use tests
+1. Navigate to flutter/knights directory in terminal
+2. Run command to test a specific file: flutter test tests/<test_file_name>
+
+#### To view Libraries and Artifacts
+1. Navigate to flutter/knights directory in terminal
+2. Run command: dart pub global run dhttpd --path doc/api
+3. Navigate to `http://localhost:8080` to view dart docs
 
 ### Web
 ### to deploy UI
