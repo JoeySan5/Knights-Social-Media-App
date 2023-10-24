@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Unit test for simple App.
+ * DatabaseTest provides unit tests for the Idea database entry.
  */
 public class IdeaTest extends TestCase {
     /**
