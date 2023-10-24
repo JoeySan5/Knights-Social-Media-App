@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 
 
-import 'package:knights/models/Idea.dart';
-import 'package:knights/components/IdeaFormat.dart';
-import 'package:knights/net/webRequests.dart';
+import 'package:knights/models/idea.dart';
+import 'package:knights/components/idea_format.dart';
+import 'package:knights/net/web_requests.dart';
 
-
+///This component creates a list view for all Idea Posts(Formats)
+///
+///Fetches Ideas from dokku and converts those ideas into Idea Format objects.
+///This then is added into a list view which is formatted within the home_page view.
 class IdeaList extends StatefulWidget{
     
     const IdeaList({super.key});
@@ -16,35 +19,36 @@ class IdeaList extends StatefulWidget{
   }
 
 
-  //now we want to read in data from dokku using get (fetchdata()), and then parse the data into idea objects.
-  //with the idea object we will get a list similar to below, 
+  
   class _IdeaList extends State<IdeaList>{
-    // final List<Idea> _ideas = [
-    //   Idea(mId: 4, mContent: 'helloworld', mLikeCount: 4),
-    //   Idea(mId: 5, mContent: 'byeworld', mLikeCount: -7),
-    // ];
-    late Future<List<Idea>> _future_list_ideas;
+    
+    late Future<List<Idea>> _futureListIdeas;
 
-    //initState called to initialize data that depends on a build
-    //once the widget is inserted inside the widget tree
+    ///Now we want to read in data from dokku using get and parse the json into idea_format objects.
+    ///
+    ///initState called to initialize data that depends on a build,
+    ///once the widget is inserted inside the widget tree. In this case the 
+    ///widget is the list of ideas_formats.
     @override
     void initState(){
-      _future_list_ideas = fetchIdeas();
+      super.initState();
+      _futureListIdeas = fetchIdeas();
     }
 
     void retry(){
       setState(() {
-        _future_list_ideas = fetchIdeas();
+        _futureListIdeas = fetchIdeas();
       });
     }
 
 
     @override
     Widget build(BuildContext context) {
+      
         var fb = FutureBuilder<List<Idea>>(
-        future: _future_list_ideas, 
-        //context keeps track of each widget in the widgetTree
-        //snapshot is what is currently available 
+        future: _futureListIdeas, 
+        ///Context keeps track of each widget in the widgetTree.
+        ///Snapshot is what is currently available of widget.
         builder: (BuildContext context, AsyncSnapshot<List<Idea>> snapshot){
           Widget child;
           
@@ -66,7 +70,7 @@ class IdeaList extends StatefulWidget{
           else if(snapshot.hasError){
             child = Text('${snapshot.error}');
           } else{
-            //this awaits snapshot data, displaying a loading spinner
+            ///This awaits snapshot data, displaying a loading spinner.
             child = const CircularProgressIndicator();
           }
           return child; 

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:knights/components/IdeaList.dart';
-import 'package:knights/pages/MessagePage.dart';
+import 'package:knights/components/idea_list.dart';
+import 'package:knights/pages/message_page.dart';
+
+///This class is the Home Page for the app.
+///
+///Features a centered column with a title, sub title, idea list,
+///and a button that navigates you to message_page (push message_page onto stack).
 class MyHomePage extends StatelessWidget{
   const MyHomePage({super.key});
 
@@ -46,7 +51,7 @@ class MyHomePage extends StatelessWidget{
                 child: IdeaList(),
               ),
               Padding(
-                padding: EdgeInsets.only(top: 35.0),
+                padding: const EdgeInsets.only(top: 35.0),
                 child: ElevatedButton(
                 style: const ButtonStyle(
                   backgroundColor: MaterialStatePropertyAll(Colors.green),
