@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:knights/components/IdeasForm.dart';
+import 'package:knights/components/ideas_form.dart';
 
-
+///This class is the Message Page for the app.
+///
+///Features a centered column with an Ideas Form and a button to 
+///navigate back home (pop current message_page)
 class MessagePage extends StatelessWidget{
   const MessagePage({super.key});
 
@@ -12,7 +15,7 @@ class MessagePage extends StatelessWidget{
       body:Center(
         child: Column(
           children: <Widget>[
-            IdeasForm(),
+            const IdeasForm(),
             
             ElevatedButton(
               style: const ButtonStyle(

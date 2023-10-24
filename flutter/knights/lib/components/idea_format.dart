@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'package:like_button/like_button.dart';
-import 'package:knights/net/webRequests.dart';
+import 'package:knights/net/web_requests.dart';
 
-//This class is the format to display an idea,
-    //includes user massage, like counter, like button (increment counter), and dislike button (decrement counter)
+  ///This class is the format to display an idea post.
+  ///
+  ///Component includes user message, like counter, like button (increment counter), and dislike button (decrement counter).
   class IdeaFormat extends StatefulWidget{
       final int mId;
       final String mContent;
@@ -16,9 +17,23 @@ import 'package:knights/net/webRequests.dart';
 
   }
 
+  //Set state to increment.
+
   class _IdeaFormat extends State<IdeaFormat> {
+      ///This is to keep track of the like count
+      int likeCount = 0;
+
+      @override
+      void initState(){
+        super.initState();
+        ///likecount is first initialized based on the respective
+        ///idea mLikeCount
+        likeCount = widget.mLikeCount;
+      }
+
       @override
       Widget build(BuildContext context) {
+        
         return Container(
           margin: const EdgeInsets.all(15.0),
           //decoration is to make borders look different
@@ -33,27 +48,32 @@ import 'package:knights/net/webRequests.dart';
               ),
             ),
           
-          height: 70,
           child:  Column(
-            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-               Padding(
-                padding: EdgeInsets.all(8.0),
+              ///Sets up the user message.
+              Padding(
+                padding: const EdgeInsets.all(8.0),
                 child:Text(
-              widget.mContent,
-              style: const TextStyle(color: Colors.white),
-              )),
+                  widget.mContent,
+                  style: const TextStyle(color: Colors.white),
+              
+                )
+              ),
+              ///Sets up the like counter.
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(
-                  widget.mLikeCount.toString(),
+                  likeCount.toString(),
                   style: const TextStyle(color: Colors.white),
                   ),
-                  //this is thumbs-up icon
+                  ///Sets up the like button.
                   LikeButton(
                     //likeCount: widget.mLikeCount,
                     onTap: (isLiked) {
+                      setState(() {
+                        likeCount++;
+                      });
                       return onLikeButtonTapped(widget.mId);
                     },
                     likeBuilder:(bool isLiked){
@@ -63,9 +83,12 @@ import 'package:knights/net/webRequests.dart';
                       );
                     },
                   ),
-                  //this is thumbs-down icon
+                  ///Sets up the dislike button.
                   LikeButton(
                     onTap: (isLiked) {
+                      setState(() {
+                        likeCount--;
+                      });
                       return onDislikeButtonTapped(widget.mId);
                     },
                     likeBuilder:(bool isLiked){

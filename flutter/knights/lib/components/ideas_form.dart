@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:knights/net/webRequests.dart';
+import 'package:knights/net/web_requests.dart';
 
-
+///Component for Ideas Form (Submission).
+///
+///Contains the a text field for the user to write into. Creates a controller to 
+///keep track of what is being written inside of the text field. Lastly, contains a 
+///submit button to post onto backend-dokku.
 class IdeasForm extends StatefulWidget{
   const IdeasForm({super.key});
 
@@ -11,7 +15,7 @@ class IdeasForm extends StatefulWidget{
 }
 
 class _IdeasForm extends State<IdeasForm>{
-  //text controller used to retreive current value of the TextField
+  ///text controller used to retreive current value of the TextField
   final myController = TextEditingController();
 
   @override
@@ -26,7 +30,7 @@ class _IdeasForm extends State<IdeasForm>{
       children: [
             
             Padding(
-              padding: EdgeInsets.only(top: 30),
+              padding: const EdgeInsets.only(top: 30),
               child: SizedBox( 
               width: 300,
               height: 300,
@@ -41,7 +45,7 @@ class _IdeasForm extends State<IdeasForm>{
               hintStyle: TextStyle(color: Colors.white),
               contentPadding: EdgeInsets.all(10)
             ),
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
             )
             )
             ),
