@@ -11,16 +11,18 @@
   - Sehyoun Jang - Project Manager - Contact Email: sej324@lehigh.edu
 
 ## URLs
-- **Git Repository**: [https://bitbucket.org/cse216-2023fa-team-25/cse216-2023fa-team-25/src/master/](https://bitbucket.org/cse216-2023fa-team-25/cse216-2023fa-team-25/src/master/)
-- **Trello Board**: [https://trello.com/invite/b/EnJtgGYY/ATTI0772a2683b64851fa36b0f707982fa087EC7746E/cse216](https://trello.com/invite/b/EnJtgGYY/ATTI0772a2683b64851fa36b0f707982fa087EC7746E/cse216)
-- **Backend URL**: [https://team-knights.dokku.cse.lehigh.edu/](https://team-knights.dokku.cse.lehigh.edu/)
+- **Git Repository**: <https://bitbucket.org/cse216-2023fa-team-25/cse216-2023fa-team-25/src/master/>
+- **Trello Board**: <https://trello.com/invite/b/EnJtgGYY/ATTI0772a2683b64851fa36b0f707982fa087EC7746E/cse216>
+- **Elephant SQL**: <https://api.elephantsql.com/console/8ce5b366-8e87-4040-afec-37897ecb4725/details>
+- **Backend URL**: <https://team-knights.dokku.cse.lehigh.edu/>
 
 ## Release Description
 
 ### Initial Setup (Version 0.1.0)
 - Repository has been set up with the essential directories and branches.
 - README file has been created and updated with team information, key URLs, and initial project description.
-- No core functionalities have been implemented yet. Future updates and functionalities will be documented in the subsequent releases.
+<<<<<<< HEAD
+
 
 ### Tagged Release
 1. mobile_v1 (sprint 6):
@@ -31,21 +33,26 @@
 ## Build & Run Instructions
 
 ### Mobile
+#### To deploy UI
 1. The mobile app can currently only be ran locally through an emulator. Therefore, the initial step is to have an Android Emulator (API 33 and above) set up 
 2. Open up the source code on an IDE and open flutter/knights/lib/main.dart
 3. Ensure the emulator is up and running, and then proceed to click **run and debug** (or f5) on your IDE (in main.dart)
 4. Wait until the app loads onto your emulator
 5. Once app is loaded you can proceed to try out all the features explained in the tagged release!
 
+#### To use tests
+1. Navigate to flutter/knights directory in terminal
+2. Run command to test a specific file: flutter test tests/<test_file_name>
+
 ### Web
-### to deploy UI
+#### to deploy UI
     * ensure that CORS is enabled through dokku
     * once this is checked, navigate to Web/ directory
     * run the command: sh deploy.sh
         * this compiles, runs, and creates the necessary folders to run
     * once loaded, navigate to the correct https location, there should be 3 different ones
 
-### to run unit tests
+#### to run unit tests
     * navigate to Web/ directory
     * run command: sh deploy.sh
     * once this compiles, select one of the three http locations provided
@@ -54,12 +61,12 @@
 
 ### Backend
 
-### Locally
+#### Locally
 1. From the backend maven project root, run mvn exec:java with the `PORT` and `DATABASE_URL` environment variables specified
     * `PORT=8998 DATABASE_URL=postgres://pfdcoetq:VMXXrjrJtMXqzP6JwpjnapwpOVpk6e9o@peanut.db.elephantsql.com/pfdcoetq mvn exec:java`
     * The address is `http://localhost:PORT/`
 
-### On Dokku
+#### On Dokku
 1. Ensure your ssh key is set up on Dokku
 2. Use `config:set` to edit and setup the environment variables
     * For example, `ssh -i ~/.ssh/id_ed25519 -t dokku@dokku.cse.lehigh.edu 'config:set team-knights CORS_ENABLED=false'`
@@ -70,5 +77,19 @@
 4. To see continuous logs, run the following after starting:
     * `ssh -i ~/.ssh/id_ed25519 -t dokku@dokku.cse.lehigh.edu 'logs team-knights -t'`
 
-### Documentation
-- **Web JSDocs** [web JSDocs](docs/web_artifacts/index.html)
+### Admin Build & Run Instructions
+- compile java code through mvn package and then run the POSTGRES command with the environment variables
+- test out different CRUD operations like create table, drop table, add row, delete row
+- verify your expected output on elephant sql 
+
+## Developer Documentation
+
+### Mobile
+[Mobile Dartdocs](docs/mobile_artifacts/api/index.html)
+
+### Web
+[Web JSDocs](docs/web_artifacts/index.html)
+### Backend API
+[Backend Javadoc](docs/backend-apidocs/site/apidocs/index.html)
+
+### Admin
