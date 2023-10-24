@@ -11,10 +11,10 @@
   - Sehyoun Jang - Project Manager - Contact Email: sej324@lehigh.edu
 
 ## URLs
-- **Git Repository**: [https://bitbucket.org/cse216-2023fa-team-25/cse216-2023fa-team-25/src/master/](https://bitbucket.org/cse216-2023fa-team-25/cse216-2023fa-team-25/src/master/)
-- **Trello Board**: [https://trello.com/invite/b/EnJtgGYY/ATTI0772a2683b64851fa36b0f707982fa087EC7746E/cse216](https://trello.com/invite/b/EnJtgGYY/ATTI0772a2683b64851fa36b0f707982fa087EC7746E/cse216)
-- **Elephant SQL**: [https://api.elephantsql.com/console/8ce5b366-8e87-4040-afec-37897ecb4725/details] (https://api.elephantsql.com/console/8ce5b366-8e87-4040-afec-37897ecb4725/details)
-- **Backend URL**: [https://team-knights.dokku.cse.lehigh.edu/](https://team-knights.dokku.cse.lehigh.edu/)
+- **Git Repository**: <https://bitbucket.org/cse216-2023fa-team-25/cse216-2023fa-team-25/src/master/>
+- **Trello Board**: <https://trello.com/invite/b/EnJtgGYY/ATTI0772a2683b64851fa36b0f707982fa087EC7746E/cse216>
+- **Elephant SQL**: <https://api.elephantsql.com/console/8ce5b366-8e87-4040-afec-37897ecb4725/details>
+- **Backend URL**: <https://team-knights.dokku.cse.lehigh.edu/>
 
 ## Release Description
 
@@ -40,14 +40,14 @@
 5. Once app is loaded you can proceed to try out all the features explained in the tagged release!
 
 ### Web
-### to deploy UI
+#### to deploy UI
     * ensure that CORS is enabled through dokku
     * once this is checked, navigate to Web/ directory
     * run the command: sh deploy.sh
         * this compiles, runs, and creates the necessary folders to run
     * once loaded, navigate to the correct https location, there should be 3 different ones
 
-### to run unit tests
+#### to run unit tests
     * navigate to Web/ directory
     * run command: sh deploy.sh
     * once this compiles, select one of the three http locations provided
@@ -56,12 +56,12 @@
 
 ### Backend
 
-### Locally
+#### Locally
 1. From the backend maven project root, run mvn exec:java with the `PORT` and `DATABASE_URL` environment variables specified
     * `PORT=8998 DATABASE_URL=postgres://pfdcoetq:VMXXrjrJtMXqzP6JwpjnapwpOVpk6e9o@peanut.db.elephantsql.com/pfdcoetq mvn exec:java`
     * The address is `http://localhost:PORT/`
 
-### On Dokku
+#### On Dokku
 1. Ensure your ssh key is set up on Dokku
 2. Use `config:set` to edit and setup the environment variables
     * For example, `ssh -i ~/.ssh/id_ed25519 -t dokku@dokku.cse.lehigh.edu 'config:set team-knights CORS_ENABLED=false'`
@@ -76,3 +76,14 @@
 - compile java code through mvn package and then run the POSTGRES command with the environment variables
 - test out different CRUD operations like create table, drop table, add row, delete row
 - verify your expected output on elephant sql 
+
+## Developer Documentation
+
+### Mobile
+
+### Web
+
+### Backend API
+[Backend Javadoc](docs/backend-apidocs/site/apidocs/index.html)
+
+### Admin
