@@ -87,3 +87,4 @@
 [Backend Javadoc](docs/backend-apidocs/site/apidocs/index.html)
 
 ### Admin
+[Admin Javadoc](docs/admin-apidocs/index.html)
