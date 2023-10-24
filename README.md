@@ -88,7 +88,7 @@
 [Mobile Dartdocs](docs/mobile_artifacts/api/index.html)
 
 ### Web
-
+[Web JSDocs](docs/web_artifacts/index.html)
 ### Backend API
 [Backend Javadoc](docs/backend-apidocs/site/apidocs/index.html)
 
