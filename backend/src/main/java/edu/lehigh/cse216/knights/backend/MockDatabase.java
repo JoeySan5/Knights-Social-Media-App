@@ -7,7 +7,7 @@ import java.util.ArrayList;
  * Used for unit testing in a controlled environment.
  * 
  * NB: The methods of MockDatabase are synchronized, since they will be used from a 
- * web framework and there may be multiple concurrent accesses to the DataStore.
+ * web framework and there may be multiple concurrent accesses to the MockDatabase.
  * 
  * Currently adjusted so that the first entry
  * in the table has ID = 1. (not 0).

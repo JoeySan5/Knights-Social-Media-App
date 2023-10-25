@@ -10,7 +10,7 @@
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-</properties>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -30,6 +30,14 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.6.0</version>
+        <configuration>
+          <mainClass>edu.lehigh.cse216.knights.admin.App</mainClass>
+        </configuration>
+      </plugin>
+        <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.6.0</version>
         <configuration>
           <mainClass>edu.lehigh.cse216.knights.admin.App</mainClass>
         </configuration>

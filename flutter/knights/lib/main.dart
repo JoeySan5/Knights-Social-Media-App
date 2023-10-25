@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 
-import 'package:knights/pages/HomePage.dart';
+import 'package:knights/pages/home_page.dart';
 
 
-//everytime like button is cliked it should be a new request, that either 
-//increments or decrements like counter
+///The main functions starts the app by calling MyHomePage
+///
+///Also holds the process to get app certification to communicate with other sites.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 

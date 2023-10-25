@@ -4,7 +4,7 @@ body {
 
 #teamName{
     text-align: center;
-    padding: 10px;
+    padding: 5px;
     font-size: 70px;
     color: white;
 }
@@ -28,26 +28,42 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
-#editElement{
-    text-align: center;
-    width: 200px;
-    margin: 0 auto;
-    color: #CFFA7C;
-    border-width: thin;
-    border-color: #CFFA7C;
-    border-style: solid;
-    border-radius: 10px;
+#addButton{
     font-family: 'Roboto', sans-serif;
+    background-color: #CFFA7C;
+    color: black;
+    border-radius: 10px;
+    text-align: center;
+    border: none;
+    padding:5px 10px;
+}
+#addCancel{
+    font-family: 'Roboto', sans-serif;
+    background-color: #CFFA7C;
+    color: black;
+    border-radius: 10px;
+    text-align: center;
+    border: none;
+    padding:5px 10px;
 }
 
-#addButtonFooter{
+#deleteId{
+    font-family: 'Roboto', sans-serif;
+    background-color: #CFFA7C;
+    color: black;
+    text-align: center;
+    border: none;
+    padding:5px 10px;
+}
+
+#showAdd{
     font-family: 'Roboto', sans-serif;
     position: fixed;
     bottom:0;
     left:50%;
     transform: translate(-50%);
     background-color: #CFFA7C;
-    color: white;
+    color: black;
     padding:10px 20px;
     border-radius: 10px;
     text-align: center;
@@ -56,30 +72,44 @@ body {
 
 #ideaList{
     font-family: 'Roboto', sans-serif;
-    max-height: 300px;
-    overflow-y: scroll;
-    display: flex;
+    max-height: 400px;
+    display:flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
+    overflow-y: scroll;
+    width: 50%;
+    margin: auto;
 }
 
 table {
-
+    table-layout: inherit;
+    overflow-y: scroll;
     border-collapse: separate;
     border-spacing: 0 0.5em;
+    max-height: 399px;
 }
 
+/*
+was having trouble getting rid of the borders around individual elements
+*/
 tr {
     font-size: 1.2em;
-    background-color: #CFFA7C;
+    color: white;
 }
 
 tr td {
   font-family: 'Roboto', sans-serif;
   padding: 15px 20px;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #CFFA7C;
 }
 
+
+/*
+    these are to make the rows rounded
+*/
 tr td:first-of-type {
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
@@ -88,21 +118,6 @@ tr td:first-of-type {
 tr td:last-of-type {
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
-}
-
-
-/**
-tr{
-    border-spacing: 0;
-    border-collapse: collapse;
-    align-items: center;
-    text-align: center;
-    margin: 0 auto;
-    color: #CFFA7C;
-    border-width: thin;
-    border-color: #CFFA7C;
-    border-style:solid;
-    border-radius: 10px;
 }
 
 
