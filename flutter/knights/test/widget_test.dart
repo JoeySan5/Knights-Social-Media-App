@@ -11,13 +11,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:knights/main.dart';
 
-//creating mock NavigatorObserver
+///Creating mock NavigatorObserver
 class MockNavigatorObserver extends Mock implements NavigatorObserver{}
+
+///The main function tests and verifies that the elevated button is present 
+///on the home page when the app is initialized.
 void main() {
   
   group('post message navigator', () {
     testWidgets('Say your piece button is present', (WidgetTester tester) async{
-    final mockObserver = MockNavigatorObserver();
+    //final mockObserver = MockNavigatorObserver();
     //builds widget
     await tester.pumpWidget(
       const MyApp()
@@ -26,6 +29,8 @@ void main() {
     expect(find.byType(ElevatedButton), findsOneWidget);
     
   });
+
+  //the test below will be updated to test the navigation of the app
 
   // testWidgets('MessagePage appears after clicking button', (WidgetTester tester) async{
   //   final mockObserver = MockNavigatorObserver();
