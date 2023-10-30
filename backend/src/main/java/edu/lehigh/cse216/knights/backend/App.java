@@ -12,6 +12,10 @@ import com.google.gson.*;
 import edu.lehigh.cse216.knights.backend.Idea;
 import edu.lehigh.cse216.knights.backend.IdeaRequest;
 
+import edu.lehigh.cse216.knights.backend.User;
+import edu.lehigh.cse216.knights.backend.UserRequest;
+
+
 /**
  * App creates an HTTP server capable of interacting with the Database.
  */

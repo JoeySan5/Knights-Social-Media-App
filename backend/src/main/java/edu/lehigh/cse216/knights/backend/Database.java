@@ -49,12 +49,17 @@ public class Database {
     /**
      * A prepared statement for creating the table in our database
      */
-    private PreparedStatement mCreateTable;
+    private PreparedStatement mCreateIdeaTable;
 
     /**
      * A prepared statement for dropping the table in our database
      */
-    private PreparedStatement mDropTable;
+    private PreparedStatement mDropIdeaTable;
+
+    private PreparedStatement mCreateUserTable;
+
+    private PreparedStatement mDropUserTable;
+
 
 
     /**
@@ -79,10 +84,23 @@ public class Database {
 
             // Note: no "IF NOT EXISTS" or "IF EXISTS" checks on table 
             // creation/deletion, so multiple executions will cause an exception
-            this.mCreateTable = this.mConnection.prepareStatement(
+            this.mCreateIdeaTable = this.mConnection.prepareStatement(
                     "CREATE TABLE ideas (id SERIAL PRIMARY KEY, content VARCHAR(2048) NOT NULL, likeCount INT)");
             // tjp Question: should we use 'id' or 'ID'? Really a choice for admin to make
-            this.mDropTable = this.mConnection.prepareStatement("DROP TABLE ideas");
+            this.mDropIdeaTable = this.mConnection.prepareStatement("DROP TABLE ideas");
+
+            this.mCreateUserTable = this.mConnection.prepareStatement(
+                "CREATE TABLE users (" +
+                "userID SERIAL PRIMARY KEY, " +
+                "username VARCHAR(30) NOT NULL, " +
+                "email VARCHAR(50), " +
+                "GI VARCHAR(10), " +
+                "SO VARCHAR(15), " +
+                "note VARCHAR(100), " +
+                "valid BOOLEAN NOT NULL" +
+                ")");
+
+            this.mDropUserTable = this.mConnection.prepareStatement("DROP TABLE users");
 
             // Standard CRUD operations
             // tjp: these SQL prepared statement are essential for understanding exactly what the backend is asking the database
@@ -292,23 +310,39 @@ public class Database {
     }
 
     /**
-     * Create tblData.  If it already exists, this will print an error
+     * Create idea tblData.  If it already exists, this will print an error
      */
-    void createTable() {
+    void createIdeaTable() {
         try {
-            mCreateTable.execute();
+            mCreateIdeaTable.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     /**
-     * Remove tblData from the database.  If it does not exist, this will print
+     * Remove idea tblData from the database.  If it does not exist, this will print
      * an error.
      */
-    void dropTable() {
+    void dropIdeaTable() {
         try {
-            mDropTable.execute();
+            mDropIdeaTable.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void CreateUserTable() {
+        try {
+            mCreateUserTable.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void DropUserTable() {
+        try {
+            mDropUserTable.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
