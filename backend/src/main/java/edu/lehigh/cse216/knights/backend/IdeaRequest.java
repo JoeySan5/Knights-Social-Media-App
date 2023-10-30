@@ -8,6 +8,17 @@ package edu.lehigh.cse216.knights.backend;
  *     do not need a constructor.
  */
 public class IdeaRequest {    
+
+    
+    /**
+     * The unique identifier for the idea. This is generally provided by the database and is unique
+     * thoruhg the whole program.
+     * 
+     * This field can be used for display the comments on the idea.
+     */
+    public int mId;
+
+
     /**
      * The content being provided by the client.
      * 
