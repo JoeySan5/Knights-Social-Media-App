@@ -14,7 +14,7 @@ public class User {
      * The unique identifier associated with this user. It's final, because
      * we never want to change it.
      */
-    public final int mId;
+    public final String mId;
 
     /**
      * The username for this user entry
@@ -56,7 +56,7 @@ public class User {
      * @param email The email for this User
      */
 
-    public User(int id, String email) {
+    public User(String id, String email) {
         mId = id;
         mEmail = email;
 
@@ -81,7 +81,7 @@ public class User {
      * @param note The note for this User
      */
 
-    public User(int id, String username, String email, String gi, String so, String note) {
+    public User(String id, String username, String email, String gi, String so, String note) {
         mId = id;
         mUsername = username;
         mEmail = email;

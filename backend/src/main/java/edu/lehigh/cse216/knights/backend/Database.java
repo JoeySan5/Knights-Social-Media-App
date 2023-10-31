@@ -111,7 +111,7 @@ public class Database {
 
             this.mCreateUserTable = this.mConnection.prepareStatement(
                     "CREATE TABLE users (" +
-                            "userID SERIAL PRIMARY KEY, " +
+                            "userID VARCHAR(256) PRIMARY KEY, " +
                             "username VARCHAR(30) NOT NULL, " +
                             "email VARCHAR(50), " +
                             "GI VARCHAR(10), " +
