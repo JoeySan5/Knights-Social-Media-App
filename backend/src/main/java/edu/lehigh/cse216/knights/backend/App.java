@@ -165,6 +165,20 @@ public class App
             }
         });
 
+
+        Spark.post("/users", (request, response) -> {
+            UserRequest req = gson.fromJson(request.body(), UserRequest.class);
+            
+            response.status(200);
+            response.type("application/json");
+            
+            int rowsInserted = db.insertNewUser(req.mEmail);
+            if (rowsInserted <= 0) {
+                return gson.toJson(new StructuredResponse("error", "error creating user", null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + " user(s)", null));
+            }
+        });
     }
 
     private static final String DEFAULT_PORT_DB = "5432";

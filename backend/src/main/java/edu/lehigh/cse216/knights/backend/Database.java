@@ -60,7 +60,7 @@ public class Database {
 
     private PreparedStatement mDropUserTable;
 
-
+    private PreparedStatement mInsertNewUser;
 
     /**
      * The Database constructor is private: we only create Database objects 
@@ -89,6 +89,14 @@ public class Database {
             // tjp Question: should we use 'id' or 'ID'? Really a choice for admin to make
             this.mDropIdeaTable = this.mConnection.prepareStatement("DROP TABLE ideas");
 
+            // Standard CRUD operations
+            // tjp: these SQL prepared statement are essential for understanding exactly what the backend is asking the database
+            this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE id = ?"); // Not implemented in Phase 1?
+            this.mInsertOneIdea = this.mConnection.prepareStatement("INSERT INTO ideas VALUES (default, ?, 0)");
+            this.mSelectAllIdeas = this.mConnection.prepareStatement("SELECT id, content, likeCount FROM ideas ORDER BY id DESC");
+            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE id=?");
+            this.mUpdateIdeaLikeCount = this.mConnection.prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE id = ?");
+
             this.mCreateUserTable = this.mConnection.prepareStatement(
                 "CREATE TABLE users (" +
                 "userID SERIAL PRIMARY KEY, " +
@@ -101,14 +109,12 @@ public class Database {
                 ")");
 
             this.mDropUserTable = this.mConnection.prepareStatement("DROP TABLE users");
+            
+            this.mInsertNewUser = this.mConnection.prepareStatement(
+                "INSERT INTO users (email, valid, username, GI, SO, note) " +
+                "VALUES (?, true, 'unknown', 'unknown', 'unknown', 'unknown')"
+            );
 
-            // Standard CRUD operations
-            // tjp: these SQL prepared statement are essential for understanding exactly what the backend is asking the database
-            this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE id = ?"); // Not implemented in Phase 1?
-            this.mInsertOneIdea = this.mConnection.prepareStatement("INSERT INTO ideas VALUES (default, ?, 0)");
-            this.mSelectAllIdeas = this.mConnection.prepareStatement("SELECT id, content, likeCount FROM ideas ORDER BY id DESC");
-            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE id=?");
-            this.mUpdateIdeaLikeCount = this.mConnection.prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE id = ?");
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
             e.printStackTrace();
@@ -226,6 +232,19 @@ public class Database {
         return count;
     }
 
+
+    int insertNewUser(String email) {
+        int count = 0;
+        try {
+            mInsertNewUser.setString(1, email);
+            count += mInsertNewUser.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
+
+    
     /**
      * Query the database for a list of ideas 
      * with their IDs, content, and likeCounts
@@ -332,6 +351,10 @@ public class Database {
         }
     }
 
+    /**
+     * Create user tblData.  If it already exists, this will print an error
+     */
+
     void CreateUserTable() {
         try {
             mCreateUserTable.execute();
@@ -340,6 +363,10 @@ public class Database {
         }
     }
 
+    /**
+     * Remove user tblData from the database.  If it does not exist, this will print
+     * an error.
+     */
     void DropUserTable() {
         try {
             mDropUserTable.execute();
