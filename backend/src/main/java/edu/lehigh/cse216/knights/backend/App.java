@@ -165,7 +165,7 @@ public class App
             }
         });
 
-
+        // Register users profile with default value
         Spark.post("/users", (request, response) -> {
             UserRequest req = gson.fromJson(request.body(), UserRequest.class);
             
@@ -180,6 +180,7 @@ public class App
             }
         });
 
+        // update user's profile
         Spark.put("/users", (request, response) -> {
             UserRequest req = gson.fromJson(request.body(), UserRequest.class);
             response.status(200);
@@ -193,7 +194,7 @@ public class App
             }
         });
 
-        // GET route for retrieving the poster's name by idea ID
+        // get poster's name
         Spark.get("/ideas/:id/postername", (request, response) -> {
             int ideaId = Integer.parseInt(request.params(":id"));
             // Ensure status 200 OK, with a MIME type of JSON
@@ -210,6 +211,7 @@ public class App
             }
         });
 
+        // get user's information
         Spark.get("/users/:id", (request, response) -> {
             String userId = request.params("id");
             // ensure status 200 OK, with a MIME type of JSON
