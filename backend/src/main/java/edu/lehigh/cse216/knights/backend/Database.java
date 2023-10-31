@@ -262,11 +262,9 @@ public class Database {
         try {
             mUpdateOneUser.setString(1, req.mUsername);
             mUpdateOneUser.setString(2, req.mEmail);
-
             mUpdateOneUser.setString(3, req.mGI);
             mUpdateOneUser.setString(4, req.mSO);
             mUpdateOneUser.setString(5, req.mNote);
-
             mUpdateOneUser.setString(6, req.mId);
             return mUpdateOneUser.executeUpdate();
         } catch (SQLException e) {

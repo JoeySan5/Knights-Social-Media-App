@@ -33,4 +33,10 @@ public class IdeaRequest {
      * look like "{'mLikeIncrement':'1'}" or "{'mLikeIncrement':'-1'}".
      */
     public int mLikeIncrement;
+
+    /**
+     * The userId associated with the idea.
+     */
+    public String mUserId;
+
 }
