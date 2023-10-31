@@ -102,7 +102,7 @@ public class Database {
             this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE id = ?"); // Not
                                                                                                        // implemented in
                                                                                                        // Phase 1?
-            this.mInsertOneIdea = this.mConnection.prepareStatement("INSERT INTO ideas VALUES (default, ?, 0)");
+            this.mInsertOneIdea = this.mConnection.prepareStatement("INSERT INTO ideas (content, userid, likeCount) VALUES (?, ?, 0)");
             this.mSelectAllIdeas = this.mConnection
                     .prepareStatement("SELECT id, content, likeCount FROM ideas ORDER BY id DESC");
             this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE id=?");
@@ -234,10 +234,11 @@ public class Database {
      * 
      * @return The number of ideas that were inserted
      */
-    int insertIdea(String content) {
+    int insertIdea(String content, String userid) {
         int count = 0;
         try {
             mInsertOneIdea.setString(1, content);
+            mInsertOneIdea.setString(2, userid);
             // likeCount will automatically be set to 0; it is written into the
             // preparedStatement
             count += mInsertOneIdea.executeUpdate();
@@ -284,7 +285,12 @@ public class Database {
         try {
             ResultSet rs = mSelectAllIdeas.executeQuery();
             while (rs.next()) {
-                res.add(new Idea(rs.getInt("id"), rs.getString("content"), rs.getInt("likeCount")));
+                res.add(new Idea(
+                    rs.getInt("id"),
+                    rs.getString("content"),
+                    rs.getInt("likeCount"),
+                    rs.getString("userid")
+                ));
             }
             rs.close();
             return res;
@@ -307,7 +313,12 @@ public class Database {
             mSelectOneIdea.setInt(1, id);
             ResultSet rs = mSelectOneIdea.executeQuery();
             if (rs.next()) {
-                res = new Idea(rs.getInt("id"), rs.getString("content"), rs.getInt("likeCount"));
+                res = new Idea(
+                    rs.getInt("id"),
+                    rs.getString("content"),
+                    rs.getInt("likeCount"),
+                    rs.getString("userid") 
+                );
             }
         } catch (SQLException e) {
             e.printStackTrace();

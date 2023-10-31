@@ -114,7 +114,7 @@ public class App
             //     describes the error.
             response.status(200);
             response.type("application/json");
-            int rowsInserted = db.insertIdea(req.mContent);
+            int rowsInserted = db.insertIdea(req.mContent, req.mUserId);
             if (rowsInserted <= 0) {
                 return gson.toJson(new StructuredResponse("error", "error creating idea", null));
             } else {
