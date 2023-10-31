@@ -66,6 +66,8 @@ public class Database {
 
     private PreparedStatement mUpdateOneUser;
 
+    private PreparedStatement mGetPosterName;
+
     /**
      * The Database constructor is private: we only create Database objects
      * through the getDatabase() method.
@@ -102,10 +104,14 @@ public class Database {
             this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE id = ?"); // Not
                                                                                                        // implemented in
                                                                                                        // Phase 1?
-            this.mInsertOneIdea = this.mConnection.prepareStatement("INSERT INTO ideas (content, userid, likeCount) VALUES (?, ?, 0)");
+            this.mInsertOneIdea = this.mConnection
+                    .prepareStatement("INSERT INTO ideas (content, userid, likeCount) VALUES (?, ?, 0)");
             this.mSelectAllIdeas = this.mConnection
                     .prepareStatement("SELECT id, content, likeCount FROM ideas ORDER BY id DESC");
-            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE id=?");
+            this.mSelectAllIdeas = this.mConnection
+                    .prepareStatement("SELECT ideaid, content, likeCount FROM ideas ORDER BY ideaid DESC");
+                    
+            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaid=?");            
             this.mUpdateIdeaLikeCount = this.mConnection
                     .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE id = ?");
 
@@ -128,6 +134,12 @@ public class Database {
 
             this.mUpdateOneUser = this.mConnection.prepareStatement(
                     "UPDATE users SET username = ?, email = ?,  GI = ?, SO = ?, note = ? WHERE userID = ?");
+
+            this.mGetPosterName = this.mConnection.prepareStatement(
+                    "SELECT u.username " +
+                            "FROM ideas i " +
+                            "JOIN users u ON i.userid = u.userid " +
+                            "WHERE i.ideaid = ?");
 
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
@@ -248,32 +260,6 @@ public class Database {
         return count;
     }
 
-    int insertNewUser(String mId) {
-        int count = 0;
-        try {
-            mInsertNewUser.setString(1, mId);
-            count += mInsertNewUser.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return count;
-    }
-
-    int updateOneUser(UserRequest req) {
-        try {
-            mUpdateOneUser.setString(1, req.mUsername);
-            mUpdateOneUser.setString(2, req.mEmail);
-            mUpdateOneUser.setString(3, req.mGI);
-            mUpdateOneUser.setString(4, req.mSO);
-            mUpdateOneUser.setString(5, req.mNote);
-            mUpdateOneUser.setString(6, req.mId);
-            return mUpdateOneUser.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
     /**
      * Query the database for a list of ideas
      * with their IDs, content, and likeCounts
@@ -286,11 +272,10 @@ public class Database {
             ResultSet rs = mSelectAllIdeas.executeQuery();
             while (rs.next()) {
                 res.add(new Idea(
-                    rs.getInt("id"),
-                    rs.getString("content"),
-                    rs.getInt("likeCount"),
-                    rs.getString("userid")
-                ));
+                        rs.getInt("id"),
+                        rs.getString("content"),
+                        rs.getInt("likeCount"),
+                        rs.getString("userid")));
             }
             rs.close();
             return res;
@@ -307,18 +292,17 @@ public class Database {
      * 
      * @return The data for the requested idea, or null if the ID was invalid
      */
-    Idea selectOneIdea(int id) {
+    Idea selectOneIdea(int ideaid) {
         Idea res = null;
         try {
-            mSelectOneIdea.setInt(1, id);
+            mSelectOneIdea.setInt(1, ideaid);
             ResultSet rs = mSelectOneIdea.executeQuery();
             if (rs.next()) {
                 res = new Idea(
-                    rs.getInt("id"),
-                    rs.getString("content"),
-                    rs.getInt("likeCount"),
-                    rs.getString("userid") 
-                );
+                        rs.getInt("ideaid"),
+                        rs.getString("content"),
+                        rs.getInt("likeCount"),
+                        rs.getString("userid"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -369,6 +353,48 @@ public class Database {
         }
         return res;
     }
+
+    int insertNewUser(String mId) {
+        int count = 0;
+        try {
+            mInsertNewUser.setString(1, mId);
+            count += mInsertNewUser.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
+
+    int updateOneUser(UserRequest req) {
+        try {
+            mUpdateOneUser.setString(1, req.mUsername);
+            mUpdateOneUser.setString(2, req.mEmail);
+            mUpdateOneUser.setString(3, req.mGI);
+            mUpdateOneUser.setString(4, req.mSO);
+            mUpdateOneUser.setString(5, req.mNote);
+            mUpdateOneUser.setString(6, req.mId);
+            return mUpdateOneUser.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+
+    String GetPosterName(int ideaid) {
+        String posterName = null;
+        try {
+            mGetPosterName.setInt(1, ideaid);
+            ResultSet rs = mGetPosterName.executeQuery();
+            if (rs.next()) {
+                posterName = rs.getString("username");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return posterName;
+    }
+
 
     /**
      * Create idea tblData. If it already exists, this will print an error

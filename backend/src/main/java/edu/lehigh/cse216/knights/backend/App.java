@@ -13,7 +13,7 @@ import edu.lehigh.cse216.knights.backend.Idea;
 import edu.lehigh.cse216.knights.backend.IdeaRequest;
 
 import edu.lehigh.cse216.knights.backend.User;
-import edu.lehigh.cse216.knights.backend.UserRequest;
+import edu.lehigh.cse216.knights.backend.UserRequest;   
 
 
 /**
@@ -192,6 +192,24 @@ public class App
                 return gson.toJson(new StructuredResponse("ok", "updated " + rowsUpdated + " user(s)", null));
             }
         });
+
+        // GET route for retrieving the poster's name by idea ID
+        Spark.get("/ideas/:id/postername", (request, response) -> {
+            int ideaId = Integer.parseInt(request.params(":id"));
+            // Ensure status 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            
+            // Call your function to get the poster's name based on the idea ID
+            String posterName = db.GetPosterName(ideaId);
+            
+            if (posterName != null) {
+                return gson.toJson(new StructuredResponse("ok", null, posterName));
+            } else {
+                return gson.toJson(new StructuredResponse("error", "Poster not found", null));
+            }
+        });
+        
     }
 
     private static final String DEFAULT_PORT_DB = "5432";
