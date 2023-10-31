@@ -179,6 +179,19 @@ public class App
                 return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + " user(s)", null));
             }
         });
+
+        Spark.put("/users", (request, response) -> {
+            UserRequest req = gson.fromJson(request.body(), UserRequest.class);
+            response.status(200);
+            response.type("application/json");
+        
+            int rowsUpdated = db.updateOneUser(req);
+            if (rowsUpdated <= 0) {
+                return gson.toJson(new StructuredResponse("error", "error updating user", null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", "updated " + rowsUpdated + " user(s)", null));
+            }
+        });
     }
 
     private static final String DEFAULT_PORT_DB = "5432";
