@@ -209,6 +209,19 @@ public class App
                 return gson.toJson(new StructuredResponse("error", "Poster not found", null));
             }
         });
+
+        Spark.get("/users/:id", (request, response) -> {
+            String userId = request.params("id");
+            // ensure status 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            User user = db.selectOneUser(userId);
+            if (user == null) {
+                return gson.toJson(new StructuredResponse("error", userId + " not found", null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", null, user));
+            }
+        });
         
     }
 

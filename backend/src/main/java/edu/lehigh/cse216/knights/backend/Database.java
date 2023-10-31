@@ -68,6 +68,7 @@ public class Database {
 
     private PreparedStatement mGetPosterName;
 
+    private PreparedStatement mSelectOneUser;
     /**
      * The Database constructor is private: we only create Database objects
      * through the getDatabase() method.
@@ -106,8 +107,10 @@ public class Database {
                                                                                                        // Phase 1?
             this.mInsertOneIdea = this.mConnection
                     .prepareStatement("INSERT INTO ideas (content, userid, likeCount) VALUES (?, ?, 0)");
+
             this.mSelectAllIdeas = this.mConnection
                     .prepareStatement("SELECT id, content, likeCount FROM ideas ORDER BY id DESC");
+
             this.mSelectAllIdeas = this.mConnection
                     .prepareStatement("SELECT ideaid, content, likeCount FROM ideas ORDER BY ideaid DESC");
                     
@@ -133,13 +136,16 @@ public class Database {
                             "VALUES ('unknown', true, 'unknown', 'unknown', 'unknown', 'unknown', ?)");
 
             this.mUpdateOneUser = this.mConnection.prepareStatement(
-                    "UPDATE users SET username = ?, email = ?,  GI = ?, SO = ?, note = ? WHERE userID = ?");
+                    "UPDATE users SET username = ?, email = ?, GI = ?, SO = ?, note = ? WHERE userId = ?");
 
             this.mGetPosterName = this.mConnection.prepareStatement(
                     "SELECT u.username " +
                             "FROM ideas i " +
                             "JOIN users u ON i.userid = u.userid " +
                             "WHERE i.ideaid = ?");
+
+            this.mSelectOneUser = this.mConnection.prepareStatement(
+                    "SELECT * from users WHERE userid=?");
 
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
@@ -310,6 +316,27 @@ public class Database {
         return res;
     }
 
+
+    User selectOneUser(String userId) {
+        User res = null;
+        try {
+            mSelectOneUser.setString(1, userId);
+            ResultSet rs = mSelectOneUser.executeQuery();
+            if (rs.next()) {
+                res = new User(
+                        rs.getString("userid"),
+                        rs.getString("username"),
+                        rs.getString("email"),
+                        rs.getString("GI"),
+                        rs.getString("SO"),
+                        rs.getString("note"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+    
     /**
      * Delete an idea by ID
      * 
@@ -381,6 +408,7 @@ public class Database {
     }
 
 
+
     String GetPosterName(int ideaid) {
         String posterName = null;
         try {
@@ -394,6 +422,8 @@ public class Database {
         }
         return posterName;
     }
+
+
 
 
     /**
