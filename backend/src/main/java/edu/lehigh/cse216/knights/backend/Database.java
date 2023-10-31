@@ -123,11 +123,11 @@ public class Database {
             this.mDropUserTable = this.mConnection.prepareStatement("DROP TABLE users");
 
             this.mInsertNewUser = this.mConnection.prepareStatement(
-                    "INSERT INTO users (email, valid, username, GI, SO, note) " +
-                            "VALUES (?, true, 'unknown', 'unknown', 'unknown', 'unknown')");
+                    "INSERT INTO users (email, valid, username, GI, SO, note, userid) " +
+                            "VALUES ('unknown', true, 'unknown', 'unknown', 'unknown', 'unknown', ?)");
 
             this.mUpdateOneUser = this.mConnection.prepareStatement(
-                    "UPDATE users SET username = ?, GI = ?, SO = ?, note = ? WHERE userID = ?");
+                    "UPDATE users SET username = ?, email = ?,  GI = ?, SO = ?, note = ? WHERE userID = ?");
 
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
@@ -247,10 +247,10 @@ public class Database {
         return count;
     }
 
-    int insertNewUser(String email) {
+    int insertNewUser(String mId) {
         int count = 0;
         try {
-            mInsertNewUser.setString(1, email);
+            mInsertNewUser.setString(1, mId);
             count += mInsertNewUser.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -261,10 +261,13 @@ public class Database {
     int updateOneUser(UserRequest req) {
         try {
             mUpdateOneUser.setString(1, req.mUsername);
-            mUpdateOneUser.setString(2, req.mGI);
-            mUpdateOneUser.setString(3, req.mSO);
-            mUpdateOneUser.setString(4, req.mNote);
-            mUpdateOneUser.setInt(5, req.mId);
+            mUpdateOneUser.setString(2, req.mEmail);
+
+            mUpdateOneUser.setString(3, req.mGI);
+            mUpdateOneUser.setString(4, req.mSO);
+            mUpdateOneUser.setString(5, req.mNote);
+
+            mUpdateOneUser.setString(6, req.mId);
             return mUpdateOneUser.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

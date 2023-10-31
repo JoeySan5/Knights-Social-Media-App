@@ -28,6 +28,7 @@ public class Idea {
      */
     public int mLikeCount;
 
+    
     /**
      * The creation date for this idea entry.  Once it is set, it cannot be 
      * changed. Not yet implemented in phase 1
@@ -42,8 +43,9 @@ public class Idea {
      *           throughout the whole program.
      * @param content The content string for this Idea
      */
-    public Idea(int id, String content) {
+    public Idea(int id, String content, String userid) {
         mId = id;
+
         mContent = content;
         mLikeCount = 0;
     }

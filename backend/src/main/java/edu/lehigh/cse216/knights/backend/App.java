@@ -172,7 +172,7 @@ public class App
             response.status(200);
             response.type("application/json");
             
-            int rowsInserted = db.insertNewUser(req.mEmail);
+            int rowsInserted = db.insertNewUser(req.mId);
             if (rowsInserted <= 0) {
                 return gson.toJson(new StructuredResponse("error", "error creating user", null));
             } else {

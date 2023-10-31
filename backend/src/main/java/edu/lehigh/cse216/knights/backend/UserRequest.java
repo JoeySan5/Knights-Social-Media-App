@@ -3,11 +3,11 @@ package edu.lehigh.cse216.knights.backend;
 public class UserRequest {    
 
     /**
-     * The unique identifier for the user. This is generally provided by the database and is unique 
+     * The unique identifier for the user. This is generally provided by the google API and is unique 
      * throughout the whole program.
      * This field can be used for check the user's edit and delete permission.
      */
-    public int mId;
+    public String mId;
     
     /**
      * The username of the user.
