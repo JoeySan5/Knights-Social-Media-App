@@ -10,6 +10,9 @@ import java.sql.SQLException;
 
 import java.util.ArrayList;
 
+import edu.lehigh.cse216.knights.backend.Comment.ExtendedComment;
+import edu.lehigh.cse216.knights.backend.Idea.ExtendedIdea;
+
 /**
  * Database interacts with the ElephantSQL database through a set of
  * preparedStatements
@@ -127,12 +130,10 @@ public class Database {
                     .prepareStatement("INSERT INTO ideas (content, userid, likeCount) VALUES (?, ?, 0)");
 
             this.mSelectAllIdeas = this.mConnection
-                    .prepareStatement("SELECT id, content, likeCount FROM ideas ORDER BY id DESC");
-
-            this.mSelectAllIdeas = this.mConnection
                     .prepareStatement("SELECT ideaid, content, likeCount FROM ideas ORDER BY ideaid DESC");
                     
-            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaid=?");            
+            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaid=?");
+
             this.mUpdateIdeaLikeCount = this.mConnection
                     .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE id = ?");
 
@@ -157,13 +158,6 @@ public class Database {
             this.mUpdateOneUser = this.mConnection.prepareStatement(
                     "UPDATE users SET username = ?, email = ?, GI = ?, SO = ?, note = ? WHERE userId = ?");
 
-            // Get the PosterName
-            this.mGetPosterName = this.mConnection.prepareStatement(
-                    "SELECT u.username " +
-                            "FROM ideas i " +
-                            "JOIN users u ON i.userid = u.userid " +
-                            "WHERE i.ideaid = ?");
-
             // Get all information of specific user
             this.mSelectOneUser = this.mConnection.prepareStatement(
                     "SELECT * from users WHERE userid=?");
@@ -186,6 +180,13 @@ public class Database {
                             "FROM comments c " +
                             "JOIN users u ON c.userid = u.userid " +
                             "WHERE c.commentid = ?");
+
+            // Get the PosterName
+            this.mGetPosterName = this.mConnection.prepareStatement(
+                    "SELECT u.username " +
+                            "FROM ideas i " +
+                            "JOIN users u ON i.userid = u.userid " +
+                            "WHERE i.ideaid = ?");
             
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
@@ -338,24 +339,55 @@ public class Database {
      * 
      * @return The data for the requested idea, or null if the ID was invalid
      */
-    Idea selectOneIdea(int ideaId) {
-        Idea res = null;
-        try {
-            mSelectOneIdea.setInt(1, ideaId);
-            ResultSet rs = mSelectOneIdea.executeQuery();
-            if (rs.next()) {
-                res = new Idea(
-                        rs.getInt("ideaid"),
-                        rs.getString("content"),
-                        rs.getInt("likeCount"),
-                        rs.getString("userid"));
+ExtendedIdea selectOneIdea(int ideaId) {
+    ExtendedIdea res = null;
+    try {
+        mSelectOneIdea.setInt(1, ideaId);
+        ResultSet rs = mSelectOneIdea.executeQuery();
+        if (rs.next()) {
+            mGetPosterName.setInt(1, ideaId);
+            ResultSet rsPoster = mGetPosterName.executeQuery();
+            String posterUsername = "";
+            if (rsPoster.next()) {
+                posterUsername = rsPoster.getString("username");
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    }
+            rsPoster.close();
 
+            ArrayList<ExtendedComment> comments = new ArrayList<>();
+            mSelectAllComments.setInt(1, ideaId);
+            ResultSet rsComments = mSelectAllComments.executeQuery();
+            while (rsComments.next()) {
+                int commentId = rsComments.getInt("commentid");
+                String content = rsComments.getString("content");
+                String userId = rsComments.getString("userid");
+
+                mGetCommenterName.setInt(1, commentId);
+                ResultSet rsCommenter = mGetCommenterName.executeQuery();
+                String commenterUsername = "";
+                if (rsCommenter.next()) {
+                    commenterUsername = rsCommenter.getString("username");
+                }
+                rsCommenter.close();
+
+                comments.add(new ExtendedComment(commentId, userId, ideaId, content, commenterUsername));
+            }
+            rsComments.close();
+
+            res = new ExtendedIdea(
+                    rs.getInt("ideaid"),
+                    rs.getString("content"),
+                    rs.getInt("likeCount"),
+                    rs.getString("userid"),
+                    posterUsername,
+                    comments);
+        }
+        rs.close();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return res;
+}
+    
 
     User selectOneUser(String userId) {
         User res = null;
@@ -516,9 +548,10 @@ public class Database {
         }
     }
 
-    ArrayList<Comment> selectAllComments() {
+    ArrayList<Comment> selectAllComments(int ideaId) {
         ArrayList<Comment> res = new ArrayList<Comment>();
         try {
+            mSelectAllComments.setInt(1, ideaId);
             ResultSet rs = mSelectAllComments.executeQuery();
             while (rs.next()) {
                 res.add(new Comment(

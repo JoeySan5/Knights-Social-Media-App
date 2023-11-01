@@ -1,5 +1,10 @@
 package edu.lehigh.cse216.knights.backend;
 
+
+import java.util.ArrayList;
+
+import edu.lehigh.cse216.knights.backend.Comment.ExtendedComment;
+
 // import java.util.Date; // should use something like java.sql.Date instead
 
 /**
@@ -81,5 +86,18 @@ public class Idea {
         mContent = idea.mContent;
         mLikeCount = idea.mLikeCount;
         mUserId = idea.mUserId;
+    }
+
+
+    public static class ExtendedIdea extends Idea {
+        public String mPosterUsername;
+        public ArrayList<ExtendedComment> mComments;
+
+        public ExtendedIdea(int id, String content, int likeCount, String userid,
+                            String posterUsername, ArrayList<ExtendedComment> comments) {
+            super(id, content, likeCount, userid);
+            this.mPosterUsername = posterUsername;
+            this.mComments = comments;
+        }
     }
 }
