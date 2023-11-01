@@ -252,12 +252,6 @@ public class App
             }
         });
 
-        Spark.get("/comments", (request, response) -> {
-            // ensure status 200 OK, with a MIME type of JSON
-            response.status(200);
-            response.type("application/json");
-            return gson.toJson(new StructuredResponse("ok", null, db.selectAllComments()));
-        });
     }
 
     private static final String DEFAULT_PORT_DB = "5432";

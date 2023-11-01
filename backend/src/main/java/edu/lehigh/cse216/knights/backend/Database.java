@@ -132,7 +132,8 @@ public class Database {
             this.mSelectAllIdeas = this.mConnection
                     .prepareStatement("SELECT ideaid, content, likeCount FROM ideas ORDER BY ideaid DESC");
                     
-            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaid=?");            
+            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaid=?");
+
             this.mUpdateIdeaLikeCount = this.mConnection
                     .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE id = ?");
 
