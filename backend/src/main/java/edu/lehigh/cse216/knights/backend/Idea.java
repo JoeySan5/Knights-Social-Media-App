@@ -28,6 +28,8 @@ public class Idea {
      */
     public int mLikeCount;
 
+    public String mUserId;
+
     /**
      * The creation date for this idea entry.  Once it is set, it cannot be 
      * changed. Not yet implemented in phase 1
@@ -41,10 +43,13 @@ public class Idea {
      * @param id The id to associate with the Idea in this row.  Assumed to be unique 
      *           throughout the whole program.
      * @param content The content string for this Idea
+     * @param userid The userid associated with this Idea
+     * 
      */
-    public Idea(int id, String content) {
+    public Idea(int id, String content, String userid) {
         mId = id;
         mContent = content;
+        mUserId = userid; 
         mLikeCount = 0;
     }
 
@@ -56,12 +61,15 @@ public class Idea {
      *           throughout the whole program.
      * @param content The content string for this Idea
      * @param likeCount The number of likes this Idea has
+     * @param userid The userid associated with this Idea
      */
-    public Idea(int id, String content, int likeCount) {
+    public Idea(int id, String content, int likeCount, String userid) {
         mId = id;
         mContent = content;
         mLikeCount = likeCount;
+        mUserId = userid;
     }
+
 
     /**
      * Copy constructor to create one Idea from another.
@@ -72,5 +80,6 @@ public class Idea {
         // NB: Strings and Dates are immutable, so copy-by-reference is safe
         mContent = idea.mContent;
         mLikeCount = idea.mLikeCount;
+        mUserId = idea.mUserId;
     }
 }

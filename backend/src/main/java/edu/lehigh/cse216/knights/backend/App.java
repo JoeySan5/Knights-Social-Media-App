@@ -12,6 +12,10 @@ import com.google.gson.*;
 import edu.lehigh.cse216.knights.backend.Idea;
 import edu.lehigh.cse216.knights.backend.IdeaRequest;
 
+import edu.lehigh.cse216.knights.backend.User;
+import edu.lehigh.cse216.knights.backend.UserRequest;   
+
+
 /**
  * App creates an HTTP server capable of interacting with the Database.
  */
@@ -110,7 +114,7 @@ public class App
             //     describes the error.
             response.status(200);
             response.type("application/json");
-            int rowsInserted = db.insertIdea(req.mContent);
+            int rowsInserted = db.insertIdea(req.mContent, req.mUserId);
             if (rowsInserted <= 0) {
                 return gson.toJson(new StructuredResponse("error", "error creating idea", null));
             } else {
@@ -161,6 +165,66 @@ public class App
             }
         });
 
+        // Register users profile with default value
+        Spark.post("/users", (request, response) -> {
+            UserRequest req = gson.fromJson(request.body(), UserRequest.class);
+            
+            response.status(200);
+            response.type("application/json");
+            
+            int rowsInserted = db.insertNewUser(req.mId);
+            if (rowsInserted <= 0) {
+                return gson.toJson(new StructuredResponse("error", "error creating user", null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + " user(s)", null));
+            }
+        });
+
+        // update user's profile
+        Spark.put("/users", (request, response) -> {
+            UserRequest req = gson.fromJson(request.body(), UserRequest.class);
+            response.status(200);
+            response.type("application/json");
+        
+            int rowsUpdated = db.updateOneUser(req);
+            if (rowsUpdated <= 0) {
+                return gson.toJson(new StructuredResponse("error", "error updating user", null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", "updated " + rowsUpdated + " user(s)", null));
+            }
+        });
+
+        // get poster's name
+        Spark.get("/ideas/:id/postername", (request, response) -> {
+            int ideaId = Integer.parseInt(request.params(":id"));
+            // Ensure status 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            
+            // Call your function to get the poster's name based on the idea ID
+            String posterName = db.GetPosterName(ideaId);
+            
+            if (posterName != null) {
+                return gson.toJson(new StructuredResponse("ok", null, posterName));
+            } else {
+                return gson.toJson(new StructuredResponse("error", "Poster not found", null));
+            }
+        });
+
+        // get user's information
+        Spark.get("/users/:id", (request, response) -> {
+            String userId = request.params("id");
+            // ensure status 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            User user = db.selectOneUser(userId);
+            if (user == null) {
+                return gson.toJson(new StructuredResponse("error", userId + " not found", null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", null, user));
+            }
+        });
+        
     }
 
     private static final String DEFAULT_PORT_DB = "5432";
