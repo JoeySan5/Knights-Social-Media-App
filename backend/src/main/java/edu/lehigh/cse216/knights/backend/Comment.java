@@ -22,6 +22,14 @@ public class Comment {
         mIdeaId = comment.mIdeaId;
         mContent = comment.mContent;
     }
+ 
+    public static class ExtendedComment extends Comment {
+        public String mCommenterUsername;
     
+        public ExtendedComment(int id, String userid, int ideaid, String content, String commenterUsername) {
+            super(id, userid, ideaid, content);
+            this.mCommenterUsername = commenterUsername;
+        }
+    }
     
 }
