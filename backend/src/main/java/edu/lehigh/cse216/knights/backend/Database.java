@@ -62,13 +62,31 @@ public class Database {
 
     private PreparedStatement mDropUserTable;
 
+    // Register user's default profile with specific userid
     private PreparedStatement mInsertNewUser;
 
+    // Edit user's profile with specific userid
     private PreparedStatement mUpdateOneUser;
 
+    // Get the PosterName
     private PreparedStatement mGetPosterName;
 
+    // Get all information of specific user
     private PreparedStatement mSelectOneUser;
+
+    // Post a comment to an specific idea with specific user
+    private PreparedStatement mInsertOneComment;
+
+    // Edit a comment to an specific idea with specific user
+    private PreparedStatement mUpdateOneComment;
+
+    // Get all comments of specific idea
+    private PreparedStatement mSelectAllComments;
+
+    // Get the commenter username of specific comment
+    private PreparedStatement mGetCommenterName;
+
+
     /**
      * The Database constructor is private: we only create Database objects
      * through the getDatabase() method.
@@ -131,22 +149,44 @@ public class Database {
 
             this.mDropUserTable = this.mConnection.prepareStatement("DROP TABLE users");
 
+            // Register user's default profile
             this.mInsertNewUser = this.mConnection.prepareStatement(
                     "INSERT INTO users (email, valid, username, GI, SO, note, userid) " +
                             "VALUES ('unknown', true, 'unknown', 'unknown', 'unknown', 'unknown', ?)");
-
+            // Edit user's profile
             this.mUpdateOneUser = this.mConnection.prepareStatement(
                     "UPDATE users SET username = ?, email = ?, GI = ?, SO = ?, note = ? WHERE userId = ?");
 
+            // Get the PosterName
             this.mGetPosterName = this.mConnection.prepareStatement(
                     "SELECT u.username " +
                             "FROM ideas i " +
                             "JOIN users u ON i.userid = u.userid " +
                             "WHERE i.ideaid = ?");
 
+            // Get all information of specific user
             this.mSelectOneUser = this.mConnection.prepareStatement(
                     "SELECT * from users WHERE userid=?");
 
+            // Post a comment to an specific idea with specific user
+            this.mInsertOneComment = this.mConnection.prepareStatement(
+                    "INSERT INTO comments (content, userid, ideaid) VALUES (?, ?, ?)");
+
+            // Edit a comment to an specific idea with specific user
+            this.mUpdateOneComment = this.mConnection.prepareStatement(
+                    "UPDATE comments SET content = ? WHERE commentid = ?");
+
+            // Get all comments of specific idea
+            this.mSelectAllComments = this.mConnection.prepareStatement(
+                    "SELECT * from comments WHERE ideaid=?");
+            
+            // Get the commenter username of specific comment
+            this.mGetCommenterName = this.mConnection.prepareStatement(
+                    "SELECT u.username " +
+                            "FROM comments c " +
+                            "JOIN users u ON c.userid = u.userid " +
+                            "WHERE c.commentid = ?");
+            
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
             e.printStackTrace();
@@ -252,11 +292,11 @@ public class Database {
      * 
      * @return The number of ideas that were inserted
      */
-    int insertIdea(String content, String userid) {
+    int insertIdea(String content, String userId) {
         int count = 0;
         try {
             mInsertOneIdea.setString(1, content);
-            mInsertOneIdea.setString(2, userid);
+            mInsertOneIdea.setString(2, userId);
             // likeCount will automatically be set to 0; it is written into the
             // preparedStatement
             count += mInsertOneIdea.executeUpdate();
@@ -298,10 +338,10 @@ public class Database {
      * 
      * @return The data for the requested idea, or null if the ID was invalid
      */
-    Idea selectOneIdea(int ideaid) {
+    Idea selectOneIdea(int ideaId) {
         Idea res = null;
         try {
-            mSelectOneIdea.setInt(1, ideaid);
+            mSelectOneIdea.setInt(1, ideaId);
             ResultSet rs = mSelectOneIdea.executeQuery();
             if (rs.next()) {
                 res = new Idea(
@@ -336,7 +376,7 @@ public class Database {
         }
         return res;
     }
-    
+
     /**
      * Delete an idea by ID
      * 
@@ -344,10 +384,10 @@ public class Database {
      * 
      * @return The number of rows that were deleted. -1 indicates an error.
      */
-    int deleteIdea(int id) {
+    int deleteIdea(int ideaId) {
         int res = -1;
         try {
-            mDeleteOneIdea.setInt(1, id);
+            mDeleteOneIdea.setInt(1, ideaId);
             res = mDeleteOneIdea.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -365,14 +405,14 @@ public class Database {
      * @return The amount of posts affected by the given likeCountged. -1 indicates
      *         an error.
      */
-    int updateIdeaLikeCount(int id, int likeDelta) {
+    int updateIdeaLikeCount(int ideaId, int likeDelta) {
         // tjp: I'm open to changing what the return value should be, e.g.
         // differentiating between a dislike and like
         int res = -1;
         try {
             if (likeDelta == 1 || likeDelta == -1) {
                 mUpdateIdeaLikeCount.setInt(1, likeDelta);
-                mUpdateIdeaLikeCount.setInt(2, id);
+                mUpdateIdeaLikeCount.setInt(2, ideaId);
                 res = mUpdateIdeaLikeCount.executeUpdate();
             }
         } catch (SQLException e) {
@@ -381,10 +421,10 @@ public class Database {
         return res;
     }
 
-    int insertNewUser(String mId) {
+    int insertNewUser(String userId) {
         int count = 0;
         try {
-            mInsertNewUser.setString(1, mId);
+            mInsertNewUser.setString(1, userId);
             count += mInsertNewUser.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -408,8 +448,7 @@ public class Database {
     }
 
 
-
-    String GetPosterName(int ideaid) {
+    String getPosterName(int ideaid) {
         String posterName = null;
         try {
             mGetPosterName.setInt(1, ideaid);
@@ -423,9 +462,51 @@ public class Database {
         return posterName;
     }
 
+    //(content, userid, ideaid)
+    int insertNewComment(String content, String userId, int ideaId){
+        int count = 0;
+        try {
+            mInsertOneComment.setString(1, content);
+            mInsertOneComment.setString(2, userId);
+            mInsertOneComment.setInt(3, ideaId);
+            count += mInsertOneComment.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
 
+    int updateOneComment(String content, int commentId){
+        try {
+            mUpdateOneComment.setString(1, content);
+            mUpdateOneComment.setInt(2, commentId);
+            return mUpdateOneComment.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
 
+    ArrayList<Comment> selectAllComments() {
+        ArrayList<Comment> res = new ArrayList<Comment>();
+        try {
+            ResultSet rs = mSelectAllComments.executeQuery();
+            while (rs.next()) {
+                res.add(new Comment(
+                        rs.getInt("id"),
+                        rs.getString("userid"),
+                        rs.getInt("ideaid"),
+                        rs.getString("content")));
+            }
+            rs.close();
+            return res;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
+    
     /**
      * Create idea tblData. If it already exists, this will print an error
      */
