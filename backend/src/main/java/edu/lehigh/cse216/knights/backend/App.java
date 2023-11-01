@@ -202,7 +202,7 @@ public class App
             response.type("application/json");
             
             // Call your function to get the poster's name based on the idea ID
-            String posterName = db.GetPosterName(ideaId);
+            String posterName = db.getPosterName(ideaId);
             
             if (posterName != null) {
                 return gson.toJson(new StructuredResponse("ok", null, posterName));
@@ -224,7 +224,40 @@ public class App
                 return gson.toJson(new StructuredResponse("ok", null, user));
             }
         });
+
+        // post a comment
+        Spark.post("/comments", (request, response) -> {
+            CommentRequest req = gson.fromJson(request.body(), CommentRequest.class);
+            response.status(200);
+            response.type("application/json");
+            int rowsInserted = db.insertNewComment(req.mContent, req.mUserId, req.mIdeaId);
+            if (rowsInserted <= 0) {
+                return gson.toJson(new StructuredResponse("error", "error creating comment", null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + " comment(s)", null));
+            }
+        });
+
+        // Edit a comment
+        Spark.put("/comments", (request, response) -> {
+            CommentRequest req = gson.fromJson(request.body(), CommentRequest.class);
+            response.status(200);
+            response.type("application/json");
         
+            int rowsUpdated = db.updateOneComment(req.mContent, req.mId);
+            if (rowsUpdated <= 0) {
+                return gson.toJson(new StructuredResponse("error", "error updating comment", null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", "updated " + rowsUpdated + " comment(s)", null));
+            }
+        });
+
+        Spark.get("/comments", (request, response) -> {
+            // ensure status 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            return gson.toJson(new StructuredResponse("ok", null, db.selectAllComments()));
+        });
     }
 
     private static final String DEFAULT_PORT_DB = "5432";
