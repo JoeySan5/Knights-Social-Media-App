@@ -89,6 +89,14 @@ public class Database {
     // Get the commenter username of specific comment
     private PreparedStatement mGetCommenterName;
 
+    private PreparedStatement mCheckIfLikeExists;
+
+    private PreparedStatement mInsertNewLike;
+
+    private PreparedStatement mDeleteOneLike;
+
+    private PreparedStatement mUpdateOneLike;
+
     /**
      * The Database constructor is private: we only create Database objects
      * through the getDatabase() method.
@@ -122,7 +130,7 @@ public class Database {
             // Standard CRUD operations
             // tjp: these SQL prepared statement are essential for understanding exactly
             // what the backend is asking the database
-            this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE id = ?"); // Not
+            this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE ideaid = ?"); // Not
                                                                                                        // implemented in
                                                                                                        // Phase 1?
             this.mInsertOneIdea = this.mConnection
@@ -134,7 +142,7 @@ public class Database {
             this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaid=?");
 
             this.mUpdateIdeaLikeCount = this.mConnection
-                    .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE id = ?");
+                    .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE ideaid = ?");
 
             this.mCreateUserTable = this.mConnection.prepareStatement(
                     "CREATE TABLE users (" +
@@ -186,6 +194,20 @@ public class Database {
                             "FROM ideas i " +
                             "JOIN users u ON i.userid = u.userid " +
                             "WHERE i.ideaid = ?");
+
+            this.mCheckIfLikeExists = this.mConnection.prepareStatement(
+                    "SELECT value " +
+                            "FROM likes " +
+                            "WHERE userid = ? AND ideaid = ?");
+
+            this.mInsertNewLike = this.mConnection.prepareStatement(
+                    "INSERT INTO likes (ideaid, userid, value) VALUES (?, ?, ?)");
+            
+            this.mDeleteOneLike = this.mConnection.prepareStatement(
+                    "DELETE FROM likes WHERE ideaid = ? AND userid = ?");
+
+            this.mUpdateOneLike = this.mConnection.prepareStatement(
+                    "UPDATE likes SET value = ? WHERE ideaid = ? AND userid = ?");
 
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
@@ -426,16 +448,25 @@ public class Database {
     }
 
     // TODO: comment this and write the prepared statement // code from tjp
-    int previousLikeValue(String userID, int ideaId){
-        mCheckIfLikeExists.setInt(1, userID);
-        mCheckIfLikeExists.setString(2, ideaID);
-        ResultSet res = mCheckIfLikeExists.executeUpdate();
+    int previousLikeValue(String userID, int ideaID){
+        try{
+        mCheckIfLikeExists.setString(1, userID);
+        mCheckIfLikeExists.setInt(2, ideaID);
+        
         // Return true if the user has (dis)liked the post before
+        ResultSet res = mCheckIfLikeExists.executeQuery();
         if(res.next()){
             return res.getInt("value");
+        } else{
+            return 0;
         }
-        return 0;
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        return -1;
     }
+
 
     /**
      * Update the likeCount for an idea in the database
@@ -453,23 +484,34 @@ public class Database {
         int res = -1;
         try {
             if (likeValue == 1 || likeValue == -1) {
-                int likeDelta = 0;
-                int previousLikeValue = previousLikeValue(userID, ideaId)
+                int likeDelta = likeValue;
+                int previousLikeValue = previousLikeValue(userID, ideaId);
                 // Case 1: No like currently exists
                 if(previousLikeValue == 0){
-                    //add new like
-                    // mAddNewLike
+                    mInsertNewLike.setInt(1, ideaId);
+                    mInsertNewLike.setString(2, userID);
+                    mInsertNewLike.setInt(3, likeValue);
+                    res = mInsertNewLike.executeUpdate();
                 }
                 else {
                     if(likeValue == previousLikeValue){
                         // delete (dis)like from table
+                        mDeleteOneLike.setInt(1, ideaId);
+                        mDeleteOneLike.setString(2, userID);
+                        res = mDeleteOneLike.executeUpdate();
+
                         likeDelta = -1*likeValue;
                     }
                     else if(likeValue != previousLikeValue){
-                        // mUpdateLikeStatus
+                        mUpdateOneLike.setInt(1, likeValue);
+                        mUpdateOneLike.setInt(2, ideaId);
+                        mUpdateOneLike.setString(3, userID);
+                        res = mUpdateOneLike.executeUpdate();
+
                         likeDelta = 2*likeValue;
                     }
                 }
+                System.out.println(likeDelta);
                 mUpdateIdeaLikeCount.setInt(1, likeDelta);
                 mUpdateIdeaLikeCount.setInt(2, ideaId);
                 res = mUpdateIdeaLikeCount.executeUpdate();

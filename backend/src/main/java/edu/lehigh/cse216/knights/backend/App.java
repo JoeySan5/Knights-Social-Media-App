@@ -13,7 +13,8 @@ import edu.lehigh.cse216.knights.backend.Idea;
 import edu.lehigh.cse216.knights.backend.IdeaRequest;
 
 import edu.lehigh.cse216.knights.backend.User;
-import edu.lehigh.cse216.knights.backend.UserRequest;   
+import edu.lehigh.cse216.knights.backend.UserRequest;
+import edu.lehigh.cse216.knights.backend.Idea.ExtendedIdea;   
 
 
 /**
@@ -93,7 +94,7 @@ public class App
             // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
-            Idea idea = db.selectOneIdea(idx);
+            ExtendedIdea idea = db.selectOneIdea(idx);
             if (idea == null) {
                 return gson.toJson(new StructuredResponse("error", idx + " not found", null));
             } else {
@@ -124,12 +125,15 @@ public class App
 
         // PUT route for modifying a likeCount of an idea. This is almost 
         // exactly the same as POST
-        Spark.put("/ideas/:id", (request, response) -> {
+        Spark.put("/ideas/:id/likes", (request, response) -> {
             // If we can't get an ID or can't parse the JSON, Spark will send
             // a status 500
             int idx = Integer.parseInt(request.params("id"));
             IdeaRequest req = gson.fromJson(request.body(), IdeaRequest.class);
+            String userID = req.mUserId;
             int likeIncrement = req.mLikeIncrement;
+
+
             if(likeIncrement == 0){
                 // Specific error response to say that the request was formatted incorrectly
                 // Occurs when 'mLikeIncrement' is missing from request (or value is 0)
@@ -138,7 +142,7 @@ public class App
             // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
-            int rowsUpdated = db.updateIdeaLikeCount(idx, likeIncrement);
+            int rowsUpdated = db.updateIdeaLikeCount(userID, idx, likeIncrement);
             if (rowsUpdated <= 0) {
                 return gson.toJson(new StructuredResponse("error", "unable to change likes on idea #" + idx + " by " + likeIncrement, null));
             } else {
@@ -180,7 +184,7 @@ public class App
             }
         });
 
-        // update user's profile
+        // Edit user's profile
         Spark.put("/users", (request, response) -> {
             UserRequest req = gson.fromJson(request.body(), UserRequest.class);
             response.status(200);
@@ -191,23 +195,6 @@ public class App
                 return gson.toJson(new StructuredResponse("error", "error updating user", null));
             } else {
                 return gson.toJson(new StructuredResponse("ok", "updated " + rowsUpdated + " user(s)", null));
-            }
-        });
-
-        // get poster's name
-        Spark.get("/ideas/:id/postername", (request, response) -> {
-            int ideaId = Integer.parseInt(request.params(":id"));
-            // Ensure status 200 OK, with a MIME type of JSON
-            response.status(200);
-            response.type("application/json");
-            
-            // Call your function to get the poster's name based on the idea ID
-            String posterName = db.getPosterName(ideaId);
-            
-            if (posterName != null) {
-                return gson.toJson(new StructuredResponse("ok", null, posterName));
-            } else {
-                return gson.toJson(new StructuredResponse("error", "Poster not found", null));
             }
         });
 
@@ -251,6 +238,10 @@ public class App
                 return gson.toJson(new StructuredResponse("ok", "updated " + rowsUpdated + " comment(s)", null));
             }
         });
+
+        
+
+
 
     }
 
