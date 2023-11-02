@@ -1,5 +1,7 @@
 package edu.lehigh.cse216.knights.admin;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -91,24 +93,35 @@ public class Database {
     private Database() {
     }
 
+    private Database createPreparedStatements() {
+        // TODO create prepared statements in this method
+        return this;
+    }
+
     /**
-     * Get a fully-configured connection to the database
-     * 
-     * @param ip   The IP address of the database server
-     * @param port The port on the database server to which connection requests
-     *             should be sent
-     * @param user The user ID to use when connecting
-     * @param pass The password to use when connecting
-     * 
-     * @return A Database object, or null if we cannot connect properly
-     */
-    static Database getDatabase(String ip, String port, String user, String pass) {
+    * Get a fully-configured connection to the database
+    * 
+    * @param host The IP address or hostname of the database server
+    * @param port The port on the database server to which connection requests
+    *             should be sent
+    * @param path The path to use, can be null
+    * @param user The user ID to use when connecting
+    * @param pass The password to use when connecting
+    * 
+    * @return A Database object, or null if we cannot connect properly
+    */
+    static Database getDatabase(String host, String port, String path, String user, String pass) {
+        if( path==null || "".equals(path) ){
+            path="/";
+        }
+
         // Create an un-configured Database object
         Database db = new Database();
 
         // Give the Database object a connection, fail if we cannot get one
         try {
-            Connection conn = DriverManager.getConnection("jdbc:postgresql://" + ip + ":" + port + "/", user, pass);
+            String dbUrl = "jdbc:postgresql://" + host + ':' + port + path;
+            Connection conn = DriverManager.getConnection(dbUrl, user, pass);
             if (conn == null) {
                 System.err.println("Error: DriverManager.getConnection() returned a null object");
                 return null;
@@ -120,35 +133,33 @@ public class Database {
             return null;
         }
 
-        // Attempt to create all of our prepared statements.  If any of these 
-        // fail, the whole getDatabase() call should fail
+        db = db.createPreparedStatements();
+        return db;
+    } 
+
+    /**
+    * Get a fully-configured connection to the database
+    * 
+    * @param db_url The url to the database
+    * @param port_default port to use if absent in db_url
+    * 
+    * @return A Database object, or null if we cannot connect properly
+    */
+    static Database getDatabase(String db_url, String port_default) {
         try {
-            // NB: we can easily get ourselves in trouble here by typing the
-            //     SQL incorrectly.  We really should have things like "ideas"
-            //     as constants, and then build the strings for the statements
-            //     from those constants.
+            URI dbUri = new URI(db_url);
+            String username = dbUri.getUserInfo().split(":")[0];
+            String password = dbUri.getUserInfo().split(":")[1];
+            String host = dbUri.getHost();
+            String path = dbUri.getPath();
+            String port = dbUri.getPort() == -1 ? port_default : Integer.toString(dbUri.getPort());
 
-            // Note: no "IF NOT EXISTS" or "IF EXISTS" checks on table 
-            // creation/deletion, so multiple executions will cause an exception
-            db.mCreateTable = db.mConnection.prepareStatement(
-                    "CREATE TABLE ideas (id SERIAL PRIMARY KEY, content VARCHAR(50) "
-                    + "NOT NULL, likeCount integer DEFAULT 0 NOT NULL)");
-            db.mDropTable = db.mConnection.prepareStatement("DROP TABLE ideas");
-
-            // Standard CRUD operations
-            db.mDeleteOne = db.mConnection.prepareStatement("DELETE FROM ideas WHERE id = ?");
-            db.mInsertOne = db.mConnection.prepareStatement("INSERT INTO ideas VALUES (default, ?, ?)");
-            db.mSelectAll = db.mConnection.prepareStatement("SELECT id, content, likeCount FROM ideas");
-            db.mSelectOne = db.mConnection.prepareStatement("SELECT * from ideas WHERE id=?");
-            // db.mUpdateOne = db.mConnection.prepareStatement("UPDATE ideas SET message = ? WHERE id = ?");
-        } catch (SQLException e) {
-            System.err.println("Error creating prepared statement");
-            e.printStackTrace();
-            db.disconnect();
+            return getDatabase(host, port, path, username, password);
+        } catch (URISyntaxException s) {
+            System.out.println("URI Syntax Error");
             return null;
         }
-        return db;
-    }
+    } 
 
     /**
      * Close the current connection to the database, if one exists.

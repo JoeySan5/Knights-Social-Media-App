@@ -107,16 +107,9 @@ public class App {
      * @param argv Command-line options.  Ignored by this program.
      */
     public static void main(String[] argv) {
-        // get the Postgres configuration from the environment
-        Map<String, String> env = System.getenv();
-        String ip = env.get("POSTGRES_IP");
-        String port = env.get("POSTGRES_PORT");
-        String user = env.get("POSTGRES_USER");
-        String pass = env.get("POSTGRES_PASS");
-
         // Get a fully-configured connection to the database, or exit 
         // immediately
-        Database db = Database.getDatabase(ip, port, user, pass);
+        Database db = getDatabaseConnection();
         if (db == null)
             return;
 
@@ -184,5 +177,46 @@ public class App {
         // Always remember to disconnect from the database when the program 
         // exits
         db.disconnect();
+    }
+
+    private static final String DEFAULT_PORT_DB = "5432";
+
+    /**
+    * Get a fully-configured connection to the database, or exit immediately
+    * Uses the Postgres configuration from environment variables
+    * 
+    * NB: now when we shutdown the server, we no longer lose all data
+    * 
+    * @return null on failure, otherwise configured database object
+    */
+    private static Database getDatabaseConnection(){
+        System.out.println("db url = " + System.getenv("DATABASE_URL"));
+        if( System.getenv("DATABASE_URL") != null ){
+            return Database.getDatabase(System.getenv("DATABASE_URL"), DEFAULT_PORT_DB);
+        }
+
+        Map<String, String> env = System.getenv();
+        String ip = env.get("POSTGRES_IP");
+        String port = env.get("POSTGRES_PORT");
+        String user = env.get("POSTGRES_USER");
+        String pass = env.get("POSTGRES_PASS");
+        return Database.getDatabase(ip, port, "", user, pass);
+    } 
+
+    /**
+    * Get an integer environment variable if it exists, and otherwise return the
+    * default value.
+    * 
+    * @envar      The name of the environment variable to get.
+    * @defaultVal The integer value to use as the default if envar isn't found
+    * 
+    * @returns The best answer we could come up with for a value for envar
+    */
+    static int getIntFromEnv(String envar, int defaultVal) {
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        if (processBuilder.environment().get(envar) != null) {
+            return Integer.parseInt(processBuilder.environment().get(envar));
+        }
+        return defaultVal;
     }
 }
