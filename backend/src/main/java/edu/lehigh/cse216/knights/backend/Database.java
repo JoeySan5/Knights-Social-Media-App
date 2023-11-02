@@ -89,7 +89,6 @@ public class Database {
     // Get the commenter username of specific comment
     private PreparedStatement mGetCommenterName;
 
-
     /**
      * The Database constructor is private: we only create Database objects
      * through the getDatabase() method.
@@ -130,8 +129,8 @@ public class Database {
                     .prepareStatement("INSERT INTO ideas (content, userid, likeCount) VALUES (?, ?, 0)");
 
             this.mSelectAllIdeas = this.mConnection
-                    .prepareStatement("SELECT ideaid, content, likeCount FROM ideas ORDER BY ideaid DESC");
-                    
+                    .prepareStatement("SELECT ideaid, content, likeCount, userid FROM ideas ORDER BY ideaid DESC");
+
             this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaid=?");
 
             this.mUpdateIdeaLikeCount = this.mConnection
@@ -173,7 +172,7 @@ public class Database {
             // Get all comments of specific idea
             this.mSelectAllComments = this.mConnection.prepareStatement(
                     "SELECT * from comments WHERE ideaid=?");
-            
+
             // Get the commenter username of specific comment
             this.mGetCommenterName = this.mConnection.prepareStatement(
                     "SELECT u.username " +
@@ -187,7 +186,7 @@ public class Database {
                             "FROM ideas i " +
                             "JOIN users u ON i.userid = u.userid " +
                             "WHERE i.ideaid = ?");
-            
+
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
             e.printStackTrace();
@@ -319,7 +318,7 @@ public class Database {
             ResultSet rs = mSelectAllIdeas.executeQuery();
             while (rs.next()) {
                 res.add(new Idea(
-                        rs.getInt("id"),
+                        rs.getInt("ideaid"),
                         rs.getString("content"),
                         rs.getInt("likeCount"),
                         rs.getString("userid")));
@@ -339,55 +338,54 @@ public class Database {
      * 
      * @return The data for the requested idea, or null if the ID was invalid
      */
-ExtendedIdea selectOneIdea(int ideaId) {
-    ExtendedIdea res = null;
-    try {
-        mSelectOneIdea.setInt(1, ideaId);
-        ResultSet rs = mSelectOneIdea.executeQuery();
-        if (rs.next()) {
-            mGetPosterName.setInt(1, ideaId);
-            ResultSet rsPoster = mGetPosterName.executeQuery();
-            String posterUsername = "";
-            if (rsPoster.next()) {
-                posterUsername = rsPoster.getString("username");
-            }
-            rsPoster.close();
-
-            ArrayList<ExtendedComment> comments = new ArrayList<>();
-            mSelectAllComments.setInt(1, ideaId);
-            ResultSet rsComments = mSelectAllComments.executeQuery();
-            while (rsComments.next()) {
-                int commentId = rsComments.getInt("commentid");
-                String content = rsComments.getString("content");
-                String userId = rsComments.getString("userid");
-
-                mGetCommenterName.setInt(1, commentId);
-                ResultSet rsCommenter = mGetCommenterName.executeQuery();
-                String commenterUsername = "";
-                if (rsCommenter.next()) {
-                    commenterUsername = rsCommenter.getString("username");
+    ExtendedIdea selectOneIdea(int ideaId) {
+        ExtendedIdea res = null;
+        try {
+            mSelectOneIdea.setInt(1, ideaId);
+            ResultSet rs = mSelectOneIdea.executeQuery();
+            if (rs.next()) {
+                mGetPosterName.setInt(1, ideaId);
+                ResultSet rsPoster = mGetPosterName.executeQuery();
+                String posterUsername = "";
+                if (rsPoster.next()) {
+                    posterUsername = rsPoster.getString("username");
                 }
-                rsCommenter.close();
+                rsPoster.close();
 
-                comments.add(new ExtendedComment(commentId, userId, ideaId, content, commenterUsername));
+                ArrayList<ExtendedComment> comments = new ArrayList<>();
+                mSelectAllComments.setInt(1, ideaId);
+                ResultSet rsComments = mSelectAllComments.executeQuery();
+                while (rsComments.next()) {
+                    int commentId = rsComments.getInt("commentid");
+                    String content = rsComments.getString("content");
+                    String userId = rsComments.getString("userid");
+
+                    mGetCommenterName.setInt(1, commentId);
+                    ResultSet rsCommenter = mGetCommenterName.executeQuery();
+                    String commenterUsername = "";
+                    if (rsCommenter.next()) {
+                        commenterUsername = rsCommenter.getString("username");
+                    }
+                    rsCommenter.close();
+
+                    comments.add(new ExtendedComment(commentId, userId, ideaId, content, commenterUsername));
+                }
+                rsComments.close();
+
+                res = new ExtendedIdea(
+                        rs.getInt("ideaid"),
+                        rs.getString("content"),
+                        rs.getInt("likeCount"),
+                        rs.getString("userid"),
+                        posterUsername,
+                        comments);
             }
-            rsComments.close();
-
-            res = new ExtendedIdea(
-                    rs.getInt("ideaid"),
-                    rs.getString("content"),
-                    rs.getInt("likeCount"),
-                    rs.getString("userid"),
-                    posterUsername,
-                    comments);
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        rs.close();
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return res;
     }
-    return res;
-}
-    
 
     User selectOneUser(String userId) {
         User res = null;
@@ -479,7 +477,6 @@ ExtendedIdea selectOneIdea(int ideaId) {
         }
     }
 
-
     String getPosterName(int ideaid) {
         String posterName = null;
         try {
@@ -494,8 +491,8 @@ ExtendedIdea selectOneIdea(int ideaId) {
         return posterName;
     }
 
-    //(content, userid, ideaid)
-    int insertNewComment(String content, String userId, int ideaId){
+    // (content, userid, ideaid)
+    int insertNewComment(String content, String userId, int ideaId) {
         int count = 0;
         try {
             mInsertOneComment.setString(1, content);
@@ -508,7 +505,7 @@ ExtendedIdea selectOneIdea(int ideaId) {
         return count;
     }
 
-    int updateOneComment(String content, int commentId){
+    int updateOneComment(String content, int commentId) {
         try {
             mUpdateOneComment.setString(1, content);
             mUpdateOneComment.setInt(2, commentId);
@@ -539,7 +536,6 @@ ExtendedIdea selectOneIdea(int ideaId) {
         }
     }
 
-    
     /**
      * Create idea tblData. If it already exists, this will print an error
      */
