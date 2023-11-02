@@ -96,7 +96,7 @@ class NewEntryForm {
                 console.log(data);
             }).catch((error) => {
                 console.warn('Something went wrong with POST.', error);
-                window.alert("Unspecified error");
+                window.alert("Unspecified error, in fetch for submitForm, in NewEntryForm");
             });
         }
 
@@ -123,7 +123,7 @@ class NewEntryForm {
         }
         // Handle other errors with a less-detailed popup message
         else {
-            window.alert("Unspecified error returned");
+            window.alert("Unspecified error returned, in onSubmitResponse, in NewEntryForm");
         }
     }
 } // end class NewEntryForm
@@ -160,7 +160,7 @@ class ElementList {
                 console.log(data);
             }).catch((error) => {
                 console.warn('Something went wrong with GET.', error);
-                window.alert("Unspecified error");
+                window.alert("Unspecified error with refresh()");
             });
         }
 
@@ -246,7 +246,7 @@ class ElementList {
                 console.log(data);
             }).catch((error) => {
                 console.warn('Something went wrong.', error);
-                window.alert("Unspecified error");
+                window.alert("Unspecified error, in clickDelete function");
             });
         }
 
@@ -284,7 +284,7 @@ class ElementList {
                 mainList.refresh();
             }).catch((error) => {
                 console.warn('Something went wrong.', error);
-                window.alert("Unspecified error, on click edit");
+                window.alert("Unspecified error, on addLike");
             });
         }
 
@@ -323,7 +323,7 @@ class ElementList {
                 mainList.refresh();
             }).catch((error) => {
                 console.warn('Something went wrong.', error);
-                window.alert("Unspecified error, on click edit");
+                window.alert("Unspecified error, on addDislike");
             });
         }
 

@@ -19,10 +19,9 @@ npm update
 
 # step 3: copy static html, css, and JavaScript files
 echo "Copying static html, css, and js files"
-cp index.html $TARGETFOLDER/index.html
+cp index.html $TARGETFOLDER
 cp app.js app.css $TARGETFOLDER
-cp -r src $TARGETFOLDER/src
-cp app.css $TARGETFOLDER
+#cp -r src $TARGETFOLDER
 
 # step 4: compile TypeScript files
 echo "Compiling app.ts"
@@ -36,7 +35,7 @@ cp node_modules/jasmine-core/lib/jasmine-core/*.js $TARGETFOLDER/$WEBFOLDERNAME
 
 # step 6: output JSDocs with compiled app.js
 echo "generating and outputting JSDocs"
-jsdoc $TARGETFOLDER/app.js
+node_modules/.bin/jsdoc $TARGETFOLDER/app.js
 #move to docs foldero docs folder
 echo "moving out folder to docs folder"
 mv out/scripts docs/
