@@ -334,16 +334,26 @@ public class Database {
      * 
      * @return All Ideas, as an ArrayList
      */
-    ArrayList<Idea> selectAllIdeas() {
-        ArrayList<Idea> res = new ArrayList<Idea>();
+    ArrayList<ExtendedIdea> selectAllIdeas() {
+        ArrayList<ExtendedIdea> res = new ArrayList<ExtendedIdea>();
         try {
             ResultSet rs = mSelectAllIdeas.executeQuery();
+            
             while (rs.next()) {
-                res.add(new Idea(
+                int ideaId = rs.getInt("ideaid");
+                mGetPosterName.setInt(1, ideaId);
+                ResultSet rsPoster = mGetPosterName.executeQuery();
+                String posterUsername = "";
+                if (rsPoster.next()) {
+                    posterUsername = rsPoster.getString("username");
+                }
+            rsPoster.close();
+                res.add(new ExtendedIdea(
                         rs.getInt("ideaid"),
                         rs.getString("content"),
                         rs.getInt("likeCount"),
-                        rs.getString("userid")));
+                        rs.getString("userid"),
+                        posterUsername));
             }
             rs.close();
             return res;
@@ -511,7 +521,6 @@ public class Database {
                         likeDelta = 2*likeValue;
                     }
                 }
-                System.out.println(likeDelta);
                 mUpdateIdeaLikeCount.setInt(1, likeDelta);
                 mUpdateIdeaLikeCount.setInt(2, ideaId);
                 res = mUpdateIdeaLikeCount.executeUpdate();

@@ -99,5 +99,13 @@ public class Idea {
             this.mPosterUsername = posterUsername;
             this.mComments = comments;
         }
+        
+        //No comment
+        public ExtendedIdea(int id, String content, int likeCount, String userid,
+                            String posterUsername) {
+            super(id, content, likeCount, userid);
+            this.mPosterUsername = posterUsername;
+            this.mComments = new ArrayList<ExtendedComment>();
+        }
     }
 }
