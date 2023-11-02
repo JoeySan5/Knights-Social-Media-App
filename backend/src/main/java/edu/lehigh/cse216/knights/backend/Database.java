@@ -425,6 +425,18 @@ public class Database {
         return res;
     }
 
+    // TODO: comment this and write the prepared statement // code from tjp
+    int previousLikeValue(String userID, int ideaId){
+        mCheckIfLikeExists.setInt(1, userID);
+        mCheckIfLikeExists.setString(2, ideaID);
+        ResultSet res = mCheckIfLikeExists.executeUpdate();
+        // Return true if the user has (dis)liked the post before
+        if(res.next()){
+            return res.getInt("value");
+        }
+        return 0;
+    }
+
     /**
      * Update the likeCount for an idea in the database
      * 
@@ -435,12 +447,29 @@ public class Database {
      * @return The amount of posts affected by the given likeCountged. -1 indicates
      *         an error.
      */
-    int updateIdeaLikeCount(int ideaId, int likeDelta) {
+    int updateIdeaLikeCount(String userID, int ideaId, int likeValue) {
         // tjp: I'm open to changing what the return value should be, e.g.
         // differentiating between a dislike and like
         int res = -1;
         try {
-            if (likeDelta == 1 || likeDelta == -1) {
+            if (likeValue == 1 || likeValue == -1) {
+                int likeDelta = 0;
+                int previousLikeValue = previousLikeValue(userID, ideaId)
+                // Case 1: No like currently exists
+                if(previousLikeValue == 0){
+                    //add new like
+                    // mAddNewLike
+                }
+                else {
+                    if(likeValue == previousLikeValue){
+                        // delete (dis)like from table
+                        likeDelta = -1*likeValue;
+                    }
+                    else if(likeValue != previousLikeValue){
+                        // mUpdateLikeStatus
+                        likeDelta = 2*likeValue;
+                    }
+                }
                 mUpdateIdeaLikeCount.setInt(1, likeDelta);
                 mUpdateIdeaLikeCount.setInt(2, ideaId);
                 res = mUpdateIdeaLikeCount.executeUpdate();
