@@ -9,8 +9,6 @@ import java.util.Hashtable;
 import java.util.Map;
 import static spark.Spark.*;
 
-import org.eclipse.jetty.server.HttpTransport;
-
 // Import Google's JSON library
 import com.google.gson.*;
 
