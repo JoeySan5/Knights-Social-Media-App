@@ -137,9 +137,11 @@ public class Database {
                     .prepareStatement("INSERT INTO ideas (content, userid, likeCount) VALUES (?, ?, 0)");
 
             this.mSelectAllIdeas = this.mConnection
-                    .prepareStatement("SELECT ideaid, content, likeCount, userid FROM ideas ORDER BY ideaid DESC");
+                    .prepareStatement("SELECT ideaid, content, likeCount, userid FROM ideas " +
+                                        "WHERE valid IS TRUE " +
+                                        "ORDER BY ideaid DESC");
 
-            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaid=?");
+            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaid=? AND valid IS TRUE");
 
             this.mUpdateIdeaLikeCount = this.mConnection
                     .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE ideaid = ?");
@@ -419,19 +421,38 @@ public class Database {
         return res;
     }
 
-    User selectOneUser(String userId) {
+    /**
+     * Gets a single user from the users table. Can specify restriction to prevent sending private
+     * info on a GET request on a profile page.
+     * @param userId userId of the requested user
+     * @param restrictInfo set to true is the user accessing data other of a user other than themself.
+     * @return the User with all non restricted data, or null if no User with the userId exists
+     */
+    User selectOneUser(String userId, boolean restrictInfo) {
         User res = null;
         try {
             mSelectOneUser.setString(1, userId);
             ResultSet rs = mSelectOneUser.executeQuery();
             if (rs.next()) {
-                res = new User(
+                if(restrictInfo){
+                    // Do not save the GI or SO if restricted
+                    res = new User(
+                        rs.getString("userid"),
+                        rs.getString("username"),
+                        rs.getString("email"),
+                        rs.getString("note"),
+                        rs.getBoolean("valid"));
+                }
+                else{
+                    res = new User(
                         rs.getString("userid"),
                         rs.getString("username"),
                         rs.getString("email"),
                         rs.getString("GI"),
                         rs.getString("SO"),
-                        rs.getString("note"));
+                        rs.getString("note"),
+                        rs.getBoolean("valid"));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -542,7 +563,7 @@ public class Database {
         return count;
     }
 
-    int updateOneUser(UserRequest req) {
+    int updateOneUser(Request.UserRequest req) {
         try {
             mUpdateOneUser.setString(1, req.mUsername);
             mUpdateOneUser.setString(2, req.mEmail);

@@ -81,14 +81,34 @@ public class User {
      * @param note The note for this User
      */
 
-    public User(String id, String username, String email, String gi, String so, String note) {
+    public User(String id, String username, String email, String gi, String so, String note, boolean valid) {
         mId = id;
         mUsername = username;
         mEmail = email;
         mGI = gi;
         mSO = so;
         mNote = note;
-        mValid = true;
+        mValid = valid;
+    }
+
+    /**
+     * Constructor for creating a User instance when request the profile page of another user.
+     * This constructor sets GI and SO to null, but initializes other fields 
+     * with given values.
+     * 
+     * @param id The id to associate with the User in this row. Assumed to be unique 
+     *               throughout the whole program.
+     * @param email The email for this User
+     */
+
+    public User(String id, String username, String email, String note, boolean valid) {
+        mId = id;
+        mUsername = username;
+        mEmail = email;
+        mGI = null;
+        mSO = null;
+        mNote = note;
+        mValid = valid;
     }
 
 }
