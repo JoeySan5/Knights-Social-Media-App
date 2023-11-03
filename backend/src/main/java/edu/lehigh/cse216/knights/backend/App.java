@@ -13,13 +13,6 @@ import org.eclipse.jetty.server.HttpTransport;
 // Import Google's JSON library
 import com.google.gson.*;
 
-import edu.lehigh.cse216.knights.backend.Idea;
-import edu.lehigh.cse216.knights.backend.IdeaRequest;
-
-import edu.lehigh.cse216.knights.backend.User;
-import edu.lehigh.cse216.knights.backend.UserRequest;
-import edu.lehigh.cse216.knights.backend.Idea.ExtendedIdea;
-
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -60,6 +53,9 @@ public class App
          * String = userId
          */
         Hashtable<String, String> sessionKeyTable = new Hashtable<>();
+        for(int testId=1; testId<=5; testId++){
+            sessionKeyTable.put("testx"+testId, "x"+testId);
+        }
 
         // Set the port on which to listen for requests from the environment
         Spark.port(getIntFromEnv("PORT", DEFAULT_PORT_SPARK));
@@ -113,7 +109,7 @@ public class App
             // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
-            ExtendedIdea idea = db.selectOneIdea(idx);
+            Idea.ExtendedIdea idea = db.selectOneIdea(idx);
             if (idea == null) {
                 return gson.toJson(new StructuredResponse("error", idx + " not found", null));
             } else {
@@ -138,7 +134,7 @@ public class App
         Spark.post("/ideas", (request, response) -> {
             // NB: if gson.Json fails, Spark will reply with status 500 Internal 
             // Server Error
-            IdeaRequest req = gson.fromJson(request.body(), IdeaRequest.class);
+            Request.IdeaRequest req = gson.fromJson(request.body(), Request.IdeaRequest.class);
             // ensure status 200 OK, with a MIME type of JSON
             // NB: even on error, we return 200, but with a JSON object that
             //     describes the error.
@@ -158,7 +154,7 @@ public class App
             // If we can't get an ID or can't parse the JSON, Spark will send
             // a status 500
             int idx = Integer.parseInt(request.params("id"));
-            LikeRequest req = gson.fromJson(request.body(), LikeRequest.class);
+            Request.LikeRequest req = gson.fromJson(request.body(), Request.LikeRequest.class);
 
             String key = req.sessionKey;
             if(!sessionKeyTable.containsKey(key)){
@@ -169,7 +165,7 @@ public class App
             int likeIncrement = req.value;
             if(likeIncrement == 0){
                 // Specific error response to say that the request was formatted incorrectly
-                // Occurs when 'mLikeIncrement' is missing from request (or value is 0)
+                // Occurs when 'value' is missing from request (or value is 0)
                 return gson.toJson(new StructuredResponse("error", "could not find mLikeIncrement field from request", null));
             }
             // ensure status 200 OK, with a MIME type of JSON
@@ -257,12 +253,14 @@ public class App
             }
     
             // If no user exists, add a new user to the users table in the database
-            User res = db.selectOneUser(userId);
+            User res = db.selectOneUser(userId, true);
             if(res == null){
                 int rowsInserted = db.insertNewUser(userId);
                 if (rowsInserted <= 0) {
                     return gson.toJson(new StructuredResponse("error", "error creating user", null));
                 }
+            } else if(res.mValid == false){
+                return gson.toJson(new StructuredResponse("error", "user has been invalidated", null));
             }
 
             // generate a new session key-a random string.
@@ -274,7 +272,7 @@ public class App
 
         // Register users profile with default value
         Spark.post("/users", (request, response) -> {
-            UserRequest req = gson.fromJson(request.body(), UserRequest.class);
+            Request.UserRequest req = gson.fromJson(request.body(), Request.UserRequest.class);
             
             response.status(200);
             response.type("application/json");
@@ -289,7 +287,7 @@ public class App
 
         // Edit user's profile
         Spark.put("/users", (request, response) -> {
-            UserRequest req = gson.fromJson(request.body(), UserRequest.class);
+            Request.UserRequest req = gson.fromJson(request.body(), Request.UserRequest.class);
             response.status(200);
             response.type("application/json");
         
@@ -307,14 +305,14 @@ public class App
             // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
-            UserRequest req = gson.fromJson(request.body(), UserRequest.class);
+            Request.UserRequest req = gson.fromJson(request.body(), Request.UserRequest.class);
 
 
             String key = req.sessionKey;
             if(!sessionKeyTable.containsKey(key)){
                 return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
             }
-            String userID = sessionKeyTable.get(key);
+            String userId = sessionKeyTable.get(key);
 
             User user = db.selectOneUser(requestedUserId, userId.equals(requestedUserId));
             if (user == null) {
@@ -326,7 +324,7 @@ public class App
 
         // post a comment
         Spark.post("/comments", (request, response) -> {
-            CommentRequest req = gson.fromJson(request.body(), CommentRequest.class);
+            Request.CommentRequest req = gson.fromJson(request.body(), Request.CommentRequest.class);
             response.status(200);
             response.type("application/json");
             int rowsInserted = db.insertNewComment(req.mContent, req.mUserId, req.mIdeaId);
@@ -339,7 +337,7 @@ public class App
 
         // Edit a comment
         Spark.put("/comments", (request, response) -> {
-            CommentRequest req = gson.fromJson(request.body(), CommentRequest.class);
+            Request.CommentRequest req = gson.fromJson(request.body(), Request.CommentRequest.class);
             response.status(200);
             response.type("application/json");
         
