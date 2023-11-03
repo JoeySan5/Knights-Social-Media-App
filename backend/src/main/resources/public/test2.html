@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Google Login</title>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id"
+        content="1019349198762-463i1tt2naq9ipll3f9ade5u7nli7gju.apps.googleusercontent.com">
+</head>
+
+<body>
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+    <button onclick="signOut();">Sign out</button>
+
+    <script>
+
+        function onSignIn(googleUser) {
+            var id_token = googleUser.getAuthResponse().id_token;
+            console.log("ID Token: " + id_token);
+
+            // Send ID Token to Server
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `idtoken=${id_token}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "ok") {
+                        console.log("Authenticated with user ID:", data.data.userId);
+                        // If needed, redirect or perform other actions here.
+                    } else {
+                        console.error("Authentication failed:", data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error during authentication:', error);
+                });
+        }
+
+        function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+                console.log('User signed out.');
+            });
+        }
+    </script>
+</body>
+
+</html>

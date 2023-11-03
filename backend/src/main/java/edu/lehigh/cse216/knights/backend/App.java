@@ -7,6 +7,7 @@ import spark.Spark;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
+import static spark.Spark.*;
 
 import org.eclipse.jetty.server.HttpTransport;
 
@@ -34,6 +35,8 @@ public class App
      */
     public static void main( String[] args )
     {
+        staticFiles.location("/public");
+
         // Get a fully-configured connection to the database, or exit immediately
         Database db = getDatabaseConnection();
         if (db == null)
@@ -216,7 +219,7 @@ public class App
             .build();
 
             // (Receive idTokenString by HTTPS POST)
-            String idTokenString = request.queryParams("idtoken");
+            String idTokenString = request.raw().getParameter("idtoken");
             GoogleIdToken idToken = verifier.verify(idTokenString);
             
             String userId = null;
@@ -264,7 +267,7 @@ public class App
             }
 
             // generate a new session key-a random string.
-            String sessionKey = "testing_key";  //TODO: make this a random session key
+            String sessionKey =  SessionKeyGenerator.generateRandomString(12);
             sessionKeyTable.put(sessionKey, userId);
             
             return gson.toJson(new StructuredResponse("ok", "authentication success", sessionKey));
