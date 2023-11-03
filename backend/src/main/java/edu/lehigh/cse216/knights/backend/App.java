@@ -203,6 +203,7 @@ public class App
 
 
         Spark.post("/login", (request, response) -> {
+
             // tjp: TODO maybe set this as environment variable. Hard-coding the client_id goes against 12-factor app guidelines
             String CLIENT_ID = "1019349198762-463i1tt2naq9ipll3f9ade5u7nli7gju.apps.googleusercontent.com";
 
@@ -219,17 +220,22 @@ public class App
             .build();
 
             // (Receive idTokenString by HTTPS POST)
-            String idTokenString = request.raw().getParameter("idtoken");
+            String idTokenString = request.queryParams("credential"); 
+
             GoogleIdToken idToken = verifier.verify(idTokenString);
-            
+
             String userId = null;
             if (idToken != null) {
                 Payload payload = idToken.getPayload();
 
                 // Print user identifier
                 userId = payload.getSubject();
-                System.out.println("For testing backend, User ID: " + userId);
-
+                String email = payload.getEmail();
+                System.out.println("User ID: " + userId);
+                System.out.println("Email: " + email);
+                if(email != null && !email.endsWith("@lehigh.edu")) {
+                    return gson.toJson(new StructuredResponse("error", "authentication failed, only approve @lehigh.edu domain", null));
+                }
                 // Get profile information from payload
                 // String email = payload.getEmail();
                 // System.out.println("The email is: " + email);

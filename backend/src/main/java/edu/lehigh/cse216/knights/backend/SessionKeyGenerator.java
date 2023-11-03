@@ -18,8 +18,5 @@ public class SessionKeyGenerator {
     }
 
     public static void main(String[] args) {
-        int keyLength = 12; // 원하는 랜덤 문자열의 길이를 설정하세요.
-        String sessionKey = generateRandomString(keyLength);
-        System.out.println("Generated Session Key: " + sessionKey);
     }
 }
