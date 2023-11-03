@@ -313,8 +313,9 @@ public class App
                 return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
             }
             String userId = sessionKeyTable.get(key);
+            boolean restrictInfo = !(userId.equals(requestedUserId));
 
-            User user = db.selectOneUser(requestedUserId, userId.equals(requestedUserId));
+            User user = db.selectOneUser(requestedUserId, restrictInfo);
             if (user == null) {
                 return gson.toJson(new StructuredResponse("error", requestedUserId + " not found", null));
             } else {
