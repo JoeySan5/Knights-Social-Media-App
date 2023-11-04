@@ -54,10 +54,8 @@ public class App
          * String = userId
          */
         Hashtable<String, String> sessionKeyTable = new Hashtable<>();
-        for(int testId=1; testId<=5; testId++){
-            sessionKeyTable.put("testx"+testId, "x"+testId);
-        }
-
+        sessionKeyTable.put("lGaJjDO8kdNq", "112569610817039937158");
+        sessionKeyTable.put("k0kyOGwPlod5", "107106171889739877350");
         // Set the port on which to listen for requests from the environment
         Spark.port(getIntFromEnv("PORT", DEFAULT_PORT_SPARK));
 
@@ -158,11 +156,14 @@ public class App
             Request.LikeRequest req = gson.fromJson(request.body(), Request.LikeRequest.class);
 
             String key = req.sessionKey;
+            System.out.println("sessionKey: " + key);
+
             if(!sessionKeyTable.containsKey(key)){
                 return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
             }
             String userID = sessionKeyTable.get(key);
-
+            System.out.println("userID: " + userID);
+            
             int likeIncrement = req.value;
             if(likeIncrement == 0){
                 // Specific error response to say that the request was formatted incorrectly
@@ -172,7 +173,11 @@ public class App
             // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
+            
+            System.out.println("sessionKey: " + key + "userID: " + userID + "likeIncrement: " + likeIncrement);
+
             int rowsUpdated = db.updateIdeaLikeCount(userID, idx, likeIncrement);
+
             if (rowsUpdated <= 0) {
                 return gson.toJson(new StructuredResponse("error", "unable to change likes on idea #" + idx + " by " + likeIncrement, null));
             } else {
@@ -273,7 +278,8 @@ public class App
             // generate a new session key-a random string.
             String sessionKey =  SessionKeyGenerator.generateRandomString(12);
             sessionKeyTable.put(sessionKey, userId);
-            
+            // show up the sessionKeyTable
+            System.out.println("sessionKeyTable: " + sessionKeyTable);
             return gson.toJson(new StructuredResponse("ok", "authentication success", sessionKey));
         });
 
@@ -312,10 +318,13 @@ public class App
             // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
-            Request.UserRequest req = gson.fromJson(request.body(), Request.UserRequest.class);
 
+            // Explain, why we can't use this way to get sessionKey
+            // Request.UserRequest req = gson.fromJson(request.body(), Request.UserRequest.class);
+            // String key = req.sessionKey;
 
-            String key = req.sessionKey;
+            String key = request.queryParams("sessionKey");
+
             if(!sessionKeyTable.containsKey(key)){
                 return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
             }

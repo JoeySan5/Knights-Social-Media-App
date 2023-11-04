@@ -478,7 +478,6 @@ public class Database {
         return res;
     }
 
-    // TODO: comment this and write the prepared statement // code from tjp
     int previousLikeValue(String userID, int ideaID){
         try{
         mCheckIfLikeExists.setString(1, userID);
