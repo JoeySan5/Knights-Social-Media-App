@@ -89,6 +89,13 @@ public class Database {
     // Get the commenter username of specific comment
     private PreparedStatement mGetCommenterName;
 
+    private PreparedStatement mCheckIfLikeExists;
+
+    private PreparedStatement mInsertNewLike;
+
+    private PreparedStatement mDeleteOneLike;
+
+    private PreparedStatement mUpdateOneLike;
 
     /**
      * The Database constructor is private: we only create Database objects
@@ -123,19 +130,21 @@ public class Database {
             // Standard CRUD operations
             // tjp: these SQL prepared statement are essential for understanding exactly
             // what the backend is asking the database
-            this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE id = ?"); // Not
+            this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE ideaid = ?"); // Not
                                                                                                        // implemented in
                                                                                                        // Phase 1?
             this.mInsertOneIdea = this.mConnection
                     .prepareStatement("INSERT INTO ideas (content, userid, likeCount) VALUES (?, ?, 0)");
 
             this.mSelectAllIdeas = this.mConnection
-                    .prepareStatement("SELECT ideaid, content, likeCount FROM ideas ORDER BY ideaid DESC");
-                    
-            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaid=?");
+                    .prepareStatement("SELECT ideaid, content, likeCount, userid FROM ideas " +
+                                        "WHERE valid IS TRUE " +
+                                        "ORDER BY ideaid DESC");
+
+            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaid=? AND valid IS TRUE");
 
             this.mUpdateIdeaLikeCount = this.mConnection
-                    .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE id = ?");
+                    .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE ideaid = ?");
 
             this.mCreateUserTable = this.mConnection.prepareStatement(
                     "CREATE TABLE users (" +
@@ -173,7 +182,7 @@ public class Database {
             // Get all comments of specific idea
             this.mSelectAllComments = this.mConnection.prepareStatement(
                     "SELECT * from comments WHERE ideaid=?");
-            
+
             // Get the commenter username of specific comment
             this.mGetCommenterName = this.mConnection.prepareStatement(
                     "SELECT u.username " +
@@ -187,7 +196,21 @@ public class Database {
                             "FROM ideas i " +
                             "JOIN users u ON i.userid = u.userid " +
                             "WHERE i.ideaid = ?");
+
+            this.mCheckIfLikeExists = this.mConnection.prepareStatement(
+                    "SELECT value " +
+                            "FROM likes " +
+                            "WHERE userid = ? AND ideaid = ?");
+
+            this.mInsertNewLike = this.mConnection.prepareStatement(
+                    "INSERT INTO likes (ideaid, userid, value) VALUES (?, ?, ?)");
             
+            this.mDeleteOneLike = this.mConnection.prepareStatement(
+                    "DELETE FROM likes WHERE ideaid = ? AND userid = ?");
+
+            this.mUpdateOneLike = this.mConnection.prepareStatement(
+                    "UPDATE likes SET value = ? WHERE ideaid = ? AND userid = ?");
+
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
             e.printStackTrace();
@@ -313,16 +336,26 @@ public class Database {
      * 
      * @return All Ideas, as an ArrayList
      */
-    ArrayList<Idea> selectAllIdeas() {
-        ArrayList<Idea> res = new ArrayList<Idea>();
+    ArrayList<ExtendedIdea> selectAllIdeas() {
+        ArrayList<ExtendedIdea> res = new ArrayList<ExtendedIdea>();
         try {
             ResultSet rs = mSelectAllIdeas.executeQuery();
+            
             while (rs.next()) {
-                res.add(new Idea(
-                        rs.getInt("id"),
+                int ideaId = rs.getInt("ideaid");
+                mGetPosterName.setInt(1, ideaId);
+                ResultSet rsPoster = mGetPosterName.executeQuery();
+                String posterUsername = "";
+                if (rsPoster.next()) {
+                    posterUsername = rsPoster.getString("username");
+                }
+            rsPoster.close();
+                res.add(new ExtendedIdea(
+                        rs.getInt("ideaid"),
                         rs.getString("content"),
                         rs.getInt("likeCount"),
-                        rs.getString("userid")));
+                        rs.getString("userid"),
+                        posterUsername));
             }
             rs.close();
             return res;
@@ -339,69 +372,87 @@ public class Database {
      * 
      * @return The data for the requested idea, or null if the ID was invalid
      */
-ExtendedIdea selectOneIdea(int ideaId) {
-    ExtendedIdea res = null;
-    try {
-        mSelectOneIdea.setInt(1, ideaId);
-        ResultSet rs = mSelectOneIdea.executeQuery();
-        if (rs.next()) {
-            mGetPosterName.setInt(1, ideaId);
-            ResultSet rsPoster = mGetPosterName.executeQuery();
-            String posterUsername = "";
-            if (rsPoster.next()) {
-                posterUsername = rsPoster.getString("username");
-            }
-            rsPoster.close();
-
-            ArrayList<ExtendedComment> comments = new ArrayList<>();
-            mSelectAllComments.setInt(1, ideaId);
-            ResultSet rsComments = mSelectAllComments.executeQuery();
-            while (rsComments.next()) {
-                int commentId = rsComments.getInt("commentid");
-                String content = rsComments.getString("content");
-                String userId = rsComments.getString("userid");
-
-                mGetCommenterName.setInt(1, commentId);
-                ResultSet rsCommenter = mGetCommenterName.executeQuery();
-                String commenterUsername = "";
-                if (rsCommenter.next()) {
-                    commenterUsername = rsCommenter.getString("username");
+    ExtendedIdea selectOneIdea(int ideaId) {
+        ExtendedIdea res = null;
+        try {
+            mSelectOneIdea.setInt(1, ideaId);
+            ResultSet rs = mSelectOneIdea.executeQuery();
+            if (rs.next()) {
+                mGetPosterName.setInt(1, ideaId);
+                ResultSet rsPoster = mGetPosterName.executeQuery();
+                String posterUsername = "";
+                if (rsPoster.next()) {
+                    posterUsername = rsPoster.getString("username");
                 }
-                rsCommenter.close();
+                rsPoster.close();
 
-                comments.add(new ExtendedComment(commentId, userId, ideaId, content, commenterUsername));
+                ArrayList<ExtendedComment> comments = new ArrayList<>();
+                mSelectAllComments.setInt(1, ideaId);
+                ResultSet rsComments = mSelectAllComments.executeQuery();
+                while (rsComments.next()) {
+                    int commentId = rsComments.getInt("commentid");
+                    String content = rsComments.getString("content");
+                    String userId = rsComments.getString("userid");
+
+                    mGetCommenterName.setInt(1, commentId);
+                    ResultSet rsCommenter = mGetCommenterName.executeQuery();
+                    String commenterUsername = "";
+                    if (rsCommenter.next()) {
+                        commenterUsername = rsCommenter.getString("username");
+                    }
+                    rsCommenter.close();
+
+                    comments.add(new ExtendedComment(commentId, userId, ideaId, content, commenterUsername));
+                }
+                rsComments.close();
+
+                res = new ExtendedIdea(
+                        rs.getInt("ideaid"),
+                        rs.getString("content"),
+                        rs.getInt("likeCount"),
+                        rs.getString("userid"),
+                        posterUsername,
+                        comments);
             }
-            rsComments.close();
-
-            res = new ExtendedIdea(
-                    rs.getInt("ideaid"),
-                    rs.getString("content"),
-                    rs.getInt("likeCount"),
-                    rs.getString("userid"),
-                    posterUsername,
-                    comments);
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        rs.close();
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return res;
     }
-    return res;
-}
-    
 
-    User selectOneUser(String userId) {
+    /**
+     * Gets a single user from the users table. Can specify restriction to prevent sending private
+     * info on a GET request on a profile page.
+     * @param userId userId of the requested user
+     * @param restrictInfo set to true is the user accessing data other of a user other than themself.
+     * @return the User with all non restricted data, or null if no User with the userId exists
+     */
+    User selectOneUser(String userId, boolean restrictInfo) {
         User res = null;
         try {
             mSelectOneUser.setString(1, userId);
             ResultSet rs = mSelectOneUser.executeQuery();
             if (rs.next()) {
-                res = new User(
+                if(restrictInfo){
+                    // Do not save the GI or SO if restricted
+                    res = new User(
+                        rs.getString("userid"),
+                        rs.getString("username"),
+                        rs.getString("email"),
+                        rs.getString("note"),
+                        rs.getBoolean("valid"));
+                }
+                else{
+                    res = new User(
                         rs.getString("userid"),
                         rs.getString("username"),
                         rs.getString("email"),
                         rs.getString("GI"),
                         rs.getString("SO"),
-                        rs.getString("note"));
+                        rs.getString("note"),
+                        rs.getBoolean("valid"));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -427,17 +478,25 @@ ExtendedIdea selectOneIdea(int ideaId) {
         return res;
     }
 
-    // TODO: comment this and write the prepared statement // code from tjp
-    int previousLikeValue(String userID, int ideaId){
-        mCheckIfLikeExists.setInt(1, userID);
-        mCheckIfLikeExists.setString(2, ideaID);
-        ResultSet res = mCheckIfLikeExists.executeUpdate();
+    int previousLikeValue(String userID, int ideaID){
+        try{
+        mCheckIfLikeExists.setString(1, userID);
+        mCheckIfLikeExists.setInt(2, ideaID);
+        
         // Return true if the user has (dis)liked the post before
+        ResultSet res = mCheckIfLikeExists.executeQuery();
         if(res.next()){
             return res.getInt("value");
+        } else{
+            return 0;
         }
-        return 0;
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        return -1;
     }
+
 
     /**
      * Update the likeCount for an idea in the database
@@ -455,20 +514,30 @@ ExtendedIdea selectOneIdea(int ideaId) {
         int res = -1;
         try {
             if (likeValue == 1 || likeValue == -1) {
-                int likeDelta = 0;
-                int previousLikeValue = previousLikeValue(userID, ideaId)
+                int likeDelta = likeValue;
+                int previousLikeValue = previousLikeValue(userID, ideaId);
                 // Case 1: No like currently exists
                 if(previousLikeValue == 0){
-                    //add new like
-                    // mAddNewLike
+                    mInsertNewLike.setInt(1, ideaId);
+                    mInsertNewLike.setString(2, userID);
+                    mInsertNewLike.setInt(3, likeValue);
+                    res = mInsertNewLike.executeUpdate();
                 }
                 else {
                     if(likeValue == previousLikeValue){
                         // delete (dis)like from table
+                        mDeleteOneLike.setInt(1, ideaId);
+                        mDeleteOneLike.setString(2, userID);
+                        res = mDeleteOneLike.executeUpdate();
+
                         likeDelta = -1*likeValue;
                     }
                     else if(likeValue != previousLikeValue){
-                        // mUpdateLikeStatus
+                        mUpdateOneLike.setInt(1, likeValue);
+                        mUpdateOneLike.setInt(2, ideaId);
+                        mUpdateOneLike.setString(3, userID);
+                        res = mUpdateOneLike.executeUpdate();
+
                         likeDelta = 2*likeValue;
                     }
                 }
@@ -493,7 +562,7 @@ ExtendedIdea selectOneIdea(int ideaId) {
         return count;
     }
 
-    int updateOneUser(UserRequest req) {
+    int updateOneUser(Request.UserRequest req) {
         try {
             mUpdateOneUser.setString(1, req.mUsername);
             mUpdateOneUser.setString(2, req.mEmail);
@@ -507,7 +576,6 @@ ExtendedIdea selectOneIdea(int ideaId) {
             return 0;
         }
     }
-
 
     String getPosterName(int ideaid) {
         String posterName = null;
@@ -523,8 +591,8 @@ ExtendedIdea selectOneIdea(int ideaId) {
         return posterName;
     }
 
-    //(content, userid, ideaid)
-    int insertNewComment(String content, String userId, int ideaId){
+    // (content, userid, ideaid)
+    int insertNewComment(String content, String userId, int ideaId) {
         int count = 0;
         try {
             mInsertOneComment.setString(1, content);
@@ -537,7 +605,7 @@ ExtendedIdea selectOneIdea(int ideaId) {
         return count;
     }
 
-    int updateOneComment(String content, int commentId){
+    int updateOneComment(String content, int commentId) {
         try {
             mUpdateOneComment.setString(1, content);
             mUpdateOneComment.setInt(2, commentId);
@@ -568,7 +636,6 @@ ExtendedIdea selectOneIdea(int ideaId) {
         }
     }
 
-    
     /**
      * Create idea tblData. If it already exists, this will print an error
      */
