@@ -135,7 +135,7 @@ public class App {
             } else if (action == 'T') {
                 createTable(in);
             } else if (action == 'D') {
-                // db.dropTable();
+                dropTable(in);
             } else if (action == '1') {
                 int id = getInt(in, "Enter the row ID");
                 if (id == -1)
@@ -203,7 +203,34 @@ public class App {
         } else if (action == 'L'){
             db.createTable("likes");
         } else if (action == '*'){
-            db.createTable("all");
+            db.createTable("users");
+            db.createTable("ideas");
+            db.createTable("comments");
+            db.createTable("likes");
+        }
+    }
+
+    private static void dropTable(BufferedReader in) {
+        System.out.println("Drop a table (warning: data cannot be recovered)");
+        System.out.println("  [U] 'users'");
+        System.out.println("  [I] 'ideas'");
+        System.out.println("  [C] 'comments'");
+        System.out.println("  [L] 'likes'");
+        System.out.println("  [*] Drop all tables");
+        char action = prompt(in, App.TABLE_OPTIONS);
+        if(action == 'U'){
+            db.dropTable("users");
+        } else if (action == 'I'){
+            db.dropTable("ideas");
+        } else if (action == 'C'){
+            db.dropTable("comments");
+        } else if (action == 'L'){
+            db.dropTable("likes");
+        } else if (action == '*'){
+            db.dropTable("users");
+            db.dropTable("ideas");
+            db.dropTable("comments");
+            db.dropTable("likes");
         }
     }
 

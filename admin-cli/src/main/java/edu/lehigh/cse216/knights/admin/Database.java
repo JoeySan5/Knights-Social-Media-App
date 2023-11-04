@@ -50,8 +50,19 @@ public class Database {
     /** A prepared statement for creating the table 'likes' in our database */
     private PreparedStatement mCreateLikesTable;
 
-    /** A prepared statement for dropping a specfied table in our database*/
-    private PreparedStatement mDropSpecifiedTable;
+    /** A prepared statement for dropping the table 'users' from our database */
+    private PreparedStatement mDropUsersTable;
+
+    /** A prepared statement for dropping the table 'ideas' from our database */
+    private PreparedStatement mDropIdeasTable;
+
+    /** A prepared statement for dropping the table 'comments' from our database */
+    private PreparedStatement mDropCommentsTable;
+
+    /** A prepared statement for dropping the table 'likes' from our database */
+    private PreparedStatement mDropLikesTable;
+
+    
 
     /**
      * RowData is like a struct in C: we use it to hold data, and we allow 
@@ -109,8 +120,11 @@ public class Database {
                 "userID VARCHAR(256) REFERENCES users(userID), content VARCHAR(2048))");
             this.mCreateLikesTable = this.mConnection.prepareStatement(
                 "CREATE TABLE likes (ideaID INT, userID INT, value INT, PRIMARY KEY (ideaID, userID))");
-            // Drop the indicated table
-            this.mDropSpecifiedTable = this.mConnection.prepareStatement("DROP TABLE ?");
+            // DROP TABLE statements for each table. Use carefully- this will permanently delete table data
+            this.mDropUsersTable = this.mConnection.prepareStatement("DROP TABLE users");
+            this.mDropIdeasTable = this.mConnection.prepareStatement("DROP TABLE ideas");
+            this.mDropCommentsTable = this.mConnection.prepareStatement("DROP TABLE comments");
+            this.mDropLikesTable = this.mConnection.prepareStatement("DROP TABLE likes");
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
             e.printStackTrace();
@@ -308,9 +322,10 @@ public class Database {
     // }
 
     /**
-     * Creates one or all tables in the database.
+     * Creates one or all tables in the database. If the table(s) already exists,
+     * this will print an error.
      * 
-     * @param tableName the name of the table to be created, or 'all' for all tables. Case insensitive.
+     * @param tableName the name of the table to be created. Case insensitive.
      */
     void createTable(String tableName) {
         try {
@@ -322,26 +337,31 @@ public class Database {
                 mCreateCommentsTable.execute();
             } else if(tableName.equalsIgnoreCase("likes")){
                 mCreateLikesTable.execute();
-            } else if(tableName.equalsIgnoreCase("all")){
-                mCreateUsersTable.execute();
-                mCreateIdeasTable.execute();
-                mCreateCommentsTable.execute();
-                mCreateLikesTable.execute();
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    // /**
-    //  * Remove ideas from the database.  If it does not exist, this will print
-    //  * an error.
-    //  */
-    // void dropTable() {
-    //     try {
-    //         mDropTable.execute();
-    //     } catch (SQLException e) {
-    //         e.printStackTrace();
-    //     }
-    // }
+    /**
+     * Remove a specified table from the database.  If it does not exist, this will print
+     * an error.
+     * 
+     * @param tableName the name of the table to drop. Case insensitive.
+     */
+    void dropTable(String tableName) {
+        try {
+            if(tableName.equalsIgnoreCase("users")){
+                mDropUsersTable.execute();
+            } else if(tableName.equalsIgnoreCase("ideas")){
+                mDropIdeasTable.execute();
+            } else if(tableName.equalsIgnoreCase("comments")){
+                mDropCommentsTable.execute();
+            } else if(tableName.equalsIgnoreCase("likes")){
+                mDropLikesTable.execute();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
