@@ -13,6 +13,15 @@ import java.util.Map;
  */
 public class App {
 
+    /** Database object to communicate with the PostgreSQL database. */
+    static Database db;
+
+    /** The actions prompted to the admin from the App menu. */
+    static final String MENU_ACTIONS = "TD1*-+~q?";
+
+    /** Options for the four tables in the database: users, ideas, comments, likes. Or for all */
+    static final String TABLE_OPTIONS = "UICL*";
+
     /**
      * Print the menu for our program
      */
@@ -30,16 +39,14 @@ public class App {
     }
 
     /**
-     * Ask the user to enter a menu option; repeat until we get a valid option
+     * Ask the user to enter an option; repeat until we get a valid option
      * 
      * @param in A BufferedReader, for reading from the keyboard
+     * @param actions The valid actions for the current screen
      * 
      * @return The character corresponding to the chosen menu option
      */
-    static char prompt(BufferedReader in) {
-        // The valid actions:
-        String actions = "TD1*-+~q?";
-
+    static char prompt(BufferedReader in, String actions) {
         // We repeat until a valid single-character option is selected        
         while (true) {
             System.out.print("[" + actions + "] :> ");
@@ -109,7 +116,7 @@ public class App {
     public static void main(String[] argv) {
         // Get a fully-configured connection to the database, or exit 
         // immediately
-        Database db = getDatabaseConnection();
+        db = getDatabaseConnection();
         if (db == null)
             return;
 
@@ -120,15 +127,15 @@ public class App {
             //
             // NB: for better testability, each action should be a separate
             //     function call
-            char action = prompt(in);
+            char action = prompt(in, MENU_ACTIONS);
             if (action == '?') {
                 menu();
             } else if (action == 'q') {
                 break;
             } else if (action == 'T') {
-                db.createTable();
+                createTable(in);
             } else if (action == 'D') {
-                db.dropTable();
+                // db.dropTable();
             } else if (action == '1') {
                 int id = getInt(in, "Enter the row ID");
                 if (id == -1)
@@ -179,13 +186,32 @@ public class App {
         db.disconnect();
     }
 
+    private static void createTable(BufferedReader in) {
+        System.out.println("Create a table");
+        System.out.println("  [U] 'users'");
+        System.out.println("  [I] 'ideas'");
+        System.out.println("  [C] 'comments'");
+        System.out.println("  [L] 'likes'");
+        System.out.println("  [*] Create all tables");
+        char action = prompt(in, App.TABLE_OPTIONS);
+        if(action == 'U'){
+            db.createTable("users");
+        } else if (action == 'I'){
+            db.createTable("ideas");
+        } else if (action == 'C'){
+            db.createTable("comments");
+        } else if (action == 'L'){
+            db.createTable("likes");
+        } else if (action == '*'){
+            db.createTable("all");
+        }
+    }
+
     private static final String DEFAULT_PORT_DB = "5432";
 
     /**
     * Get a fully-configured connection to the database, or exit immediately
-    * Uses the Postgres configuration from environment variables
-    * 
-    * NB: now when we shutdown the server, we no longer lose all data
+    * Uses the Postgres configuration from environment variables.
     * 
     * @return null on failure, otherwise configured database object
     */

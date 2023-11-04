@@ -27,30 +27,31 @@ public class Database {
      */
     private PreparedStatement mSelectOne;
 
-    /**
-     * A prepared statement for deleting a row from the database
-     */
+    /** A prepared statement for deleting a row from the database */
     private PreparedStatement mDeleteOne;
 
-    /**
-     * A prepared statement for inserting into the database
-     */
+    /** A prepared statement for inserting into the database  */
     private PreparedStatement mInsertOne;
 
     /**
      * A prepared statement for updating a single row in the database
      */
-    // private PreparedStatement mUpdateOne;
+    private PreparedStatement mUpdateOne;
 
-    /**
-     * A prepared statement for creating the table in our database
-     */
-    private PreparedStatement mCreateTable;
+    /** A prepared statement for creating the table 'users' in our database */
+    private PreparedStatement mCreateUsersTable;
 
-    /**
-     * A prepared statement for dropping the table in our database
-     */
-    private PreparedStatement mDropTable;
+    /** A prepared statement for creating the table 'ideas' in our database */
+    private PreparedStatement mCreateIdeasTable;
+
+    /** A prepared statement for creating the table 'comments' in our database */
+    private PreparedStatement mCreateCommentsTable;
+
+    /** A prepared statement for creating the table 'likes' in our database */
+    private PreparedStatement mCreateLikesTable;
+
+    /** A prepared statement for dropping a specfied table in our database*/
+    private PreparedStatement mDropSpecifiedTable;
 
     /**
      * RowData is like a struct in C: we use it to hold data, and we allow 
@@ -94,7 +95,28 @@ public class Database {
     }
 
     private Database createPreparedStatements() {
-        // TODO create prepared statements in this method
+        // Add all the prepared statements used to interact with the database
+        try {
+            // CREATE TABLE statements very importantly must be consistent between admin and backend.
+            this.mCreateUsersTable = this.mConnection.prepareStatement(
+                "CREATE TABLE users ( userID VARCHAR(256) PRIMARY KEY, username VARCHAR(32) NOT NULL, "+
+                "email VARCHAR(64), GI VARCHAR(16), SO VARCHAR(16), note VARCHAR(128), valid BOOLEAN NOT NULL);");
+            this.mCreateIdeasTable = this.mConnection.prepareStatement(
+                "CREATE TABLE ideas ( ideaID SERIAL PRIMARY KEY, userID VARCHAR(256) REFERENCES users(userID), "+
+                "content VARCHAR(2048), likeCount INT, valid BOOLEAN NOT NULL)");
+            this.mCreateCommentsTable = this.mConnection.prepareStatement(
+                "CREATE TABLE comments (commentID SERIAL PRIMARY KEY, ideaID INT REFERENCES ideas(ideaID), "+
+                "userID VARCHAR(256) REFERENCES users(userID), content VARCHAR(2048))");
+            this.mCreateLikesTable = this.mConnection.prepareStatement(
+                "CREATE TABLE likes (ideaID INT, userID INT, value INT, PRIMARY KEY (ideaID, userID))");
+            // Drop the indicated table
+            this.mDropSpecifiedTable = this.mConnection.prepareStatement("DROP TABLE ?");
+        } catch (SQLException e) {
+            System.err.println("Error creating prepared statement");
+            e.printStackTrace();
+            this.disconnect();
+            return null;
+        }
         return this;
     }
 
@@ -286,25 +308,40 @@ public class Database {
     // }
 
     /**
-     * Create ideas.  If it already exists, this will print an error
+     * Creates one or all tables in the database.
+     * 
+     * @param tableName the name of the table to be created, or 'all' for all tables. Case insensitive.
      */
-    void createTable() {
+    void createTable(String tableName) {
         try {
-            mCreateTable.execute();
+            if(tableName.equalsIgnoreCase("users")){
+                mCreateUsersTable.execute();
+            } else if(tableName.equalsIgnoreCase("ideas")){
+                mCreateIdeasTable.execute();
+            } else if(tableName.equalsIgnoreCase("comments")){
+                mCreateCommentsTable.execute();
+            } else if(tableName.equalsIgnoreCase("likes")){
+                mCreateLikesTable.execute();
+            } else if(tableName.equalsIgnoreCase("all")){
+                mCreateUsersTable.execute();
+                mCreateIdeasTable.execute();
+                mCreateCommentsTable.execute();
+                mCreateLikesTable.execute();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    /**
-     * Remove ideas from the database.  If it does not exist, this will print
-     * an error.
-     */
-    void dropTable() {
-        try {
-            mDropTable.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+    // /**
+    //  * Remove ideas from the database.  If it does not exist, this will print
+    //  * an error.
+    //  */
+    // void dropTable() {
+    //     try {
+    //         mDropTable.execute();
+    //     } catch (SQLException e) {
+    //         e.printStackTrace();
+    //     }
+    // }
 }
