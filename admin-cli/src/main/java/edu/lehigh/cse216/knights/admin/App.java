@@ -22,6 +22,9 @@ public class App {
     /** Options for the four tables in the database: users, ideas, comments, likes. Or for all */
     static final String TABLE_OPTIONS = "UICL*";
 
+    /** Entities in the database which can be invalidated by the admin */
+    static final String VALID_ENTITIES = "UI";
+
     /**
      * Print the menu for our program
      */
@@ -32,8 +35,8 @@ public class App {
         System.out.println("  [1] Query for a specific row");
         System.out.println("  [*] Query for all rows");
         System.out.println("  [-] Delete a row");
-        System.out.println("  [+] Insert a new row");
-        // System.out.println("  [~] Update a row");
+        System.out.println("  [S] Add sample data");
+        System.out.println("  [S] Invalidate an entity");
         System.out.println("  [q] Quit Program");
         System.out.println("  [?] Help (this message)");
     }
