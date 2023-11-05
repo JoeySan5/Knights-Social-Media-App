@@ -119,8 +119,8 @@ public class Database {
                 "CREATE TABLE comments (commentID SERIAL PRIMARY KEY, ideaID INT REFERENCES ideas(ideaID), "+
                 "userID VARCHAR(256) REFERENCES users(userID), content VARCHAR(2048))");
             this.mCreateLikesTable = this.mConnection.prepareStatement(
-                "CREATE TABLE likes (ideaID INT, userID INT, value INT, PRIMARY KEY (ideaID, userID))");
-            // DROP TABLE statements for each table. Use carefully- this will permanently delete table data
+                "CREATE TABLE likes (ideaID INT, userID VARCHAR(256), value INT, PRIMARY KEY (ideaID, userID))");
+            // DROP TABLE statements for each table. Use carefully- these will permanently delete table data
             this.mDropUsersTable = this.mConnection.prepareStatement("DROP TABLE users");
             this.mDropIdeasTable = this.mConnection.prepareStatement("DROP TABLE ideas");
             this.mDropCommentsTable = this.mConnection.prepareStatement("DROP TABLE comments");
