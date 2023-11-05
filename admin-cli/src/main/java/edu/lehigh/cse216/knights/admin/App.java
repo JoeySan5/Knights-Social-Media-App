@@ -27,8 +27,8 @@ public class App {
      */
     static void menu() {
         System.out.println("Main Menu");
-        System.out.println("  [T] Create ideas");
-        System.out.println("  [D] Drop ideas");
+        System.out.println("  [T] Create table(s)");
+        System.out.println("  [D] Drop table(s)");
         System.out.println("  [1] Query for a specific row");
         System.out.println("  [*] Query for all rows");
         System.out.println("  [-] Delete a row");
@@ -133,7 +133,7 @@ public class App {
             } else if (action == 'q') {
                 break;
             } else if (action == 'T') {
-                createTable(in);
+                createAllTable(in);
             } else if (action == 'D') {
                 dropTable(in);
             } else if (action == '1') {
@@ -186,51 +186,61 @@ public class App {
         db.disconnect();
     }
 
-    private static void createTable(BufferedReader in) {
-        System.out.println("Create a table");
-        System.out.println("  [U] 'users'");
-        System.out.println("  [I] 'ideas'");
-        System.out.println("  [C] 'comments'");
-        System.out.println("  [L] 'likes'");
-        System.out.println("  [*] Create all tables");
-        char action = prompt(in, App.TABLE_OPTIONS);
-        if(action == 'U'){
-            db.createTable("users");
-        } else if (action == 'I'){
-            db.createTable("ideas");
-        } else if (action == 'C'){
-            db.createTable("comments");
-        } else if (action == 'L'){
-            db.createTable("likes");
-        } else if (action == '*'){
-            db.createTable("users");
-            db.createTable("ideas");
-            db.createTable("comments");
-            db.createTable("likes");
-        }
+    /**
+     * Drops one specified table and prints whether the operation succeeded
+     * @param tableName the table to drop
+     */
+    private static void createTableAndPrintResult(String tableName){
+        System.out.println(db.createTable(tableName) ? "Created '"+tableName+"' table" : "'"+tableName + "' table already existed");
+    }
+    
+    /**
+     * Create all tables in to go in the database. 
+     * @param in BufferedReader created by main()
+     */
+    private static void createAllTable(BufferedReader in) {
+        createTableAndPrintResult("users");
+        createTableAndPrintResult("ideas");
+        createTableAndPrintResult("comments");
+        createTableAndPrintResult("likes");
     }
 
+    /**
+     * Drops one specified table and prints whether the operation succeeded
+     * @param tableName the table to drop
+     */
+    private static void dropTableAndPrintResult(String tableName){
+        System.out.println(db.dropTable(tableName) ? "Dropped '"+ tableName+"' table" : "Failed to drop '" + tableName + "' table");
+    }
+
+    /**
+     * Prompt the user for a table to drop, then attempt to drop it.
+     * @param in BufferedReader created by main()
+     */
     private static void dropTable(BufferedReader in) {
-        System.out.println("Drop a table (warning: data cannot be recovered)");
+        System.out.println("Drop a table and all tables that reference it \n(warning: data cannot be recovered)");
         System.out.println("  [U] 'users'");
         System.out.println("  [I] 'ideas'");
         System.out.println("  [C] 'comments'");
         System.out.println("  [L] 'likes'");
         System.out.println("  [*] Drop all tables");
         char action = prompt(in, App.TABLE_OPTIONS);
-        if(action == 'U'){
-            db.dropTable("users");
+        // Must drop tables in specific orders. Cannot drop a table if it's referenced by a foreign key
+        if(action == 'U' || action == '*'){
+            // As of Phase 2, 'U' and "*" are equivalent
+            dropTableAndPrintResult("likes");
+            dropTableAndPrintResult("comments");
+            dropTableAndPrintResult("ideas");
+            dropTableAndPrintResult("users");
         } else if (action == 'I'){
-            db.dropTable("ideas");
+            // tech debt: likes does not actually have a foreign key
+            dropTableAndPrintResult("likes");
+            dropTableAndPrintResult("comments");
+            dropTableAndPrintResult("ideas");
         } else if (action == 'C'){
-            db.dropTable("comments");
+            dropTableAndPrintResult("comments");
         } else if (action == 'L'){
-            db.dropTable("likes");
-        } else if (action == '*'){
-            db.dropTable("users");
-            db.dropTable("ideas");
-            db.dropTable("comments");
-            db.dropTable("likes");
+            dropTableAndPrintResult("likes");
         }
     }
 

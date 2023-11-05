@@ -62,6 +62,13 @@ public class Database {
     /** A prepared statement for dropping the table 'likes' from our database */
     private PreparedStatement mDropLikesTable;
 
+    /** Sets the likeCount of all Ideas to 0. To be called when dropping the likes table. */
+    private PreparedStatement mZeroAllLikes;
+
+    private PreparedStatement mSetUservalidation;
+
+    private PreparedStatement mSetIdeaValidation;
+
     
 
     /**
@@ -125,6 +132,9 @@ public class Database {
             this.mDropIdeasTable = this.mConnection.prepareStatement("DROP TABLE ideas");
             this.mDropCommentsTable = this.mConnection.prepareStatement("DROP TABLE comments");
             this.mDropLikesTable = this.mConnection.prepareStatement("DROP TABLE likes");
+            this.mZeroAllLikes = this.mConnection.prepareStatement("UPDATE ideas SET likeCount = 0");
+
+            
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
             e.printStackTrace();
@@ -326,8 +336,10 @@ public class Database {
      * this will print an error.
      * 
      * @param tableName the name of the table to be created. Case insensitive.
+     * 
+     * @return true if there was no SQL Error
      */
-    void createTable(String tableName) {
+    boolean createTable(String tableName) {
         try {
             if(tableName.equalsIgnoreCase("users")){
                 mCreateUsersTable.execute();
@@ -339,8 +351,11 @@ public class Database {
                 mCreateLikesTable.execute();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            // could print stack trace for lots of details, but usually the error is creating an already existing table
+            // e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     /**
@@ -348,8 +363,10 @@ public class Database {
      * an error.
      * 
      * @param tableName the name of the table to drop. Case insensitive.
+     * 
+     * @return true if there was no SQL Error
      */
-    void dropTable(String tableName) {
+    boolean dropTable(String tableName) {
         try {
             if(tableName.equalsIgnoreCase("users")){
                 mDropUsersTable.execute();
@@ -359,9 +376,13 @@ public class Database {
                 mDropCommentsTable.execute();
             } else if(tableName.equalsIgnoreCase("likes")){
                 mDropLikesTable.execute();
+                mZeroAllLikes.execute();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            // could print stack trace for lots of details, but usually the error is dropped a nonexistent table
+            // e.printStackTrace();
+         return false;
         }
+        return true;
     }
 }
