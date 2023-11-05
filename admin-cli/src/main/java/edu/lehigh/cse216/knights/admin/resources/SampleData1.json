@@ -1,0 +1,119 @@
+{
+    "sampleUsers" : [
+        {
+          "userId": "11223344556677889900aabbccddeeff",
+          "username": "userAlpha",
+          "email": "useralpha@example.com",
+          "GI": "AB1234",
+          "SO": "SO5678",
+          "note": "First test user",
+          "valid": true
+        },
+        {
+          "userId": "1234567890abcdef1234567890abcdef",
+          "username": "userBravo",
+          "email": "userbravo@example.com",
+          "GI": "BC2345",
+          "SO": "SO6789",
+          "note": "Second test user",
+          "valid": true
+        },
+        {
+          "userId": "abcdef1234567890abcdef1234567890",
+          "username": "userCharlie",
+          "email": "usercharlie@example.com",
+          "GI": "CD3456",
+          "SO": "SO7890",
+          "note": "Third test user",
+          "valId": true
+        }
+    ],
+    "sampleIdeas" : [
+        [
+        {
+            "ideaId": 1,
+            "userId": "11223344556677889900aabbccddeeff",
+            "content": "This is a great idea to start with!",
+            "likeCount": 1,
+            "valid": true
+        },
+        {
+            "ideaId": 2,
+            "userId": "1234567890abcdef1234567890abcdef",
+            "content": "This is another brilliant idea for our project!",
+            "likeCount": -2,
+            "valid": true
+        },
+        {
+            "ideaId": 3,
+            "userId": "abcdef1234567890abcdef1234567890",
+            "content": "How about this innovative concept?",
+            "likeCount": 0,
+            "valid": true
+        },
+        {
+            "ideaId": 4,
+            "userId": "11223344556677889900aabbccddeeff",
+            "content": "An idea to revolutionize our approach!",
+            "likeCount": 0,
+            "valid": true
+        },
+        {
+            "ideaId": 5,
+            "userId": "1234567890abcdef1234567890abcdef",
+            "content": "A sustainable idea for long-term growth.",
+            "likeCount": 0,
+            "valid": true
+        }
+        ]
+    ],
+    "sampleComments" : [
+        {
+            "commentId": 1,
+            "ideaId": 1,
+            "userId": "1234567890abcdef1234567890abcdef",
+            "content": "I think this idea has a lot of potentials. Let's discuss it further."
+        },
+        {
+            "commentId": 2,
+            "ideaId": 2,
+            "userId": "11223344556677889900aabbccddeeff",
+            "content": "I love where this idea is headed, but have we considered the environmental impact?"
+        },
+        {
+            "commentId": 3,
+            "ideaId": 3,
+            "userId": "abcdef1234567890abcdef1234567890",
+            "content": "This innovative concept could be a game-changer for us!"
+        },
+        {
+            "commentId": 4,
+            "ideaId": 1,
+            "userId": "11223344556677889900aabbccddeeff",
+            "content": "I'm a bit skeptical about this. Could you provide more details on the execution plan?"
+        },
+        {
+            "commentId": 5,
+            "ideaId": 2,
+            "userId": "abcdef1234567890abcdef1234567890",
+            "content": "Fantastic idea! Have we thought about potential partnerships to make this happen?"
+        }
+    ],
+    "sampleLikes" : [
+        {
+            "ideaId" : 1,
+            "userId" : "1234567890abcdef1234567890abcdef",
+            "value" : 1
+        },
+        {
+            "ideaId" : 2,
+            "userId" : "1234567890abcdef1234567890abcdef",
+            "value" : -1
+        },
+        {
+            "ideaId" : 2,
+            "userId" : "abcdef1234567890abcdef1234567890",
+            "value" : -1
+        }
+    ]
+}

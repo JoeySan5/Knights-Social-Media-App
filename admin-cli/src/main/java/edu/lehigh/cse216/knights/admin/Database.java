@@ -7,8 +7,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import java.util.ArrayList;
+import com.google.gson.*;
 
 public class Database {
     /**
@@ -32,6 +32,18 @@ public class Database {
 
     /** A prepared statement for inserting into the database  */
     private PreparedStatement mInsertOne;
+
+    /** Add a single user to the 'users' table */
+    private PreparedStatement mInsertOneUser;
+
+    /** Add a single idea to the 'ideas' table */
+    private PreparedStatement mInsertOneIdea;
+
+    /** Add a single comment to the 'comments' table */
+    private PreparedStatement mInsertOneComment;
+
+    /** Add a single like to the 'likes' table */
+    private PreparedStatement mInsertOneLike;
 
     /**
      * A prepared statement for updating a single row in the database
@@ -68,8 +80,6 @@ public class Database {
     private PreparedStatement mSetUservalidation;
 
     private PreparedStatement mSetIdeaValidation;
-
-    
 
     /**
      * RowData is like a struct in C: we use it to hold data, and we allow 
@@ -133,8 +143,21 @@ public class Database {
             this.mDropCommentsTable = this.mConnection.prepareStatement("DROP TABLE comments");
             this.mDropLikesTable = this.mConnection.prepareStatement("DROP TABLE likes");
             this.mZeroAllLikes = this.mConnection.prepareStatement("UPDATE ideas SET likeCount = 0");
-
             
+            // Statements for adding new data
+            this.mInsertOneLike = this.mConnection.prepareStatement(
+                    "INSERT INTO likes (ideaId, userId, value) VALUES (?, ?, ?)");
+        
+            this.mInsertOneComment = this.mConnection.prepareStatement(
+                    "INSERT INTO comments (commentId, content, userId, ideaId) VALUES (?, ?, ?, ?)");
+                    
+            this.mInsertOneUser = this.mConnection.prepareStatement(
+                    "INSERT INTO users (userId, username, email, GI, SO, note, valid) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?)");      
+
+            this.mInsertOneIdea = this.mConnection
+                    .prepareStatement("INSERT INTO ideas (ideaId, userId, content, likeCount, valid) VALUES (?, ?, ?, ?, ?)");
+
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
             e.printStackTrace();
@@ -230,6 +253,53 @@ public class Database {
         }
         mConnection = null;
         return true;
+    }
+            // // Statements for adding new data
+            // this.mInsertOneLike = this.mConnection.prepareStatement(
+            //         "INSERT INTO likes (ideaId, userId, value) VALUES (?, ?, ?)");
+        
+            // this.mInsertOneComment = this.mConnection.prepareStatement(
+            //         "INSERT INTO comments (commentId, content, userId, ideaId) VALUES (?, ?, ?, ?)");
+                    
+            // this.mInsertOneUser = this.mConnection.prepareStatement(
+            //         "INSERT INTO users (userId, username, email, GI, SO, note, valid) " +
+            //                 "VALUES (?, ?, ?, ?, ?, ?, ?)");      
+
+            // this.mInsertOneIdea = this.mConnection
+            //         .prepareStatement("INSERT INTO ideas (ideaId, userId, content, likeCount, valid) VALUES (?, ?, ?, ?, ?)");
+    /**
+     * 
+     */
+    int insertUser(Entity.User user){
+        int count = 0;
+        try {
+            mInsertOneUser.setString(1, user.userId);
+            mInsertOneUser.setString(2, user.username);
+            mInsertOneUser.setString(3, user.email);
+            mInsertOneUser.setString(4, user.GI);
+            mInsertOneUser.setString(5, user.SO);
+            mInsertOneUser.setString(6, user.note);
+            mInsertOneUser.setBoolean(7, user.valid);
+            count += mInsertOne.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
+
+    int insertIdea(Entity.Idea idea){
+        int count = 0;
+        try {
+            mInsertOneIdea.setInt(1, idea.ideaId);
+             mInsertOneIdea.setString(2, idea.userId);
+            mInsertOneIdea.setString(3, idea.content);
+            mInsertOneIdea.setInt(4, idea.likeCount);
+            mInsertOneIdea.setBoolean(5, idea.valid);
+            count += mInsertOne.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
     }
 
     /**

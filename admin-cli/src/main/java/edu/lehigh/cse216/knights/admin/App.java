@@ -2,10 +2,14 @@ package edu.lehigh.cse216.knights.admin;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Map;
+
+import com.google.gson.Gson;
 
 /**
  * App is our basic admin app.  For now, it is a demonstration of the six key 
@@ -17,13 +21,16 @@ public class App {
     static Database db;
 
     /** The actions prompted to the admin from the App menu. */
-    static final String MENU_ACTIONS = "TD1*-+~q?";
+    static final String MENU_ACTIONS = "TDS*Vq?";
 
     /** Options for the four tables in the database: users, ideas, comments, likes. Or for all */
     static final String TABLE_OPTIONS = "UICL*";
 
     /** Entities in the database which can be invalidated by the admin */
     static final String VALID_ENTITIES = "UI";
+
+    /** Gson object to parse json from sample data files */
+    static final Gson gson = new Gson();
 
     /**
      * Print the menu for our program
@@ -32,11 +39,10 @@ public class App {
         System.out.println("Main Menu");
         System.out.println("  [T] Create table(s)");
         System.out.println("  [D] Drop table(s)");
-        System.out.println("  [1] Query for a specific row");
-        System.out.println("  [*] Query for all rows");
-        System.out.println("  [-] Delete a row");
         System.out.println("  [S] Add sample data");
-        System.out.println("  [S] Invalidate an entity");
+        System.out.println("  [*] Query for all rows");
+        // System.out.println("  [-] Delete a row"); // BACKLOG - not required for phase 2 (replaced by (in)validation)
+        System.out.println("  [V] Invalidate an entity");
         System.out.println("  [q] Quit Program");
         System.out.println("  [?] Help (this message)");
     }
@@ -139,16 +145,18 @@ public class App {
                 createAllTable(in);
             } else if (action == 'D') {
                 dropTable(in);
-            } else if (action == '1') {
-                int id = getInt(in, "Enter the row ID");
-                if (id == -1)
-                    continue;
-                Database.RowData res = db.selectOne(id);
-                if (res != null) {
-                    System.out.println("  [" + res.mId + "] " + res.mContent);
-                    System.out.println("  --> " + res.mLikeCount);
-                }
-            } else if (action == '*') {
+            }  
+            // else if (action == '1') {
+            //     int id = getInt(in, "Enter the row ID");
+            //     if (id == -1)
+            //         continue;
+            //     Database.RowData res = db.selectOne(id);
+            //     if (res != null) {
+            //         System.out.println("  [" + res.mId + "] " + res.mContent);
+            //         System.out.println("  --> " + res.mLikeCount);
+            //     }
+            // }
+            else if (action == '*') {
                 ArrayList<Database.RowData> res = db.selectAll();
                 if (res == null)
                     continue;
@@ -157,22 +165,32 @@ public class App {
                 for (Database.RowData rd : res) {
                     System.out.println("  [" + rd.mId + "] " + rd.mContent);
                 }
-            } else if (action == '-') {
-                int id = getInt(in, "Enter the row ID");
-                if (id == -1)
-                    continue;
-                int res = db.deleteRow(id);
-                if (res == -1)
-                    continue;
-                System.out.println("  " + res + " rows deleted");
-            } else if (action == '+') {
-                String content = getString(in, "Enter the content");
-                // String message = getString(in, "Enter the message");
-                // if (subject.equals("") || message.equals(""))
-                //     continue;
-                int res = db.insertRow(content);
-                System.out.println(res + " rows added");
+            } 
+            // else if (action == '-') {
+            //     int id = getInt(in, "Enter the row ID");
+            //     if (id == -1)
+            //         continue;
+            //     int res = db.deleteRow(id);
+            //     if (res == -1)
+            //         continue;
+            //     System.out.println("  " + res + " rows deleted");
+            // } 
+            // else if (action == '+') {
+            //     String content = getString(in, "Enter the content");
+            //     // String message = getString(in, "Enter the message");
+            //     // if (subject.equals("") || message.equals(""))
+            //     //     continue;
+            //     int res = db.insertRow(content);
+            //     System.out.println(res + " rows added");
+            // } 
+            else if (action == 'S') {
+                // Add a set of sample data to the database
+                addSampleData();
+            } else if (action == 'V') {
+                // update the validation for user or idea
+
             }
+
             // } else if (action == '~') {
             //     int id = getInt(in, "Enter the row ID :> ");
             //     if (id == -1)
@@ -245,6 +263,45 @@ public class App {
         } else if (action == 'L'){
             dropTableAndPrintResult("likes");
         }
+    }
+
+    /**
+     * Note: addSampleData() was written in part through code generated using
+     * ChatGPT-3.5. 
+     * See prompt below https://chat.openai.com/share/09994c77-755e-4bbe-9c49-ecc2252eb986
+     */
+    /**
+     * Read sample data from a JSON file and insert data to the database.
+     */
+    public static void addSampleData(){
+        // BACKLOG - allow admin to specify filename to use as sample data
+        String filename = "SampleData1.json";
+        String PATH = "src/main/java/edu/lehigh/cse216/knights/admin/resourcces/";
+        // String PATH = "resources/";
+        String jsonString = "";
+        try {
+            jsonString = new String(Files.readAllBytes(Paths.get(PATH + filename)));
+        } catch (IOException e){
+            System.out.println("Error reading file: " + e.getMessage());
+        }
+        System.out.println("JSON STRING="+jsonString);
+        // Read the sample data from the file
+        SampleDataContainer container = gson.fromJson(jsonString, SampleDataContainer.class);
+
+        ArrayList<Entity.User> users = container.sampleUsers;
+        ArrayList<Entity.Idea> ideas = container.sampleIdeas;
+        ArrayList<Entity.Comment> comments = container.sampleComments;
+        ArrayList<Entity.Like> likes = container.sampleLikes;
+        
+        // The order of inserts is important since e.g. 'ideas' has a foriegn key referencing 'users'.
+        for(Entity.User user : users){
+            db.insertUser(user);
+        }
+        for(Entity.Idea idea : ideas){
+            db.insertIdea(idea);
+        }
+        // db.insertComments(comments);
+        // db.insertLikes(likes);
     }
 
     private static final String DEFAULT_PORT_DB = "5432";
