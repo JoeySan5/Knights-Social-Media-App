@@ -29,7 +29,6 @@
         }
     ],
     "sampleIdeas" : [
-        [
         {
             "ideaId": 1,
             "userId": "11223344556677889900aabbccddeeff",
@@ -65,7 +64,6 @@
             "likeCount": 0,
             "valid": true
         }
-        ]
     ],
     "sampleComments" : [
         {

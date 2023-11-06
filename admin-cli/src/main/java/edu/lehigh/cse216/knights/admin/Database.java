@@ -268,7 +268,9 @@ public class Database {
             // this.mInsertOneIdea = this.mConnection
             //         .prepareStatement("INSERT INTO ideas (ideaId, userId, content, likeCount, valid) VALUES (?, ?, ?, ?, ?)");
     /**
-     * 
+     * Add a user to the users table
+     * @param user the user to add, with all desired fields initialized
+     * @return the number of rows added. Will be 0 if a SQLException is encountered.
      */
     int insertUser(Entity.User user){
         int count = 0;
@@ -280,22 +282,27 @@ public class Database {
             mInsertOneUser.setString(5, user.SO);
             mInsertOneUser.setString(6, user.note);
             mInsertOneUser.setBoolean(7, user.valid);
-            count += mInsertOne.executeUpdate();
+            count += mInsertOneUser.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return count;
     }
 
+    /**
+     * Add an idea to the ideas table
+     * @param idea the idea to add, with all desired fields initialized
+     * @return the number of rows added. Will be 0 if a SQLException is encountered.
+     */
     int insertIdea(Entity.Idea idea){
         int count = 0;
         try {
             mInsertOneIdea.setInt(1, idea.ideaId);
-             mInsertOneIdea.setString(2, idea.userId);
+            mInsertOneIdea.setString(2, idea.userId);
             mInsertOneIdea.setString(3, idea.content);
             mInsertOneIdea.setInt(4, idea.likeCount);
             mInsertOneIdea.setBoolean(5, idea.valid);
-            count += mInsertOne.executeUpdate();
+            count += mInsertOneIdea.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

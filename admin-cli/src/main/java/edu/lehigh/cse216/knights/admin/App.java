@@ -266,9 +266,8 @@ public class App {
     }
 
     /**
-     * Note: addSampleData() was written in part through code generated using
-     * ChatGPT-3.5. 
-     * See prompt below https://chat.openai.com/share/09994c77-755e-4bbe-9c49-ecc2252eb986
+     * Note: addSampleData() was written in part through code generated using ChatGPT-3.5. 
+     * See prompts and responses https://chat.openai.com/share/09994c77-755e-4bbe-9c49-ecc2252eb986
      */
     /**
      * Read sample data from a JSON file and insert data to the database.
@@ -276,12 +275,12 @@ public class App {
     public static void addSampleData(){
         // BACKLOG - allow admin to specify filename to use as sample data
         String filename = "SampleData1.json";
-        String PATH = "src/main/java/edu/lehigh/cse216/knights/admin/resourcces/";
-        // String PATH = "resources/";
+        // Data files must be in the resources folder
+        final String path = "src/main/java/edu/lehigh/cse216/knights/admin/resources/";
         String jsonString = "";
         try {
-            jsonString = new String(Files.readAllBytes(Paths.get(PATH + filename)));
-        } catch (IOException e){
+            jsonString = new String(Files.readAllBytes(Paths.get(path + filename)));
+        } catch (IOException e) {
             System.out.println("Error reading file: " + e.getMessage());
         }
         System.out.println("JSON STRING="+jsonString);
