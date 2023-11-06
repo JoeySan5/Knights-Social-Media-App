@@ -120,4 +120,8 @@ tr td:last-of-type {
   border-bottom-right-radius: 5px;
 }
 
+.g-signin2{
+    margin: auto;
+    text-align: center;
 
+}

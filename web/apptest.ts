@@ -11,7 +11,7 @@ it("UI Test: Listing hides add feature", function(){
     // expect that the add form is not hidden
     expect( (<HTMLElement>document.getElementById("addElement")).style.display ).toEqual("none");
     // expect that the element listing is hidden
-    expect( (<HTMLElement>document.getElementById("showElements")).style.display ).toEqual("block");
+    expect( (<HTMLElement>document.getElementById("ideaList")).style.display ).toEqual("block");
 
 });
 
@@ -22,7 +22,7 @@ it("UI Test: Add Button Hides Listing", function(){
     // expect that the add form is not hidden
     expect( (<HTMLElement>document.getElementById("addElement")).style.display ).toEqual("block");
     // expect that the element listing is hidden
-    expect( (<HTMLElement>document.getElementById("showElements")).style.display ).toEqual("none");
+    expect( (<HTMLElement>document.getElementById("ideaList")).style.display ).toEqual("none");
     // reset the UI, so we don't mess up the next test
 });
 
