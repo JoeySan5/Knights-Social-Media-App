@@ -134,7 +134,7 @@ public class Database {
                                                                                                        // implemented in
                                                                                                        // Phase 1?
             this.mInsertOneIdea = this.mConnection
-                    .prepareStatement("INSERT INTO ideas (content, userid, likeCount) VALUES (?, ?, 0)");
+                    .prepareStatement("INSERT INTO ideas (content, userid, likeCount, valid) VALUES (?, ?, 0, true)");
 
             this.mSelectAllIdeas = this.mConnection
                     .prepareStatement("SELECT ideaid, content, likeCount, userid FROM ideas " +
