@@ -40,7 +40,7 @@ public class App {
         System.out.println("  [T] Create table(s)");
         System.out.println("  [D] Drop table(s)");
         System.out.println("  [S] Add sample data");
-        System.out.println("  [*] Query for all rows");
+        System.out.println("  [*] Query for data");
         // System.out.println("  [-] Delete a row"); // BACKLOG - not required for phase 2 (replaced by (in)validation)
         System.out.println("  [V] Invalidate an entity");
         System.out.println("  [q] Quit Program");
@@ -146,43 +146,9 @@ public class App {
             } else if (action == 'D') {
                 dropTable(in);
             }  
-            // else if (action == '1') {
-            //     int id = getInt(in, "Enter the row ID");
-            //     if (id == -1)
-            //         continue;
-            //     Database.RowData res = db.selectOne(id);
-            //     if (res != null) {
-            //         System.out.println("  [" + res.mId + "] " + res.mContent);
-            //         System.out.println("  --> " + res.mLikeCount);
-            //     }
-            // }
             else if (action == '*') {
-                // ArrayList<Database.RowData> res = db.selectAll();
-                // if (res == null)
-                //     continue;
-                // System.out.println("  Current Database Contents");
-                // System.out.println("  -------------------------");
-                // for (Database.RowData rd : res) {
-                //     System.out.println("  [" + rd.mId + "] " + rd.mContent);
-                // }
-            } 
-            // else if (action == '-') {
-            //     int id = getInt(in, "Enter the row ID");
-            //     if (id == -1)
-            //         continue;
-            //     int res = db.deleteRow(id);
-            //     if (res == -1)
-            //         continue;
-            //     System.out.println("  " + res + " rows deleted");
-            // } 
-            // else if (action == '+') {
-            //     String content = getString(in, "Enter the content");
-            //     // String message = getString(in, "Enter the message");
-            //     // if (subject.equals("") || message.equals(""))
-            //     //     continue;
-            //     int res = db.insertRow(content);
-            //     System.out.println(res + " rows added");
-            // } 
+                getData(in);
+            }
             else if (action == 'S') {
                 // Add a set of sample data to the database
                 addSampleData();
@@ -190,19 +156,9 @@ public class App {
                 // update the validation for user or idea
                 
             }
-            // } else if (action == '~') {
-            //     int id = getInt(in, "Enter the row ID :> ");
-            //     if (id == -1)
-            //         continue;
-            //     String newMessage = getString(in, "Enter the new message");
-            //     int res = db.updateOne(id, newMessage);
-            //     if (res == -1)
-            //         continue;
-            //     System.out.println("  " + res + " rows updated");
-            // }
         }
-        // Always remember to disconnect from the database when the program 
-        // exits
+        // Always disconnect from the database when the program exits.
+        // Our free ElephantSQL database has a low # of max connections.
         db.disconnect();
     }
 
@@ -303,6 +259,58 @@ public class App {
         for(Entity.Like like : likes){
             db.insertLike(like);
         }
+    }
+
+    /**
+     * Get some data from the database according to Admin inputs
+     * @param in
+     */
+    private static void getData(BufferedReader in) {
+        System.out.println("Get data from which table?");
+        System.out.println("  [U] 'users'");
+        System.out.println("  [I] 'ideas'");
+        System.out.println("  [C] 'comments'");
+        System.out.println("  [L] 'likes'");
+        System.out.println("  [*] 'View an idea with details");
+        char action = prompt(in, App.TABLE_OPTIONS);
+        if(action == 'U'){
+            ArrayList<Entity.User> res = db.selectAllUsers();  
+            if (res == null){
+                System.out.println("Error querying ideas");
+                return;
+            }
+            System.out.println(" User List");
+            System.out.println(" ---------");
+            // Print each User
+            for (Entity.User user : res) {
+                String validity = user.valid? "Valid" : "INVALID";
+                System.out.println(" ["+user.userId+"] " + validity);
+                System.out.println("\t"+user.username+" | email: "+user.email+" | SO: "+user.SO+" | GI: "+user.GI);
+                System.out.println("\tnote: "+user.note);
+            }
+        } else if (action == 'I'){
+            ArrayList<Entity.Idea> res = db.selectAllIdeas();
+            if (res == null){
+                System.out.println("Error querying ideas");
+                return;
+            }
+            System.out.println(" Current Ideas");
+            System.out.println(" -------------");
+            // Print each Idea
+            for (Entity.Idea idea : res) {
+                String validity = idea.valid? "Valid" : "INVALID";
+                System.out.println(" [" + idea.ideaId + "] " + idea.likeCount + " likes | " + validity);
+                System.out.println("\t'"+idea.content+"'");
+            }
+        } else if (action == 'C'){
+            System.out.println("Comment viewing is a phase 2 backlog item");
+        } else if (action == 'L'){
+            System.out.println("Like viewing is a phase 2 backlog item");
+        } else if (action == '*'){
+            System.out.println("Detailed Idea view is a backlog item");
+        }
+        
+           
     }
 
     private static final String DEFAULT_PORT_DB = "5432";

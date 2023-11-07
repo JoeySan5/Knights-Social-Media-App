@@ -17,10 +17,11 @@ public class Database {
      */
     private Connection mConnection;
 
-    /**
-     * A prepared statement for getting all data in the database
-     */
-    private PreparedStatement mSelectAll;
+    /** A prepared statement for getting all ideas in the database */
+    private PreparedStatement mSelectAllUsers;
+
+    /** A prepared statement for getting all ideas in the database */
+    private PreparedStatement mSelectAllIdeas;
 
     /**
      * A prepared statement for getting one row from the database
@@ -112,17 +113,19 @@ public class Database {
             
             // Statements for adding new data
             this.mInsertOneLike = this.mConnection.prepareStatement(
-                    "INSERT INTO likes (ideaId, userId, value) VALUES (?, ?, ?)");
-        
+                "INSERT INTO likes (ideaId, userId, value) VALUES (?, ?, ?)");
             this.mInsertOneComment = this.mConnection.prepareStatement(
-                    "INSERT INTO comments (commentId, ideaId, userId, content) VALUES (?, ?, ?, ?)");
-                    
+                "INSERT INTO comments (commentId, ideaId, userId, content) VALUES (?, ?, ?, ?)");
             this.mInsertOneUser = this.mConnection.prepareStatement(
-                    "INSERT INTO users (userId, username, email, GI, SO, note, valid) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?)");      
+                "INSERT INTO users (userId, username, email, GI, SO, note, valid) VALUES (?, ?, ?, ?, ?, ?, ?)");      
+            this.mInsertOneIdea = this.mConnection.prepareStatement(
+                "INSERT INTO ideas (ideaId, userId, content, likeCount, valid) VALUES (?, ?, ?, ?, ?)");
 
-            this.mInsertOneIdea = this.mConnection
-                    .prepareStatement("INSERT INTO ideas (ideaId, userId, content, likeCount, valid) VALUES (?, ?, ?, ?, ?)");
+            // Statements for getting values from tables
+            this.mSelectAllUsers = this.mConnection.prepareStatement(
+                "SELECT * FROM users ORDER BY userID DESC");
+            this.mSelectAllIdeas = this.mConnection.prepareStatement(  
+                "SELECT * FROM ideas ORDER BY ideaID DESC");
 
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
@@ -220,12 +223,7 @@ public class Database {
         mConnection = null;
         return true;
     }
-        // // Statements for adding new data
-        // this.mInsertOneLike = this.mConnection.prepareStatement(
-        //         "INSERT INTO likes (ideaId, userId, value) VALUES (?, ?, ?)");
-    
-        // this.mInsertOneComment = this.mConnection.prepareStatement(
-        //         "INSERT INTO comments (commentId, content, userId, ideaId) VALUES (?, ?, ?, ?)");
+       
     /**
      * Add a user to the users table
      * @param user the user to add, with all desired fields initialized
@@ -305,25 +303,52 @@ public class Database {
         return count;
     }
 
-    // /**
-    //  * Query the database for a list of all contents and their IDs
-    //  * 
-    //  * @return All rows, as an ArrayList
-    //  */
-    // ArrayList<Entity.User> selectAll() {
-    //     ArrayList<Entity.User> res = new ArrayList<Entity.User>();
-    //     try {
-    //         ResultSet rs = mSelectAll.executeQuery();
-    //         while (rs.next()) {
-    //             res.add(new RowData(rs.getInt("id"), rs.getString("content"), rs.getInt("likeCount")));
-    //         }
-    //         rs.close();
-    //         return res;
-    //     } catch (SQLException e) {
-    //         e.printStackTrace();
-    //         return null;
-    //     }
-    // }
+    /**
+     * Query the database for a list of users
+     * 
+     * @return All users, as an ArrayList
+     */
+    ArrayList<Entity.User> selectAllUsers() {
+        ArrayList<Entity.User> res = new ArrayList<Entity.User>();
+        try {
+            ResultSet rs = mSelectAllUsers.executeQuery();
+            while (rs.next()) {
+                res.add(new Entity.User(
+                    rs.getString("userID"), rs.getString("username"),
+                    rs.getString("email"), rs.getString("GI"),
+                    rs.getString("SO"), rs.getString("note"),
+                    rs.getBoolean("valid")));
+            }
+            rs.close();
+            return res;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Query the database for a list of all ideas
+     * 
+     * @return All Ideas, as an ArrayList
+     */
+    ArrayList<Entity.Idea> selectAllIdeas() {
+        ArrayList<Entity.Idea> res = new ArrayList<Entity.Idea>();
+        try {
+            ResultSet rs = mSelectAllIdeas.executeQuery();
+            while (rs.next()) {
+                res.add(new Entity.Idea(
+                    rs.getInt("id"), rs.getString("userID"),
+                    rs.getString("content"), rs.getInt("likeCount"),
+                    rs.getBoolean("valid")));
+            }
+            rs.close();
+            return res;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     // /**
     //  * Get all data for a specific row, by ID
@@ -358,26 +383,6 @@ public class Database {
     //     try {
     //         mDeleteOne.setInt(1, id);
     //         res = mDeleteOne.executeUpdate();
-    //     } catch (SQLException e) {
-    //         e.printStackTrace();
-    //     }
-    //     return res;
-    // }
-
-    // /**
-    //  * Update the message for a row in the database
-    //  * 
-    //  * @param id The id of the row to update
-    //  * @param message The new message contents
-    //  * 
-    //  * @return The number of rows that were updated.  -1 indicates an error.
-    //  */
-    // int updateOne(int id, String message) {
-    //     int res = -1;
-    //     try {
-    //         mUpdateOne.setString(1, message);
-    //         mUpdateOne.setInt(2, id);
-    //         res = mUpdateOne.executeUpdate();
     //     } catch (SQLException e) {
     //         e.printStackTrace();
     //     }

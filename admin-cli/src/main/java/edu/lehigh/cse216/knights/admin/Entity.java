@@ -7,12 +7,12 @@ package edu.lehigh.cse216.knights.admin;
  * ---
  * See backend docs for more information about the entities.
  */
-public abstract class Entity {
+public class Entity {
 
     /**
      * User to be created from JSON data
      */
-    public class User extends Entity {
+    public static class User {
         
         /** Unique 32-character string representing the user */
         public String userId;
@@ -49,7 +49,7 @@ public abstract class Entity {
     /**
      * Idea to be created from JSON data
      */
-    public class Idea extends Entity {
+    public static class Idea {
 
         /** The unique identifier associated with this element.*/
         public int ideaId;
@@ -78,7 +78,7 @@ public abstract class Entity {
     /**
      * Like to be created from JSON data
      */
-    public class Like extends Entity {
+    public static class Like {
 
         /** The content for this idea entry */
         public String userId;
@@ -99,7 +99,7 @@ public abstract class Entity {
     /**
      * Comment to be created from JSON data
      */
-    public class Comment extends Entity {
+    public static class Comment {
 
         public int commentId;
 
