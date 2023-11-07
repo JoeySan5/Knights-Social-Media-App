@@ -56,6 +56,8 @@ public class App
         Hashtable<String, String> sessionKeyTable = new Hashtable<>();
         sessionKeyTable.put("lGaJjDO8kdNq", "112569610817039937158");
         sessionKeyTable.put("k0kyOGwPlod5", "107106171889739877350");
+        sessionKeyTable.put("YMtxeMIRXi5o", "101136375578726959533");
+        
         // Set the port on which to listen for requests from the environment
         Spark.port(getIntFromEnv("PORT", DEFAULT_PORT_SPARK));
 
@@ -326,7 +328,7 @@ public class App
             String key = request.queryParams("sessionKey");
 
             if(!sessionKeyTable.containsKey(key)){
-                return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+                return gson.toJson(new StructuredResponsehash("error", "Invalid session key", null));
             }
             String userId = sessionKeyTable.get(key);
             boolean restrictInfo = !(userId.equals(requestedUserId));
