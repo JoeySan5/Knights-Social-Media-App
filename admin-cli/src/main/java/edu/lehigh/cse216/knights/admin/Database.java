@@ -82,40 +82,6 @@ public class Database {
     private PreparedStatement mSetIdeaValidation;
 
     /**
-     * RowData is like a struct in C: we use it to hold data, and we allow 
-     * direct access to its fields.  In the context of this Database, RowData 
-     * represents the data we'd see in a row.
-     * 
-     * We make RowData a static class of Database because we don't really want
-     * to encourage users to think of RowData as being anything other than an
-     * abstract representation of a row of the database.  RowData and the 
-     * Database are tightly coupled: if one changes, the other should too.
-     */
-    public static class RowData {
-        /**
-         * The ID of this row of the database
-         */
-        int mId;
-        /**
-         * The content stored in this row
-         */
-        String mContent;
-        /**
-         * The likeCount stored in this row
-         */
-        int mLikeCount;
-
-        /**
-         * Construct a RowData object by providing values for its fields
-         */
-        public RowData(int id, String content, int likeCount) {
-            mId = id;
-            mContent = content;
-            mLikeCount = likeCount;
-        }
-    }
-
-    /**
      * The Database constructor is private: we only create Database objects 
      * through the getDatabase() method.
      */
@@ -149,7 +115,7 @@ public class Database {
                     "INSERT INTO likes (ideaId, userId, value) VALUES (?, ?, ?)");
         
             this.mInsertOneComment = this.mConnection.prepareStatement(
-                    "INSERT INTO comments (commentId, content, userId, ideaId) VALUES (?, ?, ?, ?)");
+                    "INSERT INTO comments (commentId, ideaId, userId, content) VALUES (?, ?, ?, ?)");
                     
             this.mInsertOneUser = this.mConnection.prepareStatement(
                     "INSERT INTO users (userId, username, email, GI, SO, note, valid) " +
@@ -254,19 +220,12 @@ public class Database {
         mConnection = null;
         return true;
     }
-            // // Statements for adding new data
-            // this.mInsertOneLike = this.mConnection.prepareStatement(
-            //         "INSERT INTO likes (ideaId, userId, value) VALUES (?, ?, ?)");
-        
-            // this.mInsertOneComment = this.mConnection.prepareStatement(
-            //         "INSERT INTO comments (commentId, content, userId, ideaId) VALUES (?, ?, ?, ?)");
-                    
-            // this.mInsertOneUser = this.mConnection.prepareStatement(
-            //         "INSERT INTO users (userId, username, email, GI, SO, note, valid) " +
-            //                 "VALUES (?, ?, ?, ?, ?, ?, ?)");      
-
-            // this.mInsertOneIdea = this.mConnection
-            //         .prepareStatement("INSERT INTO ideas (ideaId, userId, content, likeCount, valid) VALUES (?, ?, ?, ?, ?)");
+        // // Statements for adding new data
+        // this.mInsertOneLike = this.mConnection.prepareStatement(
+        //         "INSERT INTO likes (ideaId, userId, value) VALUES (?, ?, ?)");
+    
+        // this.mInsertOneComment = this.mConnection.prepareStatement(
+        //         "INSERT INTO comments (commentId, content, userId, ideaId) VALUES (?, ?, ?, ?)");
     /**
      * Add a user to the users table
      * @param user the user to add, with all desired fields initialized
@@ -310,19 +269,18 @@ public class Database {
     }
 
     /**
-     * Insert a row into the database
-     * 
-     * @param content The content for this new row
-     * @param message The message body for this new row
-     * 
-     * @return The number of rows that were inserted
+     * Add a comment to the comments table
+     * @param comment the comment to add, with all desired fields initialized
+     * @return the number of comments added. Will be 0 if a SQLException is encountered.
      */
-    int insertRow(String content) {
+    int insertComment(Entity.Comment comment){
         int count = 0;
         try {
-            mInsertOne.setString(1, content);
-            mInsertOne.setInt(2, 0); // set likeCount to 0 by default
-            count += mInsertOne.executeUpdate();
+            mInsertOneComment.setInt(1, comment.commentId);
+            mInsertOneComment.setInt(2, comment.ideaId);
+            mInsertOneComment.setString(3, comment.userId);
+            mInsertOneComment.setString(4, comment.content);
+            count += mInsertOneComment.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -330,72 +288,90 @@ public class Database {
     }
 
     /**
-     * Query the database for a list of all contents and their IDs
-     * 
-     * @return All rows, as an ArrayList
+     * Add a like to the likes table
+     * @param like the like to add, with all desired fields initialized
+     * @return the number of likes added. Will be 0 if a SQLException is encountered.
      */
-    ArrayList<RowData> selectAll() {
-        ArrayList<RowData> res = new ArrayList<RowData>();
+    int insertLike(Entity.Like like){
+        int count = 0;
         try {
-            ResultSet rs = mSelectAll.executeQuery();
-            while (rs.next()) {
-                res.add(new RowData(rs.getInt("id"), rs.getString("content"), rs.getInt("likeCount")));
-            }
-            rs.close();
-            return res;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * Get all data for a specific row, by ID
-     * 
-     * @param id The id of the row being requested
-     * 
-     * @return The data for the requested row, or null if the ID was invalid
-     */
-    RowData selectOne(int id) {
-        RowData res = null;
-        try {
-            mSelectOne.setInt(1, id);
-            ResultSet rs = mSelectOne.executeQuery();
-            if (rs.next()) {
-                res = new RowData(rs.getInt("id"), rs.getString("content"), rs.getInt("likeCount"));
-            }
+            mInsertOneLike.setInt(1, like.ideaId);
+            mInsertOneLike.setString(2, like.userId);
+            mInsertOneLike.setInt(3, like.value);
+            count += mInsertOneLike.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return res;
+        return count;
     }
 
-    /**
-     * Delete a row by ID
-     * 
-     * @param id The id of the row to delete
-     * 
-     * @return The number of rows that were deleted.  -1 indicates an error.
-     */
-    int deleteRow(int id) {
-        int res = -1;
-        try {
-            mDeleteOne.setInt(1, id);
-            res = mDeleteOne.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    }
+    // /**
+    //  * Query the database for a list of all contents and their IDs
+    //  * 
+    //  * @return All rows, as an ArrayList
+    //  */
+    // ArrayList<Entity.User> selectAll() {
+    //     ArrayList<Entity.User> res = new ArrayList<Entity.User>();
+    //     try {
+    //         ResultSet rs = mSelectAll.executeQuery();
+    //         while (rs.next()) {
+    //             res.add(new RowData(rs.getInt("id"), rs.getString("content"), rs.getInt("likeCount")));
+    //         }
+    //         rs.close();
+    //         return res;
+    //     } catch (SQLException e) {
+    //         e.printStackTrace();
+    //         return null;
+    //     }
+    // }
 
-    /**
-     * Update the message for a row in the database
-     * 
-     * @param id The id of the row to update
-     * @param message The new message contents
-     * 
-     * @return The number of rows that were updated.  -1 indicates an error.
-     */
+    // /**
+    //  * Get all data for a specific row, by ID
+    //  * 
+    //  * @param id The id of the row being requested
+    //  * 
+    //  * @return The data for the requested row, or null if the ID was invalid
+    //  */
+    // RowData selectOne(int id) {
+    //     RowData res = null;
+    //     try {
+    //         mSelectOne.setInt(1, id);
+    //         ResultSet rs = mSelectOne.executeQuery();
+    //         if (rs.next()) {
+    //             res = new RowData(rs.getInt("id"), rs.getString("content"), rs.getInt("likeCount"));
+    //         }
+    //     } catch (SQLException e) {
+    //         e.printStackTrace();
+    //     }
+    //     return res;
+    // }
+
+    // /**
+    //  * Delete a row by ID
+    //  * 
+    //  * @param id The id of the row to delete
+    //  * 
+    //  * @return The number of rows that were deleted.  -1 indicates an error.
+    //  */
+    // int deleteRow(int id) {
+    //     int res = -1;
+    //     try {
+    //         mDeleteOne.setInt(1, id);
+    //         res = mDeleteOne.executeUpdate();
+    //     } catch (SQLException e) {
+    //         e.printStackTrace();
+    //     }
+    //     return res;
+    // }
+
+    // /**
+    //  * Update the message for a row in the database
+    //  * 
+    //  * @param id The id of the row to update
+    //  * @param message The new message contents
+    //  * 
+    //  * @return The number of rows that were updated.  -1 indicates an error.
+    //  */
     // int updateOne(int id, String message) {
     //     int res = -1;
     //     try {

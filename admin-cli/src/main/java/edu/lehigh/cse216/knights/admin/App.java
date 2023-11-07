@@ -157,14 +157,14 @@ public class App {
             //     }
             // }
             else if (action == '*') {
-                ArrayList<Database.RowData> res = db.selectAll();
-                if (res == null)
-                    continue;
-                System.out.println("  Current Database Contents");
-                System.out.println("  -------------------------");
-                for (Database.RowData rd : res) {
-                    System.out.println("  [" + rd.mId + "] " + rd.mContent);
-                }
+                // ArrayList<Database.RowData> res = db.selectAll();
+                // if (res == null)
+                //     continue;
+                // System.out.println("  Current Database Contents");
+                // System.out.println("  -------------------------");
+                // for (Database.RowData rd : res) {
+                //     System.out.println("  [" + rd.mId + "] " + rd.mContent);
+                // }
             } 
             // else if (action == '-') {
             //     int id = getInt(in, "Enter the row ID");
@@ -188,9 +188,8 @@ public class App {
                 addSampleData();
             } else if (action == 'V') {
                 // update the validation for user or idea
-
+                
             }
-
             // } else if (action == '~') {
             //     int id = getInt(in, "Enter the row ID :> ");
             //     if (id == -1)
@@ -283,10 +282,9 @@ public class App {
         } catch (IOException e) {
             System.out.println("Error reading file: " + e.getMessage());
         }
-        System.out.println("JSON STRING="+jsonString);
+
         // Read the sample data from the file
         SampleDataContainer container = gson.fromJson(jsonString, SampleDataContainer.class);
-
         ArrayList<Entity.User> users = container.sampleUsers;
         ArrayList<Entity.Idea> ideas = container.sampleIdeas;
         ArrayList<Entity.Comment> comments = container.sampleComments;
@@ -299,8 +297,12 @@ public class App {
         for(Entity.Idea idea : ideas){
             db.insertIdea(idea);
         }
-        // db.insertComments(comments);
-        // db.insertLikes(likes);
+        for(Entity.Comment comment : comments){
+            db.insertComment(comment);
+        }
+        for(Entity.Like like : likes){
+            db.insertLike(like);
+        }
     }
 
     private static final String DEFAULT_PORT_DB = "5432";
