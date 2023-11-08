@@ -15,6 +15,9 @@
 ## State Machine Drawing
 <https://lucid.app/lucidchart/1c343190-142a-4d53-8d64-69e251bbd56e/edit?viewport_l[…]C939%2C0_0&invitationId=inv_be08c6b2-8970-4fc0-aa6a-5e9e59796b3a>
 
+## New State Machine Diagram from the perspective of an idea object
+<https://lucid.app/lucidchart/abae6009-78a1-4c01-8104-5939383b6d4c/edit?beaconFlowId=AC021EE1F598D058&invitationId=inv_b0f9073d-d7dc-4fe0-94ae-a8004a329a73&page=0_0# >
+
 ## Entity Relationship Diagram (ERD)
 <https://lucid.app/lucidchart/addcf07b-8497-4cb1-950f-08842db2ab65/edit?invitationId=inv_5b2cb536-dce8-4f5d-a494-4f92b83ff0bc>
 
