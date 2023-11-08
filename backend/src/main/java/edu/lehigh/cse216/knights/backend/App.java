@@ -5,8 +5,11 @@ package edu.lehigh.cse216.knights.backend;
 import spark.Spark;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
+
 import static spark.Spark.*;
 
 // Import Google's JSON library
@@ -17,6 +20,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.Json;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 
@@ -224,9 +228,14 @@ public class App {
 
             // (Receive idTokenString by HTTPS POST)
             // System.out.println("heres req" + request.headers());
-            String idTokenString = request.queryParams("credential");
+            System.out.println(request);
+            System.out.println(request.body());
+            Request.LoginRequest req = gson.fromJson(request.body(), Request.LoginRequest.class);
 
-            GoogleIdToken idToken = verifier.verify(idTokenString);
+            // String idTokenString = request.params();
+            Set<String> paramSet = request.queryParams();
+            System.out.println("number of params found=" + paramSet.size());
+            GoogleIdToken idToken = verifier.verify(req.credential);
 
             String userId = null;
             if (idToken != null) {

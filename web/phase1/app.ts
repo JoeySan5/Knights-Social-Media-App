@@ -31,6 +31,40 @@ var likeClicked = false;
 // global for the backend url
 const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
 
+// This function is called when sign in is tapped, CredentialResponse is passed in parameters
+function handleCredentialResponse(response) {
+    // Log the JWT ID token to the console
+    console.log("Encoded JWT ID token: " + response.credential);
+    // Send the ID token to your backend for verification
+    // Here we use the Fetch API to post to our backend
+    fetch("http://localhost:8998/login", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Access-Control-Allow-Origin': 'http://localhost:8998/login'
+      },
+      body: JSON.stringify({credential: response.credential
+                            })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      //data is available once response has been parsed into JSON
+      // Check if the backend response is successful, then redirect to main page
+      if (data.mStatus === "ok") {
+        console.log(data.mMessage);
+        window.location.href = "http://localhost:8080/login"; // Redirect to the main page
+      } else {
+        // Handle login failure
+        console.error("Login failed: " + data.message);
+      }
+    })
+    .catch(error => {
+      // Handle errors during the login process
+      console.error('Error during login:', error);
+    });
+  }
+
 /**
  * NewEntryForm encapsulates all of the code for the form for adding an entry
  */
