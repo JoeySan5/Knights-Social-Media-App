@@ -25,7 +25,7 @@
 
 
 ### Tagged Release
-1. Phase1 (sprint 6):
+1. mobile_v1 (sprint 6):
     * The mobile app features two main pages, the Home Page and Idea Submission Page. The Home Page consists of a title, a small description, a list view of Idea formats, and a 'say your piece' button. Idea formats are ideas that are collected from the database and formatted so that it contains the content, like count, and two buttons to either like or dislike. The 'say your piece' buttons, if tapped, brings you to the Idea Submission Page. This page consists of a text field, a 'submit' button, and a 'go back home' button. Users can write their idea into the text field and when ready to submit and share with the world, they click the submit button to post their data onto the database. Lastly, the 'go back home' button naturally sends the user back to the Home Page.
     * The app currently does not allow the user to effectively see their like/dislike be updated on a certain post without having to refresh. 
     The app does not allow the user to refresh without doing hot reload or closing the app.
@@ -79,6 +79,7 @@
 
 ### Admin Build & Run Instructions
 - compile java code through mvn package and then run the POSTGRES command with the environment variables
+    * `DATABASE_URL=postgres://pfdcoetq:VMXXrjrJtMXqzP6JwpjnapwpOVpk6e9o@peanut.db.elephantsql.com/pfdcoetq mvn exec:java`
 - test out different CRUD operations like create table, drop table, add row, delete row
 - verify your expected output on elephant sql 
 
