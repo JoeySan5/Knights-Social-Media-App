@@ -55,7 +55,7 @@ public class App {
          * String = userId
          */
         Hashtable<String, String> sessionKeyTable = new Hashtable<>();
-        // sessionKeyTable.put("lGaJjDO8kdNq", "112569610817039937158"); // Tommy
+        sessionKeyTable.put("lGaJjDO8kdNq", "112569610817039937158"); // Tommy
         // sessionKeyTable.put("k0kyOGwPlod5", "107106171889739877350"); // Sehyoun
         sessionKeyTable.put("YMtxeMIRXi5o", "115632613034941022740 "); // Eric
         sessionKeyTable.put("FEkVssi4WBk2F", "115632613034941022740"); // Joseph
