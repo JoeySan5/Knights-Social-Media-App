@@ -1,0 +1,16 @@
+<span class="material-symbols-outlined" style="color: greenyellow;" (click)="profileClick()" routerLink="/profile-page">
+    person
+    </span>
+    <!-- <div *ngIf="!onProfile"> -->
+      <h2 id="tagline" >Here's what people have been saying:</h2>
+       <idea-list id="ideaList"></idea-list>
+      <!-- <idea-submission id="addElement"></idea-submission> -->
+    <!-- </div> -->
+      <!-- <router-outlet></router-outlet> -->
+  
+    <div *ngIf="!onProfile">
+      <div id="addButtonFooter">
+        <button id="showAdd" routerLink="/idea-submission">Post an idea</button>
+      </div>
+  
+    </div>

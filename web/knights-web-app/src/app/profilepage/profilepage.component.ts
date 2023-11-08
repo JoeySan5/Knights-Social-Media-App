@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 
 const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
-const sessionKey = "k0kyOGwPlod5";
-const userId= "107106171889739877350";
+const sessionKey = "a5PD5eZXWNg5";  //a5PD5eZXWNg5=115632613034941022740
+const userId= "115632613034941022740";
 @Component({
   selector: 'profile-page',
   templateUrl: './profilepage.component.html',
@@ -22,9 +22,8 @@ export class ProfilepageComponent {
     }).then((response) => {
         // If we get an "ok" idea, clear the form
         if (response.ok) {
-            console.log("recieved response from server for get");
+            console.log("recieved response from server for getUsers");
             return Promise.resolve(response.json());
-
         }
         // Otherwise, handle server errors with a detailed popup idea
         else {
@@ -32,7 +31,22 @@ export class ProfilepageComponent {
         }
         return Promise.reject(response);
     }).then((data) => {
+      //data will be:
         console.log('here is data:', data);
+        const userData = JSON.parse(data);
+
+        // This function written in part by generating code with ChatGPT3.5 See inputs here https://chat.openai.com/share/6fec5c7b-7cab-44f5-984b-1cd98b5e4d52
+        const username = document.getElementById('username') as HTMLInputElement;
+        const email = document.getElementById('email') as HTMLInputElement;
+        const sexuality = document.getElementById('sexuality') as HTMLInputElement;
+        const gender = document.getElementById('gender') as HTMLInputElement;
+        const note = document.getElementById('note') as HTMLInputElement;
+        username.value = userData.username;
+        email.value = userData.email;
+        sexuality.value = userData.SO;
+        gender.value = userData.GI;
+        note.value = userData.note;
+
     }).catch((error) => {
         console.warn('Something went wrong with GET.', error);
         console.log("Unspecified error with refresh()");

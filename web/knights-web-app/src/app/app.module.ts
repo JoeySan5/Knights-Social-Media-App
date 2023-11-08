@@ -8,12 +8,18 @@ import { AppComponent } from './app.component';
 import { IdeaSubmission } from './idea-submission/idea-submission.component';
 import { IdeaListComponent } from './idea-list/idea-list.component';
 import { ProfilepageComponent } from './profilepage/profilepage.component';
+import { LoginPageComponent } from './login-page/login-page.component';
+import { HomePageComponent } from './home-page/home-page.component';
 
 
 const routes: Routes = [
   { path: 'idea-list', component: IdeaListComponent, title: "ideaList" },
   { path: 'idea-submission', component: IdeaSubmission },
   {  path: 'profile-page', component: ProfilepageComponent},
+  {  path: '', component: LoginPageComponent},
+  {  path: 'home-page', component: HomePageComponent},
+
+
   
 ]; // sets up routes constant where you define your routes
 
@@ -23,7 +29,9 @@ const routes: Routes = [
     AppComponent,
     IdeaSubmission,
     IdeaListComponent,
-    ProfilepageComponent
+    ProfilepageComponent,
+    LoginPageComponent,
+    HomePageComponent
   ],
   imports: [
     BrowserModule,
