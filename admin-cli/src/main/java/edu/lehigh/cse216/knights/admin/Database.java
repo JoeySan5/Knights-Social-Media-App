@@ -10,6 +10,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import com.google.gson.*;
 
+/**
+ * Object for communication between the PostegreSQL database and the Admin Command Lini Interface.
+ */
 public class Database {
     /**
      * The connection to the database.  When there is no connection, it should
