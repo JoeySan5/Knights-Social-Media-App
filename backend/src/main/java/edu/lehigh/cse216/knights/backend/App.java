@@ -7,6 +7,8 @@ import spark.Spark;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
+
 import static spark.Spark.*;
 
 // Import Google's JSON library
@@ -206,27 +208,29 @@ public class App
         });
 
 
-        Spark.post("/login", (request, response) -> {
-
-            // tjp: TODO maybe set this as environment variable. Hard-coding the client_id goes against 12-factor app guidelines
+Spark.post("/login", (request, response) -> {
+            // tjp: TODO maybe set this as environment variable. Hard-coding the client_id
+            // goes against 12-factor app guidelines
             String CLIENT_ID = "1019349198762-463i1tt2naq9ipll3f9ade5u7nli7gju.apps.googleusercontent.com";
-
             // Need to verify that types are correct
             // Originally NetHttpTransport was type HttpTransport
             NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-            // Specify the CLIENT_ID of the app that accesses the backend:
-            .setAudience(Collections.singletonList(CLIENT_ID))
-            // Or, if multiple clients access the backend:
-            //.setAudience(Arrays.asList(CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3))
-            .build();
-
+                    // Specify the CLIENT_ID of the app that accesses the backend:
+                    .setAudience(Collections.singletonList(CLIENT_ID))
+                    // Or, if multiple clients access the backend:
+                    // .setAudience(Arrays.asList(CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3))
+                    .build();
             // (Receive idTokenString by HTTPS POST)
-            String idTokenString = request.queryParams("credential"); 
-
-            GoogleIdToken idToken = verifier.verify(idTokenString);
+            // System.out.println("heres req" + request.headers());
+            System.out.println(request);
+            System.out.println(request.body());
+            Request.LoginRequest req = gson.fromJson(request.body(), Request.LoginRequest.class);
+            // String idTokenString = request.params();
+            Set<String> paramSet = request.queryParams();
+            System.out.println("number of params found=" + paramSet.size());
+            GoogleIdToken idToken = verifier.verify(req.credential);
 
             String userId = null;
             if (idToken != null) {
