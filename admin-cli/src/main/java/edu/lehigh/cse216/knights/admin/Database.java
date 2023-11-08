@@ -78,7 +78,7 @@ public class Database {
     /** Sets the likeCount of all Ideas to 0. To be called when dropping the likes table. */
     private PreparedStatement mZeroAllLikes;
 
-    private PreparedStatement mSetUservalidation;
+    private PreparedStatement mSetUserValidation;
 
     private PreparedStatement mSetIdeaValidation;
 
@@ -126,6 +126,12 @@ public class Database {
                 "SELECT * FROM users ORDER BY userID DESC");
             this.mSelectAllIdeas = this.mConnection.prepareStatement(  
                 "SELECT * FROM ideas ORDER BY ideaID DESC");
+
+            // Statements for modifying a single entry in a table
+            this.mSetUserValidation = this.mConnection.prepareStatement(
+                "UPDATE users SET valid = ? WHERE userID = ?");
+            this.mSetIdeaValidation = this.mConnection.prepareStatement(
+                "UPDATE ideas SET valid = ? WHERE ideaID = ?");
 
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
@@ -227,7 +233,7 @@ public class Database {
     /**
      * Add a user to the users table
      * @param user the user to add, with all desired fields initialized
-     * @return the number of rows added. Will be 0 if a SQLException is encountered.
+     * @return the number of rows added. Will be 0 if a SQLException occurs.
      */
     int insertUser(Entity.User user){
         int count = 0;
@@ -249,7 +255,7 @@ public class Database {
     /**
      * Add an idea to the ideas table
      * @param idea the idea to add, with all desired fields initialized
-     * @return the number of rows added. Will be 0 if a SQLException is encountered.
+     * @return the number of rows added. Will be 0 if a SQLException occurs.
      */
     int insertIdea(Entity.Idea idea){
         int count = 0;
@@ -269,7 +275,7 @@ public class Database {
     /**
      * Add a comment to the comments table
      * @param comment the comment to add, with all desired fields initialized
-     * @return the number of comments added. Will be 0 if a SQLException is encountered.
+     * @return the number of comments added. Will be 0 if a SQLException occurs.
      */
     int insertComment(Entity.Comment comment){
         int count = 0;
@@ -288,7 +294,7 @@ public class Database {
     /**
      * Add a like to the likes table
      * @param like the like to add, with all desired fields initialized
-     * @return the number of likes added. Will be 0 if a SQLException is encountered.
+     * @return the number of likes added. Will be 0 if a SQLException occurs.
      */
     int insertLike(Entity.Like like){
         int count = 0;
@@ -338,7 +344,7 @@ public class Database {
             ResultSet rs = mSelectAllIdeas.executeQuery();
             while (rs.next()) {
                 res.add(new Entity.Idea(
-                    rs.getInt("id"), rs.getString("userID"),
+                    rs.getInt("ideaID"), rs.getString("userID"),
                     rs.getString("content"), rs.getInt("likeCount"),
                     rs.getBoolean("valid")));
             }
@@ -348,6 +354,42 @@ public class Database {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * Sets a User to valid or invalid
+     * @param userId the ID of the user to modify
+     * @param validity the new status for this user
+     * @return the number of users affected. Will be 0 if a SQLException occurs.
+     */
+    int setUserValidity(String userId, boolean validity){
+        int res = 0;
+        try {
+            mSetUserValidation.setBoolean(1, validity);
+            mSetUserValidation.setString(2, userId);
+            res = mSetUserValidation.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    /**
+     * Sets an Idea to valid or invalid
+     * @param ideaId the ID of the idea to modify
+     * @param validity the new status for this idea
+     * @return the number of ideas affected. Will be 0 if a SQLException occurs.
+     */
+    int setIdeaValidity(int ideaId, boolean validity){
+        int res = 0;
+        try {
+            mSetIdeaValidation.setBoolean(1, validity);
+            mSetIdeaValidation.setInt(2, ideaId);
+            res = mSetIdeaValidation.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
     }
 
     // /**

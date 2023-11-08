@@ -154,7 +154,7 @@ public class App {
                 addSampleData();
             } else if (action == 'V') {
                 // update the validation for user or idea
-                
+                setValidity(in);
             }
         }
         // Always disconnect from the database when the program exits.
@@ -309,8 +309,52 @@ public class App {
         } else if (action == '*'){
             System.out.println("Detailed Idea view is a backlog item");
         }
-        
-           
+    }
+
+    /**
+     * Mark a User or Idea as Invalid, or set them back to valid.
+     */
+    private static void setValidity(BufferedReader in) {
+        System.out.println("Set validity of a (U)ser or (I)dea?");
+        char action = prompt(in, App.VALID_ENTITIES);
+        String SET_INVALID = "Invalidate";
+        String SET_VALID = "Restore";
+        String entityId = "", validityInput;
+        // updatedValidity is specified in the CLI. Only reason to the value here is for avoiding compiler warning.
+        boolean updatedValidity = true;
+        int entitiesChanged = 0;
+        // Tech debt - make cli cleaner by first specify if the entity exists
+
+        // Getting inputs
+        try {
+            System.out.println("Input ID:");
+            entityId = in.readLine();
+            System.out.println("Type '"+SET_INVALID+"' to set to invalid or '"+SET_VALID+"' to set to valid.");
+            validityInput = in.readLine();
+            if(validityInput.equalsIgnoreCase(SET_INVALID)) {
+                updatedValidity = false;
+            } else if(validityInput.equalsIgnoreCase(SET_VALID)) {
+                updatedValidity = true;
+            } else {
+            System.out.println("Invalid command. Cancelling action without making changes.");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Backlog: clean up logic in this function
+        if(action == 'U'){
+            entitiesChanged = db.setUserValidity(entityId, updatedValidity);
+        } else if(action == 'I') {
+            try {
+              int numericID = Integer.parseInt(entityId);
+              entitiesChanged = db.setIdeaValidity(numericID, updatedValidity);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid ID, not a number.");
+            }
+        }
+        System.out.println("Updated "+entitiesChanged+" entity in database");
+
     }
 
     private static final String DEFAULT_PORT_DB = "5432";
