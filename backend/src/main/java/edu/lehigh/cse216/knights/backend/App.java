@@ -5,7 +5,6 @@ package edu.lehigh.cse216.knights.backend;
 import spark.Spark;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +19,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.json.Json;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 
@@ -56,9 +54,10 @@ public class App {
          */
         Hashtable<String, String> sessionKeyTable = new Hashtable<>();
         // sessionKeyTable.put("lGaJjDO8kdNq", "112569610817039937158"); // Tommy
-        // sessionKeyTable.put("k0kyOGwPlod5", "107106171889739877350"); // Sehyoun
-        sessionKeyTable.put("YMtxeMIRXi5o", "115632613034941022740"); // Joseph
-        sessionKeyTable.put("FEkVssi4WBk2F", "101136375578726959533"); // Eric
+        sessionKeyTable.put("HPfj41XbfAx0", "107106171889739877350"); // Sehyoun
+        sessionKeyTable.put("YMtxeMIRXi5o", "115632613034941022740"); // Eric
+        sessionKeyTable.put("FEkVssi4WBk2F", "101136375578726959533"); // Joseph
+
         // Set the port on which to listen for requests from the environment
         Spark.port(getIntFromEnv("PORT", DEFAULT_PORT_SPARK));
 
