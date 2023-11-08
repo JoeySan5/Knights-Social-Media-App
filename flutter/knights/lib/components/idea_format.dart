@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:like_button/like_button.dart';
 import 'package:knights/net/web_requests.dart';
+import 'package:knights/pages/detailed_post_page.dart';
 
   ///This class is the format to display an idea post.
   ///
@@ -63,6 +64,14 @@ import 'package:knights/net/web_requests.dart';
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+                  // to allow each post to be tappable to see detailed view of post
+                  InkWell(
+                    onTap: (){
+                      MaterialPageRoute(
+                        builder: (context) => DetailedPostPage(widget.mId)
+                      );
+                    }
+                  ),
                   Text(
                   likeCount.toString(),
                   style: const TextStyle(color: Colors.white),
@@ -98,7 +107,6 @@ import 'package:knights/net/web_requests.dart';
                       );
                     },
                   ),
-              
                 ],
               )
             ],
