@@ -8,12 +8,10 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
-
 import static spark.Spark.*;
 
 // Import Google's JSON library
 import com.google.gson.*;
-
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -229,6 +227,7 @@ public class App {
 
             // (Receive idTokenString by HTTPS POST)
             // System.out.println("heres req" + request.headers());
+
             System.out.println(request);
             System.out.println(request.body());
             Request.LoginRequest req = gson.fromJson(request.body(), Request.LoginRequest.class);
