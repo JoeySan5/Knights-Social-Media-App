@@ -166,31 +166,21 @@ public class Database {
             // We have "ideas" as the table name for example - this must be consistent
             // across the Admin and Backend components
 
+            // ******************************************************************************
+
+            // tjp Question: should we use 'id' or 'ID'? Really a choice for admin to make
+            // sej Answer:n PostgreSQL, identifiers (table names, column names, etc.) are case-insensitive by default. 
+            // If you don't enclose identifiers in double quotes (""), PostgreSQL will convert them to lowercase.
+            // We will still use 'ID' for the sake of team convention.
+
+            // ******************************************************************************
+            // These four prepared statements are not actually used in the backend.
             // Note: no "IF NOT EXISTS" or "IF EXISTS" checks on table
             // creation/deletion, so multiple executions will cause an exception
             this.mCreateIdeaTable = this.mConnection.prepareStatement(
-                    "CREATE TABLE ideas (id SERIAL PRIMARY KEY, content VARCHAR(2048) NOT NULL, likeCount INT)");
-            // tjp Question: should we use 'id' or 'ID'? Really a choice for admin to make
+                    "CREATE TABLE ideas (ID SERIAL PRIMARY KEY, content VARCHAR(2048) NOT NULL, likeCount INT)");
+
             this.mDropIdeaTable = this.mConnection.prepareStatement("DROP TABLE ideas");
-
-            // Standard CRUD operations
-            // tjp: these SQL prepared statement are essential for understanding exactly
-            // what the backend is asking the database
-            this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE ideaid = ?"); // Not
-                                                                                                       // implemented in
-                                                                                                       // Phase 1?
-            this.mInsertOneIdea = this.mConnection
-                    .prepareStatement("INSERT INTO ideas (content, userid, likeCount) VALUES (?, ?, 0)");
-
-            this.mSelectAllIdeas = this.mConnection
-                    .prepareStatement("SELECT ideaid, content, likeCount, userid FROM ideas " +
-                                        "WHERE valid IS TRUE " +
-                                        "ORDER BY ideaid DESC");
-
-            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaid=? AND valid IS TRUE");
-
-            this.mUpdateIdeaLikeCount = this.mConnection
-                    .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE ideaid = ?");
 
             this.mCreateUserTable = this.mConnection.prepareStatement(
                     "CREATE TABLE users (" +
@@ -204,6 +194,30 @@ public class Database {
                             ")");
 
             this.mDropUserTable = this.mConnection.prepareStatement("DROP TABLE users");
+
+            this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE ideaid = ?"); // Not
+                                                                                                       // implemented in
+                                                                                                       // Phase 1? - Yes, also in phase 2. 
+            // ******************************************************************************
+
+            // Standard CRUD operations
+            // tjp: these SQL prepared statement are essential for understanding exactly
+            // what the backend is asking the database
+            this.mInsertOneIdea = this.mConnection
+                    .prepareStatement("INSERT INTO ideas (content, userid, likeCount) VALUES (?, ?, 0)");
+
+            // Get all ideas in the database
+            this.mSelectAllIdeas = this.mConnection
+                    .prepareStatement("SELECT ideaid, content, likeCount, userid FROM ideas " +
+                                        "WHERE valid IS TRUE " +
+                                        "ORDER BY ideaid DESC");
+
+            // 
+            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaid=? AND valid IS TRUE");
+
+            this.mUpdateIdeaLikeCount = this.mConnection
+                    .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE ideaid = ?");
+
 
             // Register user's default profile
             this.mInsertNewUser = this.mConnection.prepareStatement(
@@ -243,17 +257,22 @@ public class Database {
                             "JOIN users u ON i.userid = u.userid " +
                             "WHERE i.ideaid = ?");
 
+            // Get the value for checking if a like exists
+            // If it is not existing in the table, return 0
             this.mCheckIfLikeExists = this.mConnection.prepareStatement(
                     "SELECT value " +
                             "FROM likes " +
                             "WHERE userid = ? AND ideaid = ?");
 
+            // Insert a new like into the table
             this.mInsertNewLike = this.mConnection.prepareStatement(
                     "INSERT INTO likes (ideaid, userid, value) VALUES (?, ?, ?)");
             
+            // Delete a like from the table
             this.mDeleteOneLike = this.mConnection.prepareStatement(
                     "DELETE FROM likes WHERE ideaid = ? AND userid = ?");
 
+            // Update a like in the table
             this.mUpdateOneLike = this.mConnection.prepareStatement(
                     "UPDATE likes SET value = ? WHERE ideaid = ? AND userid = ?");
 
