@@ -25,6 +25,32 @@ public class Database {
      */
     private Connection mConnection;
 
+    // ******************************************************************************
+
+    // The functionality to create and drop tables is the responsibility of the admin,
+    // and these prepared statements are not typically used in ordinary cases
+    /**
+     * A prepared statement for creating the table in our database
+     */
+    private PreparedStatement mCreateIdeaTable;
+
+    /**
+     * A prepared statement for dropping the table in our database
+     */
+    private PreparedStatement mDropIdeaTable;
+
+    /**
+     * A prepared statement for creating the user table in our database
+     */
+    private PreparedStatement mCreateUserTable;
+
+    /**
+     * A prepared statement for dropping the user table in our database
+     */
+    private PreparedStatement mDropUserTable;
+
+    // ******************************************************************************
+
     /**
      * A prepared statement for getting all ideas in the database
      */
@@ -37,6 +63,7 @@ public class Database {
 
     /**
      * A prepared statement for deleting an idea from the database
+     * But, this functionality is unlikely to be used in practice. Phase 2 guidelines do not provide instructions for implementing this feature
      */
     private PreparedStatement mDeleteOneIdea;
 
@@ -52,50 +79,69 @@ public class Database {
     private PreparedStatement mUpdateIdeaLikeCount;
 
     /**
-     * A prepared statement for creating the table in our database
+     * A prepared statement for checking if a like exists
+     * This statement is related to the like functionality
      */
-    private PreparedStatement mCreateIdeaTable;
-
-    /**
-     * A prepared statement for dropping the table in our database
-     */
-    private PreparedStatement mDropIdeaTable;
-
-    private PreparedStatement mCreateUserTable;
-
-    private PreparedStatement mDropUserTable;
-
-    // Register user's default profile with specific userid
-    private PreparedStatement mInsertNewUser;
-
-    // Edit user's profile with specific userid
-    private PreparedStatement mUpdateOneUser;
-
-    // Get the PosterName
-    private PreparedStatement mGetPosterName;
-
-    // Get all information of specific user
-    private PreparedStatement mSelectOneUser;
-
-    // Post a comment to an specific idea with specific user
-    private PreparedStatement mInsertOneComment;
-
-    // Edit a comment to an specific idea with specific user
-    private PreparedStatement mUpdateOneComment;
-
-    // Get all comments of specific idea
-    private PreparedStatement mSelectAllComments;
-
-    // Get the commenter username of specific comment
-    private PreparedStatement mGetCommenterName;
-
     private PreparedStatement mCheckIfLikeExists;
 
+    /**
+     * A prepared statement for inserting a new like into the database
+     * This statement is related to the like functionality
+     */
     private PreparedStatement mInsertNewLike;
 
+    /**
+     * A prepared statement for deleting a like from the database
+     * This statement is related to the like functionality
+     */
     private PreparedStatement mDeleteOneLike;
 
+    /**
+     * A prepared statement for updating a like in the database
+     * This statement is related to the like functionality
+     */
     private PreparedStatement mUpdateOneLike;
+
+    /**
+     * A prepared statement for inserting a new user into the database with default profile
+     */
+    private PreparedStatement mInsertNewUser;
+
+    /**
+     * A prepared statement for updating a user's profile in the database
+     */
+    private PreparedStatement mUpdateOneUser;
+
+    /**
+     * A prepared statement for getting the poster name of an idea
+     */
+    private PreparedStatement mGetPosterName;
+
+    /**
+     * A prepared statement for getting information of a specific user
+     * Based on the user's session key request, limited information can be provided, or all information can be provided.
+     */
+    private PreparedStatement mSelectOneUser;
+
+    /**
+     * A prepared statement for inserting a new comment into the database
+     */
+    private PreparedStatement mInsertOneComment;
+
+    /**
+     * A prepared statement for updating a comment in the database
+     */
+    private PreparedStatement mUpdateOneComment;
+
+    /**
+     * A prepared statement for getting all comments of a specific idea
+     */
+    private PreparedStatement mSelectAllComments;
+
+    /**
+     * A prepared statement for getting the commenter username of a specific comment
+     */
+    private PreparedStatement mGetCommenterName;
 
     /**
      * The Database constructor is private: we only create Database objects
