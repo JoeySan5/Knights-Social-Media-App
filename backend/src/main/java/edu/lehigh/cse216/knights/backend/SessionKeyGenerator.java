@@ -16,7 +16,5 @@ public class SessionKeyGenerator {
         }
         return sb.toString();
     }
-
-    public static void main(String[] args) {
-    }
+    
 }

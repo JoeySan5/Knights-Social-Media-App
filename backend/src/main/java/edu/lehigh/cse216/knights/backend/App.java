@@ -5,7 +5,6 @@ package edu.lehigh.cse216.knights.backend;
 import spark.Spark;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +19,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.json.Json;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 
@@ -34,6 +32,18 @@ public class App {
      * @param args The command line arguments, (unused)
      */
     public static void main(String[] args) {
+        /**
+         * Key = sessionKey
+         * String = userId
+         */
+        Hashtable<String, String> sessionKeyTable = new Hashtable<>();
+
+        // Testing hash Table
+        // sessionKeyTable.put("lGaJjDO8kdNq", "112569610817039937158"); // Tommy
+        // sessionKeyTable.put("HPfj41XbfAx0", "107106171889739877350"); // Sehyoun
+        // sessionKeyTable.put("YMtxeMIRXi5o", "115632613034941022740"); // Eric
+        // sessionKeyTable.put("FEkVssi4WBk2F", "101136375578726959533"); // Joseph
+
         staticFiles.location("/public");
 
         // Get a fully-configured connection to the database, or exit immediately
@@ -50,15 +60,6 @@ public class App {
         // https://stackoverflow.com/questions/10380835/is-it-ok-to-use-gson-instance-as-a-static-field-in-a-model-bean-reuse
         final Gson gson = new Gson();
 
-        /**
-         * Key = sessionKey
-         * String = userId
-         */
-        Hashtable<String, String> sessionKeyTable = new Hashtable<>();
-        // sessionKeyTable.put("lGaJjDO8kdNq", "112569610817039937158"); // Tommy
-        sessionKeyTable.put("HPfj41XbfAx0", "107106171889739877350"); // Sehyoun
-        sessionKeyTable.put("YMtxeMIRXi5o", "115632613034941022740"); // Eric
-        sessionKeyTable.put("FEkVssi4WBk2F", "101136375578726959533"); // Joseph
 
         // Set the port on which to listen for requests from the environment
         Spark.port(getIntFromEnv("PORT", DEFAULT_PORT_SPARK));
@@ -120,17 +121,6 @@ public class App {
                 return gson.toJson(new StructuredResponse("ok", null, idea));
             }
         });
-
-        // TODO - we might need to implement this route specifically for newly-created
-        // users to be re-reouted to
-        // already logged in users should be routed to /ideas
-        // /users route should act like /users/:id but with self's own id only.
-        // This is a backlog item and possibly is completely unnecessary.
-        //
-        // Spark.get("/users", (request, response) -> {
-        // //verify session key
-        // // function the same as GET /users/:id
-        // }
 
         // POST route for adding a new idea to the Database. This will read
         // JSON from the body of the request, turn it into a IdeaRequest
@@ -194,6 +184,7 @@ public class App {
         });
 
         // DELETE route for removing an idea from the Database.
+        // This is actually an unused feature. There are no implementation instructions for this feature in phase 2
         Spark.delete("/ideas/:id", (request, response) -> {
             // If we can't get an ID, Spark will send a status 500
             int idx = Integer.parseInt(request.params("id"));
@@ -211,6 +202,8 @@ public class App {
             }
         });
 
+
+        
         Spark.post("/login", (request, response) -> {
 
             // tjp: TODO maybe set this as environment variable. Hard-coding the client_id
