@@ -203,12 +203,15 @@ public class App {
         });
 
 
-        
+
         Spark.post("/login", (request, response) -> {
 
-            // tjp: TODO maybe set this as environment variable. Hard-coding the client_id
-            // goes against 12-factor app guidelines
-            String CLIENT_ID = "1019349198762-463i1tt2naq9ipll3f9ade5u7nli7gju.apps.googleusercontent.com";
+            String CLIENT_ID = System.getenv("CLIENT_ID");
+
+            if (CLIENT_ID == null) {
+                System.out.println("CLIENT_ID is not set, please check your mvn exec command");
+                return gson.toJson(new StructuredResponse("error", "CLIENT_ID is not set, please check your mvn exec command", null));
+            }
 
             // Need to verify that types are correct
             // Originally NetHttpTransport was type HttpTransport
@@ -226,7 +229,7 @@ public class App {
             // System.out.println("heres req" + request.headers());
 
             System.out.println(request);
-            System.out.println(request.body());
+            // System.out.println(request.body());
             Request.LoginRequest req = gson.fromJson(request.body(), Request.LoginRequest.class);
 
             // String idTokenString = request.params();
@@ -263,7 +266,7 @@ public class App {
 
             } else {
                 // Case for authentication failed
-                System.out.println("For testing backend - Invalid ID token.");
+                System.out.println("Invalid ID token. please check the Client_ID or process of getting token");
                 return gson.toJson(new StructuredResponse("error", "authentication failed", null));
             }
             // This case should never occur, but it might if authentication is successful
@@ -287,7 +290,8 @@ public class App {
             // generate a new session key-a random string.
             String sessionKey = SessionKeyGenerator.generateRandomString(12);
             sessionKeyTable.put(sessionKey, userId);
-            // show up the sessionKeyTable
+            // show up the sessionKey and sessionKeyTable
+            System.out.println("session Key is " + sessionKey);
             System.out.println("sessionKeyTable: " + sessionKeyTable);
             return gson.toJson(new StructuredResponse("ok", "authentication success", sessionKey));
         });
