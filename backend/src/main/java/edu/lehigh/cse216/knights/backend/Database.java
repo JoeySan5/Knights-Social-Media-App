@@ -212,12 +212,12 @@ public class Database {
                                         "WHERE valid IS TRUE " +
                                         "ORDER BY ideaid DESC");
 
-            // 
+            // Get one idea information from the database
             this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaid=? AND valid IS TRUE");
 
+            // Update the likeCount of a single idea in the database
             this.mUpdateIdeaLikeCount = this.mConnection
                     .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE ideaid = ?");
-
 
             // Register user's default profile
             this.mInsertNewUser = this.mConnection.prepareStatement(
@@ -258,7 +258,8 @@ public class Database {
                             "WHERE i.ideaid = ?");
 
             // Get the value for checking if a like exists
-            // If it is not existing in the table, return 0
+            // in the likes table. The query will return the 'like' value if it exists.
+            // If no 'like' is found, the result set will be empty.
             this.mCheckIfLikeExists = this.mConnection.prepareStatement(
                     "SELECT value " +
                             "FROM likes " +
@@ -525,6 +526,9 @@ public class Database {
         return res;
     }
 
+
+    // ******************************************************************************
+    // unused in phase 1, 2
     /**
      * Delete an idea by ID
      * 
@@ -542,7 +546,17 @@ public class Database {
         }
         return res;
     }
+    // ******************************************************************************
 
+
+    /**
+     * Get the previous like value of a user for an idea
+     * 
+     * @param userID The id of the user
+     * @param ideaID The id of the idea
+     * 
+     * @return The previous like value of the user for the idea. 0 indicates that the user has netural position about this idea
+     */
     int previousLikeValue(String userID, int ideaID){
         try{
         mCheckIfLikeExists.setString(1, userID);
@@ -551,7 +565,7 @@ public class Database {
         // Return true if the user has (dis)liked the post before
         ResultSet res = mCheckIfLikeExists.executeQuery();
         if(res.next()){
-            return res.getInt("value");
+            return res.getInt("value"); // The value will be 1 or -1.
         } else{
             return 0;
         }
@@ -570,7 +584,7 @@ public class Database {
      * @param likeDelta the requested amount to change likes by; must be 1 or -1 to
      *                  be successful
      * 
-     * @return The amount of posts affected by the given likeCountged. -1 indicates
+     * @return The amount of posts affected by the given likeCountged. 0 indicates
      *         an error.
      */
     int updateIdeaLikeCount(String userID, int ideaId, int likeValue) {
@@ -616,6 +630,13 @@ public class Database {
         return res;
     }
 
+    /**
+     * Insert a new user into the database
+     * 
+     * @param userId The id of the user
+     * 
+     * @return The number of users that were inserted. 0 indicates an error.
+     */
     int insertNewUser(String userId) {
         int count = 0;
         try {
@@ -627,6 +648,13 @@ public class Database {
         return count;
     }
 
+    /**
+     * Update a user's profile in the database
+     * 
+     * @param req The request object containing the user's information
+     * 
+     * @return The number of users that were updated = 1. 0 indicates an error.
+     */
     int updateOneUser(Request.UserRequest req) {
         try {
             mUpdateOneUser.setString(1, req.mUsername);
@@ -641,7 +669,14 @@ public class Database {
             return 0;
         }
     }
-
+    
+    /**
+     * Get the poster name of an idea
+     * 
+     * @param ideaid The id of the idea
+     * 
+     * @return The poster name of the idea. null indicates an error.
+     */
     String getPosterName(int ideaid) {
         String posterName = null;
         try {
@@ -656,7 +691,15 @@ public class Database {
         return posterName;
     }
 
-    // (content, userid, ideaid)
+    /**
+     * Insert a new comment into the database
+     * 
+     * @param content The content of the comment
+     * @param userId The id of the user
+     * @param ideaId The id of the idea
+     * 
+     * @return The number of comments that were inserted. 0 indicates an error.
+     */
     int insertNewComment(String content, String userId, int ideaId) {
         int count = 0;
         try {
@@ -670,6 +713,14 @@ public class Database {
         return count;
     }
 
+    /**
+     * Update a comment in the database
+     * 
+     * @param content The content of the comment
+     * @param commentId The id of the comment
+     * 
+     * @return The number of comments that were updated. 0 indicates an error.
+     */
     int updateOneComment(String content, int commentId) {
         try {
             mUpdateOneComment.setString(1, content);
@@ -681,6 +732,13 @@ public class Database {
         }
     }
 
+    /**
+     * Get the Comment information of a specific comment
+     * 
+     * @param commentId The id of the comment
+     * 
+     * @return The comment information. null indicates an error.
+     */
     ArrayList<Comment> selectAllComments(int ideaId) {
         ArrayList<Comment> res = new ArrayList<Comment>();
         try {
@@ -701,6 +759,9 @@ public class Database {
         }
     }
 
+
+    // ******************************************************************************
+    // unused functions in Backend. in phase 1, 2
     /**
      * Create idea tblData. If it already exists, this will print an error
      */
@@ -747,4 +808,6 @@ public class Database {
             e.printStackTrace();
         }
     }
+    // ******************************************************************************
+
 }
