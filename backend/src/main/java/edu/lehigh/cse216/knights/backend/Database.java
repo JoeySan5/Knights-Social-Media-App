@@ -195,7 +195,7 @@ public class Database {
 
             this.mDropUserTable = this.mConnection.prepareStatement("DROP TABLE users");
 
-            this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE ideaid = ?"); // Not
+            this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE ideaID = ?"); // Not
                                                                                                        // implemented in
                                                                                                        // Phase 1? - Yes, also in phase 2. 
             // ******************************************************************************
@@ -204,58 +204,58 @@ public class Database {
             // tjp: these SQL prepared statement are essential for understanding exactly
             // what the backend is asking the database
             this.mInsertOneIdea = this.mConnection
-                    .prepareStatement("INSERT INTO ideas (content, userid, likeCount) VALUES (?, ?, 0)");
+                    .prepareStatement("INSERT INTO ideas (content, userID, likeCount) VALUES (?, ?, 0)");
 
             // Get all ideas in the database
             this.mSelectAllIdeas = this.mConnection
-                    .prepareStatement("SELECT ideaid, content, likeCount, userid FROM ideas " +
+                    .prepareStatement("SELECT ideaID, content, likeCount, userID FROM ideas " +
                                         "WHERE valid IS TRUE " +
-                                        "ORDER BY ideaid DESC");
+                                        "ORDER BY ideaID DESC");
 
             // Get one idea information from the database
-            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaid=? AND valid IS TRUE");
+            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaID=? AND valid IS TRUE");
 
             // Update the likeCount of a single idea in the database
             this.mUpdateIdeaLikeCount = this.mConnection
-                    .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE ideaid = ?");
+                    .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE ideaID = ?");
 
             // Register user's default profile
             this.mInsertNewUser = this.mConnection.prepareStatement(
-                    "INSERT INTO users (email, valid, username, GI, SO, note, userid) " +
+                    "INSERT INTO users (email, valid, username, GI, SO, note, userID) " +
                             "VALUES ('unknown', true, 'unknown', 'unknown', 'unknown', 'unknown', ?)");
             // Edit user's profile
             this.mUpdateOneUser = this.mConnection.prepareStatement(
-                    "UPDATE users SET username = ?, email = ?, GI = ?, SO = ?, note = ? WHERE userId = ?");
+                    "UPDATE users SET username = ?, email = ?, GI = ?, SO = ?, note = ? WHERE userID = ?");
 
             // Get all information of specific user
             this.mSelectOneUser = this.mConnection.prepareStatement(
-                    "SELECT * from users WHERE userid=?");
+                    "SELECT * from users WHERE userID=?");
 
             // Post a comment to an specific idea with specific user
             this.mInsertOneComment = this.mConnection.prepareStatement(
-                    "INSERT INTO comments (content, userid, ideaid) VALUES (?, ?, ?)");
+                    "INSERT INTO comments (content, userID, ideaID) VALUES (?, ?, ?)");
 
             // Edit a comment to an specific idea with specific user
             this.mUpdateOneComment = this.mConnection.prepareStatement(
-                    "UPDATE comments SET content = ? WHERE commentid = ?");
+                    "UPDATE comments SET content = ? WHERE commentID = ?");
 
             // Get all comments of specific idea
             this.mSelectAllComments = this.mConnection.prepareStatement(
-                    "SELECT * from comments WHERE ideaid=?");
+                    "SELECT * from comments WHERE ideaID=?");
 
             // Get the commenter username of specific comment
             this.mGetCommenterName = this.mConnection.prepareStatement(
                     "SELECT u.username " +
                             "FROM comments c " +
-                            "JOIN users u ON c.userid = u.userid " +
-                            "WHERE c.commentid = ?");
+                            "JOIN users u ON c.userID = u.userID " +
+                            "WHERE c.commentID = ?");
 
             // Get the PosterName
             this.mGetPosterName = this.mConnection.prepareStatement(
                     "SELECT u.username " +
                             "FROM ideas i " +
-                            "JOIN users u ON i.userid = u.userid " +
-                            "WHERE i.ideaid = ?");
+                            "JOIN users u ON i.userID = u.userID " +
+                            "WHERE i.ideaID = ?");
 
             // Get the value for checking if a like exists
             // in the likes table. The query will return the 'like' value if it exists.
@@ -263,19 +263,19 @@ public class Database {
             this.mCheckIfLikeExists = this.mConnection.prepareStatement(
                     "SELECT value " +
                             "FROM likes " +
-                            "WHERE userid = ? AND ideaid = ?");
+                            "WHERE userID = ? AND ideaID = ?");
 
             // Insert a new like into the table
             this.mInsertNewLike = this.mConnection.prepareStatement(
-                    "INSERT INTO likes (ideaid, userid, value) VALUES (?, ?, ?)");
+                    "INSERT INTO likes (ideaID, userID, value) VALUES (?, ?, ?)");
             
             // Delete a like from the table
             this.mDeleteOneLike = this.mConnection.prepareStatement(
-                    "DELETE FROM likes WHERE ideaid = ? AND userid = ?");
+                    "DELETE FROM likes WHERE ideaID = ? AND userID = ?");
 
             // Update a like in the table
             this.mUpdateOneLike = this.mConnection.prepareStatement(
-                    "UPDATE likes SET value = ? WHERE ideaid = ? AND userid = ?");
+                    "UPDATE likes SET value = ? WHERE ideaID = ? AND userID = ?");
 
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
