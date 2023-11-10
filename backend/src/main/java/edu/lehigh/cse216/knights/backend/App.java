@@ -366,6 +366,8 @@ public class App {
             // So we are using query parameter to get sessionKey
 
             String key = request.queryParams("sessionKey");
+            System.out.println("Requested sessionKey: " + key);
+            System.out.println("Reqeusted userId: " + requestedUserId);
 
             if (!sessionKeyTable.containsKey(key)) {
                 return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
@@ -383,6 +385,7 @@ public class App {
 
         // Same function as above, but without the userId parameter
         // Only use the session key, and get the user's information
+        // This function is used for getting the user's own information
         Spark.get("/users", (request, response) -> {
             // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
@@ -391,7 +394,7 @@ public class App {
             // See other get Users function for more detailed comments
 
             String key = request.queryParams("sessionKey");
-
+            System.out.println("Requested sessionKey: " + key);
             if (!sessionKeyTable.containsKey(key)) {
                 return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
             }

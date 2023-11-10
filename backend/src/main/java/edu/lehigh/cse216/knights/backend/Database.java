@@ -506,8 +506,6 @@ public class Database {
                         rs.getString("userid"),
                         rs.getString("username"),
                         rs.getString("email"),
-                        "",
-                        "",
                         rs.getString("note"),
                         rs.getBoolean("valid"));
                 }
