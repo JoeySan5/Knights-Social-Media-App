@@ -237,6 +237,7 @@ public class App {
      */
     /**
      * Read sample data from a JSON file and insert data to the database.
+     * @param in BufferedReader created by main()
      */
     public static void addSampleData(BufferedReader in){
         // Data files must be in the resources folder, unless path is specified with environment variable
@@ -278,7 +279,7 @@ public class App {
 
     /**
      * Get some data from the database according to Admin inputs
-     * @param in
+     * @param in BufferedReader created by main()
      */
     private static void getData(BufferedReader in) {
         System.out.println("Get data from which table?");
