@@ -381,8 +381,8 @@ public class App {
             }
         });
 
-        // Get route for getting a user's own information
-        // The user can only get his/her own information (GI and SO)
+        // Same function as above, but without the userId parameter
+        // Only use the session key, and get the user's information
         Spark.get("/users", (request, response) -> {
             // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
