@@ -381,6 +381,31 @@ public class App {
             }
         });
 
+        // Get route for getting a user's own information
+        // The user can only get his/her own information (GI and SO)
+        Spark.get("/users", (request, response) -> {
+            // ensure status 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+
+            // See other get Users function for more detailed comments
+
+            String key = request.queryParams("sessionKey");
+
+            if (!sessionKeyTable.containsKey(key)) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+            }
+            String userId = sessionKeyTable.get(key);
+            boolean restrictInfo = false;
+
+            User user = db.selectOneUser(userId, restrictInfo);
+            if (user == null) {
+                return gson.toJson(new StructuredResponse("error", userId + " not found", null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", null, user));
+            }
+        });
+
         // POST route for adding a new comment to the Database. This will read
         // JSON from the body of the request, turn it into a CommentRequest
         // object, extract the (content, UserID, IdeaID) insert them, and return the
