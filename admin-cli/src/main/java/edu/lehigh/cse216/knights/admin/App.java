@@ -262,10 +262,12 @@ public class App {
             db.insertUser(user);
         }
         for(Entity.Idea idea : ideas){
+            // ideaID is set automatically in database
             // The sample data should have likeCount = 0 on all ideas, unless admin is doing specific testing
             db.insertIdea(idea);
         }
         for(Entity.Comment comment : comments){
+            // commentID is set automatically in database
             db.insertComment(comment);
         }
         for(Entity.Like like : likes){

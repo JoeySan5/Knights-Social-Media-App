@@ -126,11 +126,11 @@ public class Database {
             this.mUpdateIdeaLikeCount = this.mConnection
                 .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE ideaID = ?");
             this.mInsertOneComment = this.mConnection.prepareStatement(
-                "INSERT INTO comments (commentId, ideaId, userId, content) VALUES (?, ?, ?, ?)");
+                "INSERT INTO comments (ideaId, userId, content) VALUES (?, ?, ?)");
             this.mInsertOneUser = this.mConnection.prepareStatement(
                 "INSERT INTO users (userId, username, email, GI, SO, note, valid) VALUES (?, ?, ?, ?, ?, ?, ?)");      
             this.mInsertOneIdea = this.mConnection.prepareStatement(
-                "INSERT INTO ideas (ideaId, userId, content, likeCount, valid) VALUES (?, ?, ?, ?, ?)");
+                "INSERT INTO ideas (userId, content, likeCount, valid) VALUES (?, ?, ?, ?)");
 
             // Statements for getting values from tables
             this.mSelectAllUsers = this.mConnection.prepareStatement(
@@ -272,18 +272,18 @@ public class Database {
     int insertIdea(Entity.Idea idea){
         int count = 0;
         try {
-            mInsertOneIdea.setInt(1, idea.ideaId);
-            mInsertOneIdea.setString(2, idea.userId);
-            mInsertOneIdea.setString(3, idea.content);
+            // ideaID is type SERIAL, will increment automatically
+            mInsertOneIdea.setString(1, idea.userId);
+            mInsertOneIdea.setString(2, idea.content);
             // Could hard-code likeCount to be 0, but instead this control lets an admin test edge cases
             if(idea.likeCount == null){
                 // Allow it to be not specified in sample data too
-                mInsertOneIdea.setInt(4, 0);
+                mInsertOneIdea.setInt(3, 0);
             } else{
                 // Backwards compatible with old sample data formatting with likeConut specified
-                mInsertOneIdea.setInt(4, idea.likeCount);
+                mInsertOneIdea.setInt(3, idea.likeCount);
             }
-            mInsertOneIdea.setBoolean(5, idea.valid);
+            mInsertOneIdea.setBoolean(4, idea.valid);
             count += mInsertOneIdea.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -299,10 +299,10 @@ public class Database {
     int insertComment(Entity.Comment comment){
         int count = 0;
         try {
-            mInsertOneComment.setInt(1, comment.commentId);
-            mInsertOneComment.setInt(2, comment.ideaId);
-            mInsertOneComment.setString(3, comment.userId);
-            mInsertOneComment.setString(4, comment.content);
+            // commentID is type SERIAL, will increment automatically
+            mInsertOneComment.setInt(1, comment.ideaId);
+            mInsertOneComment.setString(2, comment.userId);
+            mInsertOneComment.setString(3, comment.content);
             count += mInsertOneComment.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
