@@ -80,8 +80,9 @@
 ### Admin Build & Run Instructions
 - compile java code through mvn package and then run the POSTGRES command with the environment variables
     * `DATABASE_URL=postgres://pfdcoetq:VMXXrjrJtMXqzP6JwpjnapwpOVpk6e9o@peanut.db.elephantsql.com/pfdcoetq mvn exec:java`
-- test out different CRUD operations like create table, drop table, add row, delete row
-- verify your expected output on elephant sql 
+    * Optionally set `FILEPATH=path/to/sample/data/directory` if not running from the maven project root
+- Follow CLI instructions to ineract with the database
+- pgAdmin or ElephantSQL are useful tools to verify results
 
 ## Developer Documentation
 

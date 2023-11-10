@@ -60,8 +60,9 @@ public class Entity {
         /** The content for this idea entry */
         public String content;
 
-        /** The like count for this idea entry */
-        public int likeCount;
+        /** The like count for this idea entry. 
+         * Integer class type to allow for null values from sample data */
+        public Integer likeCount;
 
         /** Validity of the user */
         public boolean valid;

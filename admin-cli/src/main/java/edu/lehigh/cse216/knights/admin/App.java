@@ -20,6 +20,15 @@ public class App {
     /** Database object to communicate with the PostgreSQL database. */
     static Database db;
 
+    /** Defaut port to access PostgreSQL database with. Can be specified by using
+     * detailed environment variables for database setup. */
+    private static final String DEFAULT_PORT_DB = "5432";
+
+    private static String filepath;
+
+    /** File path for directory containing sample data. Can be specified with an environment variable. */
+    private static final String DEFAULT_FILE_PATH = "src/main/java/edu/lehigh/cse216/knights/admin/resources/";
+
     /** The actions prompted to the admin from the App menu. */
     static final String MENU_ACTIONS = "TDS*Vq?";
 
@@ -128,6 +137,8 @@ public class App {
         db = getDatabaseConnection();
         if (db == null)
             return;
+        // Set up the file path to use for populating with sample data
+        filepath = getFilePath();
 
         // Start our basic command-line interpreter:
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -151,7 +162,7 @@ public class App {
             }
             else if (action == 'S') {
                 // Add a set of sample data to the database
-                addSampleData();
+                addSampleData(in);
             } else if (action == 'V') {
                 // update the validation for user or idea
                 setValidity(in);
@@ -227,16 +238,16 @@ public class App {
     /**
      * Read sample data from a JSON file and insert data to the database.
      */
-    public static void addSampleData(){
-        // BACKLOG - allow admin to specify filename to use as sample data
-        String filename = "SampleData1.json";
-        // Data files must be in the resources folder
-        final String path = "src/main/java/edu/lehigh/cse216/knights/admin/resources/";
+    public static void addSampleData(BufferedReader in){
+        // Data files must be in the resources folder, unless path is specified with environment variable
         String jsonString = "";
         try {
-            jsonString = new String(Files.readAllBytes(Paths.get(path + filename)));
+            System.out.println("Input file name (with extension) containing sample data:");
+            String filename = in.readLine();
+            jsonString = new String(Files.readAllBytes(Paths.get(App.filepath + filename)));
         } catch (IOException e) {
             System.out.println("Error reading file: " + e.getMessage());
+            return;
         }
 
         // Read the sample data from the file
@@ -251,12 +262,14 @@ public class App {
             db.insertUser(user);
         }
         for(Entity.Idea idea : ideas){
+            // The sample data should have likeCount = 0 on all ideas, unless admin is doing specific testing
             db.insertIdea(idea);
         }
         for(Entity.Comment comment : comments){
             db.insertComment(comment);
         }
         for(Entity.Like like : likes){
+            // Inserting likes includes incrementing the like count
             db.insertLike(like);
         }
     }
@@ -362,8 +375,6 @@ public class App {
         System.out.println("Updated "+entitiesChanged+" "+entityName+"(s) in database");
     }
 
-    private static final String DEFAULT_PORT_DB = "5432";
-
     /**
     * Get a fully-configured connection to the database, or exit immediately
     * Uses the Postgres configuration from environment variables.
@@ -400,4 +411,16 @@ public class App {
         }
         return defaultVal;
     }
+
+    /**
+     * Get a file path from an environment variable, or return the default file path.
+     * @return the file path to use for locating sample data
+     */
+    private static String getFilePath() {
+        if(System.getenv("FILEPATH") != null ){
+            return System.getenv("FILEPATH");
+        }
+        return DEFAULT_FILE_PATH;
+    }
+
 }
