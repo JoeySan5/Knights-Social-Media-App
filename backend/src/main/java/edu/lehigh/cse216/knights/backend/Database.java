@@ -144,6 +144,11 @@ public class Database {
     private PreparedStatement mGetCommenterName;
 
     /**
+     * A prepared statement for getting the commenter ID of a specific comment
+     */
+    private PreparedStatement mGetCommenterUserID;
+
+    /**
      * The Database constructor is private: we only create Database objects
      * through the getDatabase() method.
      */
@@ -204,7 +209,7 @@ public class Database {
             // tjp: these SQL prepared statement are essential for understanding exactly
             // what the backend is asking the database
             this.mInsertOneIdea = this.mConnection
-                    .prepareStatement("INSERT INTO ideas (content, userID, likeCount) VALUES (?, ?, 0)");
+                    .prepareStatement("INSERT INTO ideas (content, userID, likeCount, valid) VALUES (?, ?, 0, true)");
 
             // Get all ideas in the database
             this.mSelectAllIdeas = this.mConnection
@@ -256,6 +261,12 @@ public class Database {
                             "FROM ideas i " +
                             "JOIN users u ON i.userID = u.userID " +
                             "WHERE i.ideaID = ?");
+
+            // Get the commenter userID
+            this.mGetCommenterUserID = this.mConnection.prepareStatement(
+                    "SELECT userID " +
+                            "FROM comments " +
+                            "WHERE commentID = ?");
 
             // Get the value for checking if a like exists
             // in the likes table. The query will return the 'like' value if it exists.
@@ -757,6 +768,31 @@ public class Database {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * Get the commenter username of a specific comment
+     * 
+     * @param commentID The id of the comment
+     * 
+     * @return The commenter username. null indicates an error.
+     */
+
+    String getCommenterUserID(int commentID){
+        String CommenterUserID = "default";
+        try {
+            mGetCommenterUserID.setInt(1, commentID);
+            ResultSet rs = mGetCommenterUserID.executeQuery();
+            if (rs.next()) {
+                System.out.println(rs.getString("userID"));
+                CommenterUserID = rs.getString("userID");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return CommenterUserID;
+
     }
 
 

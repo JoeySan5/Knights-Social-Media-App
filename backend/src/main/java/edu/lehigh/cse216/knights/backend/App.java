@@ -91,12 +91,17 @@ public class App {
         });
 
         // GET route that returns all ideas with their id, content, and likeCount.
+        // The session key should be vaild to get the ideas
         // All we do is get the data, embed it in a StructuredResponse, turn it into
         // JSON, and
         // return it. If there's no data, we return "[]", so there's no need
         // for error handling.
         Spark.get("/ideas", (request, response) -> {
             // ensure status 200 OK, with a MIME type of JSON
+            String key = request.queryParams("sessionKey");
+                if (!sessionKeyTable.containsKey(key)) {
+                    return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+                }
             response.status(200);
             response.type("application/json");
             return gson.toJson(new StructuredResponse("ok", null, db.selectAllIdeas()));
@@ -111,6 +116,10 @@ public class App {
         Spark.get("/ideas/:id", (request, response) -> {
             int idx = Integer.parseInt(request.params("id"));
             // ensure status 200 OK, with a MIME type of JSON
+            String key = request.queryParams("sessionKey");
+                if (!sessionKeyTable.containsKey(key)) {
+                    return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+                }
             response.status(200);
             response.type("application/json");
             Idea.ExtendedIdea idea = db.selectOneIdea(idx);
@@ -132,9 +141,21 @@ public class App {
             // ensure status 200 OK, with a MIME type of JSON
             // NB: even on error, we return 200, but with a JSON object that
             // describes the error.
+
+            String key = req.sessionKey;
+            String userID = null;
+                if (!sessionKeyTable.containsKey(key)) {
+                    return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+                } else{
+                    userID = sessionKeyTable.get(key);
+                    if (userID == null) {
+                        return gson.toJson(new StructuredResponse("error", "authentication failed", null));
+                    }
+                }
+
             response.status(200);
             response.type("application/json");
-            int rowsInserted = db.insertIdea(req.mContent, req.mUserId);
+            int rowsInserted = db.insertIdea(req.mContent, userID);
             if (rowsInserted <= 0) {
                 return gson.toJson(new StructuredResponse("error", "error creating idea", null));
             } else {
@@ -325,6 +346,20 @@ public class App {
             response.status(200);
             response.type("application/json");
 
+            // Check the session key
+            String key = req.sessionKey;
+            String userId;
+            if (!sessionKeyTable.containsKey(key)) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+            } else {
+                userId = sessionKeyTable.get(key);
+                if (userId == null) {
+                    return gson.toJson(new StructuredResponse("error", "authentication failed", null));
+                }
+            }
+
+            req.mId = userId;
+
             int rowsUpdated = db.updateOneUser(req);
             if (rowsUpdated <= 0) {
                 return gson.toJson(new StructuredResponse("error", "error updating user", null));
@@ -417,7 +452,19 @@ public class App {
             Request.CommentRequest req = gson.fromJson(request.body(), Request.CommentRequest.class);
             response.status(200);
             response.type("application/json");
-            int rowsInserted = db.insertNewComment(req.mContent, req.mUserId, req.mIdeaId);
+
+            String key = req.sessionKey;
+            String userID = null;
+                if (!sessionKeyTable.containsKey(key)) {
+                    return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+                } else{
+                    userID = sessionKeyTable.get(key);
+                    if (userID == null) {
+                        return gson.toJson(new StructuredResponse("error", "authentication failed", null));
+                    }
+                }
+
+            int rowsInserted = db.insertNewComment(req.mContent, userID, req.mIdeaId);
             if (rowsInserted <= 0) {
                 return gson.toJson(new StructuredResponse("error", "error creating comment", null));
             } else {
@@ -432,6 +479,26 @@ public class App {
             response.status(200);
             response.type("application/json");
 
+            String key = req.sessionKey;
+            String userID = null;
+                if (!sessionKeyTable.containsKey(key)) {
+                    return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+                } else{
+                    userID = sessionKeyTable.get(key);
+                    if (userID == null) {
+                        return gson.toJson(new StructuredResponse("error", "authentication failed", null));
+                    }
+                }
+            System.out.println("mid: " + req.mId);
+            
+            String CommenterID = db.getCommenterUserID(req.mId);
+            System.out.println("CommenterID: " + CommenterID);
+            System.out.println("userID: " + userID);
+
+            if (!userID.equals(CommenterID)) {
+                return gson.toJson(new StructuredResponse("error", "You can only edit your own comment", null));
+            }
+                
             int rowsUpdated = db.updateOneComment(req.mContent, req.mId);
             if (rowsUpdated <= 0) {
                 return gson.toJson(new StructuredResponse("error", "error updating comment", null));
