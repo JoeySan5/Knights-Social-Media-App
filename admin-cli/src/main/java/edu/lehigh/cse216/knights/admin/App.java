@@ -320,14 +320,19 @@ public class App {
         String SET_INVALID = "Invalidate";
         String SET_VALID = "Restore";
         String entityId = "", validityInput;
-        // updatedValidity is specified in the CLI. Only reason to the value here is for avoiding compiler warning.
+        // updatedValidity is specified in the CLI. Only reason to initialize the value here is for avoiding a compiler warning.
         boolean updatedValidity = true;
         int entitiesChanged = 0;
-        // Tech debt - make cli cleaner by first specify if the entity exists
+        String entityName = "entity";
+        if(action == 'U'){
+            entityName = "user";
+        } else if(action == 'I') {
+            entityName = "idea";
+        }
 
         // Getting inputs
         try {
-            System.out.println("Input ID:");
+            System.out.println("Input "+entityName+" ID:");
             entityId = in.readLine();
             System.out.println("Type '"+SET_INVALID+"' to set to invalid or '"+SET_VALID+"' to set to valid.");
             validityInput = in.readLine();
@@ -336,13 +341,14 @@ public class App {
             } else if(validityInput.equalsIgnoreCase(SET_VALID)) {
                 updatedValidity = true;
             } else {
-            System.out.println("Invalid command. Cancelling action without making changes.");
+                System.out.println("Invalid command. Cancelling action without making changes.");
+                return;
             }
         } catch (IOException e) {
             e.printStackTrace();
+            return;
         }
 
-        // Backlog: clean up logic in this function
         if(action == 'U'){
             entitiesChanged = db.setUserValidity(entityId, updatedValidity);
         } else if(action == 'I') {
@@ -353,8 +359,7 @@ public class App {
                 System.out.println("Invalid ID, not a number.");
             }
         }
-        System.out.println("Updated "+entitiesChanged+" entity in database");
-
+        System.out.println("Updated "+entitiesChanged+" "+entityName+"(s) in database");
     }
 
     private static final String DEFAULT_PORT_DB = "5432";
