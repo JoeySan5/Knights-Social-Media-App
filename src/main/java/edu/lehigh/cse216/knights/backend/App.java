@@ -5,22 +5,18 @@ package edu.lehigh.cse216.knights.backend;
 import spark.Spark;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
-
 import static spark.Spark.*;
 
 // Import Google's JSON library
 import com.google.gson.*;
-
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.json.Json;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 
@@ -34,6 +30,18 @@ public class App {
      * @param args The command line arguments, (unused)
      */
     public static void main(String[] args) {
+        /**
+         * Key = sessionKey
+         * String = userId
+         */
+        Hashtable<String, String> sessionKeyTable = new Hashtable<>();
+
+        // Testing hash Table
+        // sessionKeyTable.put("lGaJjDO8kdNq", "112569610817039937158"); // Tommy
+        // sessionKeyTable.put("HPfj41XbfAx0", "107106171889739877350"); // Sehyoun
+        // sessionKeyTable.put("YMtxeMIRXi5o", "115632613034941022740"); // Eric
+        // sessionKeyTable.put("FEkVssi4WBk2F", "101136375578726959533"); // Joseph
+
         staticFiles.location("/public");
 
         // Get a fully-configured connection to the database, or exit immediately
@@ -50,15 +58,6 @@ public class App {
         // https://stackoverflow.com/questions/10380835/is-it-ok-to-use-gson-instance-as-a-static-field-in-a-model-bean-reuse
         final Gson gson = new Gson();
 
-        /**
-         * Key = sessionKey
-         * String = userId
-         */
-        Hashtable<String, String> sessionKeyTable = new Hashtable<>();
-        sessionKeyTable.put("lGaJjDO8kdNq", "112569610817039937158"); // Tommy
-        // sessionKeyTable.put("k0kyOGwPlod5", "107106171889739877350"); // Sehyoun
-        sessionKeyTable.put("YMtxeMIRXi5o", "115632613034941022740 "); // Eric
-        sessionKeyTable.put("FEkVssi4WBk2F", "115632613034941022740"); // Joseph
         // Set the port on which to listen for requests from the environment
         Spark.port(getIntFromEnv("PORT", DEFAULT_PORT_SPARK));
 
@@ -90,12 +89,17 @@ public class App {
         });
 
         // GET route that returns all ideas with their id, content, and likeCount.
+        // The session key should be vaild to get the ideas
         // All we do is get the data, embed it in a StructuredResponse, turn it into
         // JSON, and
         // return it. If there's no data, we return "[]", so there's no need
         // for error handling.
         Spark.get("/ideas", (request, response) -> {
             // ensure status 200 OK, with a MIME type of JSON
+            String key = request.queryParams("sessionKey");
+                if (!sessionKeyTable.containsKey(key)) {
+                    return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+                }
             response.status(200);
             response.type("application/json");
             return gson.toJson(new StructuredResponse("ok", null, db.selectAllIdeas()));
@@ -110,6 +114,10 @@ public class App {
         Spark.get("/ideas/:id", (request, response) -> {
             int idx = Integer.parseInt(request.params("id"));
             // ensure status 200 OK, with a MIME type of JSON
+            String key = request.queryParams("sessionKey");
+                if (!sessionKeyTable.containsKey(key)) {
+                    return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+                }
             response.status(200);
             response.type("application/json");
             Idea.ExtendedIdea idea = db.selectOneIdea(idx);
@@ -119,17 +127,6 @@ public class App {
                 return gson.toJson(new StructuredResponse("ok", null, idea));
             }
         });
-
-        // TODO - we might need to implement this route specifically for newly-created
-        // users to be re-reouted to
-        // already logged in users should be routed to /ideas
-        // /users route should act like /users/:id but with self's own id only.
-        // This is a backlog item and possibly is completely unnecessary.
-        //
-        // Spark.get("/users", (request, response) -> {
-        // //verify session key
-        // // function the same as GET /users/:id
-        // }
 
         // POST route for adding a new idea to the Database. This will read
         // JSON from the body of the request, turn it into a IdeaRequest
@@ -142,9 +139,21 @@ public class App {
             // ensure status 200 OK, with a MIME type of JSON
             // NB: even on error, we return 200, but with a JSON object that
             // describes the error.
+
+            String key = req.sessionKey;
+            String userID = null;
+                if (!sessionKeyTable.containsKey(key)) {
+                    return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+                } else{
+                    userID = sessionKeyTable.get(key);
+                    if (userID == null) {
+                        return gson.toJson(new StructuredResponse("error", "authentication failed", null));
+                    }
+                }
+
             response.status(200);
             response.type("application/json");
-            int rowsInserted = db.insertIdea(req.mContent, req.mUserId);
+            int rowsInserted = db.insertIdea(req.mContent, userID);
             if (rowsInserted <= 0) {
                 return gson.toJson(new StructuredResponse("error", "error creating idea", null));
             } else {
@@ -193,6 +202,8 @@ public class App {
         });
 
         // DELETE route for removing an idea from the Database.
+        // This is actually an unused feature. There are no implementation instructions
+        // for this feature in phase 2
         Spark.delete("/ideas/:id", (request, response) -> {
             // If we can't get an ID, Spark will send a status 500
             int idx = Integer.parseInt(request.params("id"));
@@ -210,11 +221,21 @@ public class App {
             }
         });
 
+        // Post route for login authentication with Google OAuth
+        // If the authentication is successful, return a session key
+        // Also, add the session key and userId to the sessionKeyTable
+        // If the authentication is failed, return an error message
+        // If the user is not in the database, add the user to the database
+        // Client ID is stored in the environment variable CLIENT_ID
         Spark.post("/login", (request, response) -> {
 
-            // tjp: TODO maybe set this as environment variable. Hard-coding the client_id
-            // goes against 12-factor app guidelines
-            String CLIENT_ID = "1019349198762-463i1tt2naq9ipll3f9ade5u7nli7gju.apps.googleusercontent.com";
+            String CLIENT_ID = System.getenv("CLIENT_ID");
+
+            if (CLIENT_ID == null) {
+                System.out.println("CLIENT_ID is not set, please check your mvn exec command");
+                return gson.toJson(new StructuredResponse("error",
+                        "CLIENT_ID is not set, please check your mvn exec command", null));
+            }
 
             // Need to verify that types are correct
             // Originally NetHttpTransport was type HttpTransport
@@ -230,8 +251,9 @@ public class App {
 
             // (Receive idTokenString by HTTPS POST)
             // System.out.println("heres req" + request.headers());
+
             System.out.println(request);
-            System.out.println(request.body());
+            // System.out.println(request.body());
             Request.LoginRequest req = gson.fromJson(request.body(), Request.LoginRequest.class);
 
             // String idTokenString = request.params();
@@ -268,7 +290,7 @@ public class App {
 
             } else {
                 // Case for authentication failed
-                System.out.println("For testing backend - Invalid ID token.");
+                System.out.println("Invalid ID token. please check the Client_ID or process of getting token");
                 return gson.toJson(new StructuredResponse("error", "authentication failed", null));
             }
             // This case should never occur, but it might if authentication is successful
@@ -286,18 +308,21 @@ public class App {
                     return gson.toJson(new StructuredResponse("error", "error creating user", null));
                 }
             } else if (res.mValid == false) {
-                return gson.toJson(new StructuredResponse("error", "user has been invalidated", null));
+                return gson.toJson(new StructuredResponse("error", "user has been invalidated to login", null));
             }
 
             // generate a new session key-a random string.
             String sessionKey = SessionKeyGenerator.generateRandomString(12);
             sessionKeyTable.put(sessionKey, userId);
-            // show up the sessionKeyTable
+            // show up the sessionKey and sessionKeyTable
+            System.out.println("session Key is " + sessionKey);
             System.out.println("sessionKeyTable: " + sessionKeyTable);
             return gson.toJson(new StructuredResponse("ok", "authentication success", sessionKey));
         });
 
-        // Register users profile with default value
+        // Post route for adding a new user to the database
+        // The new user only has a userId and a valid status
+        // The other information will be 'unknown'
         Spark.post("/users", (request, response) -> {
             Request.UserRequest req = gson.fromJson(request.body(), Request.UserRequest.class);
 
@@ -312,11 +337,26 @@ public class App {
             }
         });
 
-        // Edit user's profile
+        // Put route for updating a user's information
+        // The user can only update his/her own information
         Spark.put("/users", (request, response) -> {
             Request.UserRequest req = gson.fromJson(request.body(), Request.UserRequest.class);
             response.status(200);
             response.type("application/json");
+
+            // Check the session key
+            String key = req.sessionKey;
+            String userId;
+            if (!sessionKeyTable.containsKey(key)) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+            } else {
+                userId = sessionKeyTable.get(key);
+                if (userId == null) {
+                    return gson.toJson(new StructuredResponse("error", "authentication failed", null));
+                }
+            }
+
+            req.mId = userId;
 
             int rowsUpdated = db.updateOneUser(req);
             if (rowsUpdated <= 0) {
@@ -326,19 +366,41 @@ public class App {
             }
         });
 
-        // get user's information
+        // Get route for getting a user's information
+        // The user can only get his/her own information (GI and SO)
+        // If the user request to get other user's information, the server will return
+        // information with restricted information (without GI and SO)
         Spark.get("/users/:id", (request, response) -> {
             String requestedUserId = request.params("id");
             // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
 
-            // Explain, why we can't use this way to get sessionKey
+            // Question: why we can't use this way to get sessionKey
             // Request.UserRequest req = gson.fromJson(request.body(),
             // Request.UserRequest.class);
             // String key = req.sessionKey;
 
+            // Answer:
+            // -d sends the data as the request body. GET requests typically do not have a
+            // request body, and the route handler in your server code is not set up to
+            // parse a JSON body for a GET request. It is expecting a query parameter
+            // instead.
+
+            // For the server code to accept the sessionKey from the request body, you would
+            // need to parse the JSON from the request body with
+            // gson.fromJson(request.body(), ...) within the route handler. But this is not
+            // standard practice for GET requests, which is why the -d option with a GET
+            // request is not working.
+
+            // In RESTful API design, it's more common to use query parameters or path
+            // variables for GET requests and reserve the request body for POST or PUT
+            // requests where a resource is being created or updated.
+            // So we are using query parameter to get sessionKey
+
             String key = request.queryParams("sessionKey");
+            System.out.println("Requested sessionKey: " + key);
+            System.out.println("Reqeusted userId: " + requestedUserId);
 
             if (!sessionKeyTable.containsKey(key)) {
                 return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
@@ -354,12 +416,53 @@ public class App {
             }
         });
 
-        // post a comment
+        // Same function as above, but without the userId parameter
+        // Only use the session key, and get the user's information
+        // This function is used for getting the user's own information
+        Spark.get("/users", (request, response) -> {
+            // ensure status 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+
+            // See other get Users function for more detailed comments
+
+            String key = request.queryParams("sessionKey");
+            System.out.println("Requested sessionKey: " + key);
+            if (!sessionKeyTable.containsKey(key)) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+            }
+            String userId = sessionKeyTable.get(key);
+            boolean restrictInfo = false;
+
+            User user = db.selectOneUser(userId, restrictInfo);
+            if (user == null) {
+                return gson.toJson(new StructuredResponse("error", userId + " not found", null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", null, user));
+            }
+        });
+
+        // POST route for adding a new comment to the Database. This will read
+        // JSON from the body of the request, turn it into a CommentRequest
+        // object, extract the (content, UserID, IdeaID) insert them, and return the
+        // ID of the newly created row.
         Spark.post("/comments", (request, response) -> {
             Request.CommentRequest req = gson.fromJson(request.body(), Request.CommentRequest.class);
             response.status(200);
             response.type("application/json");
-            int rowsInserted = db.insertNewComment(req.mContent, req.mUserId, req.mIdeaId);
+
+            String key = req.sessionKey;
+            String userID = null;
+                if (!sessionKeyTable.containsKey(key)) {
+                    return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+                } else{
+                    userID = sessionKeyTable.get(key);
+                    if (userID == null) {
+                        return gson.toJson(new StructuredResponse("error", "authentication failed", null));
+                    }
+                }
+
+            int rowsInserted = db.insertNewComment(req.mContent, userID, req.mIdeaId);
             if (rowsInserted <= 0) {
                 return gson.toJson(new StructuredResponse("error", "error creating comment", null));
             } else {
@@ -367,12 +470,33 @@ public class App {
             }
         });
 
-        // Edit a comment
+        // Put route for updating a comment's content
+        // The user can only update his/her own comment
         Spark.put("/comments", (request, response) -> {
             Request.CommentRequest req = gson.fromJson(request.body(), Request.CommentRequest.class);
             response.status(200);
             response.type("application/json");
 
+            String key = req.sessionKey;
+            String userID = null;
+                if (!sessionKeyTable.containsKey(key)) {
+                    return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+                } else{
+                    userID = sessionKeyTable.get(key);
+                    if (userID == null) {
+                        return gson.toJson(new StructuredResponse("error", "authentication failed", null));
+                    }
+                }
+            System.out.println("mid: " + req.mId);
+            
+            String CommenterID = db.getCommenterUserID(req.mId);
+            System.out.println("CommenterID: " + CommenterID);
+            System.out.println("userID: " + userID);
+
+            if (!userID.equals(CommenterID)) {
+                return gson.toJson(new StructuredResponse("error", "You can only edit your own comment", null));
+            }
+                
             int rowsUpdated = db.updateOneComment(req.mContent, req.mId);
             if (rowsUpdated <= 0) {
                 return gson.toJson(new StructuredResponse("error", "error updating comment", null));
