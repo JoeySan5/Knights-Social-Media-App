@@ -97,16 +97,16 @@ public class Database {
         try {
             // CREATE TABLE statements very importantly must be consistent between admin and backend.
             this.mCreateUsersTable = this.mConnection.prepareStatement(
-                "CREATE TABLE users ( userID VARCHAR(256) PRIMARY KEY, username VARCHAR(32) NOT NULL, "+
+                "CREATE TABLE users (userID VARCHAR(256) PRIMARY KEY, username VARCHAR(32) NOT NULL, "+
                 "email VARCHAR(64), GI VARCHAR(16), SO VARCHAR(16), note VARCHAR(128), valid BOOLEAN NOT NULL);");
             this.mCreateIdeasTable = this.mConnection.prepareStatement(
-                "CREATE TABLE ideas ( ideaID SERIAL PRIMARY KEY, userID VARCHAR(256) REFERENCES users(userID), "+
+                "CREATE TABLE ideas (ideaID SERIAL PRIMARY KEY, userID VARCHAR(256) REFERENCES users(userID), "+
                 "content VARCHAR(2048), likeCount INT, valid BOOLEAN NOT NULL)");
             this.mCreateCommentsTable = this.mConnection.prepareStatement(
                 "CREATE TABLE comments (commentID SERIAL PRIMARY KEY, ideaID INT REFERENCES ideas(ideaID), "+
                 "userID VARCHAR(256) REFERENCES users(userID), content VARCHAR(2048))");
             this.mCreateLikesTable = this.mConnection.prepareStatement(
-                "CREATE TABLE likes (ideaID INT, userID VARCHAR(256), value INT, PRIMARY KEY (ideaID, userID))");
+                "CREATE TABLE likes (ideaID INT REFERENCES ideas(ideaID), userID VARCHAR(256) REFERENCES users(userID), value INT)");
             // DROP TABLE statements for each table. Use carefully- these will permanently delete table data
             this.mDropUsersTable = this.mConnection.prepareStatement("DROP TABLE users");
             this.mDropIdeasTable = this.mConnection.prepareStatement("DROP TABLE ideas");
