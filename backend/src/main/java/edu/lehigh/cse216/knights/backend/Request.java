@@ -13,10 +13,6 @@ public abstract class Request {
 
   public String sessionKey;
 
-
-  /**
-   * Request to login. Does not have sessionKey.
-   */
   public class LoginRequest extends Request {
     public String credential;
   }
@@ -133,12 +129,9 @@ public abstract class Request {
    * Request format for Comment related requests, e.g. creating or editing a
    * comment.
    */
-  public class CommentRequest {
+  public class CommentRequest extends Request{
 
     public int mId;
-
-    // TODO delete this and implement sessionKey in backend.App functions
-    public String mUserId;
 
     public int mIdeaId;
 
