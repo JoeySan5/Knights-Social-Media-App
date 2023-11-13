@@ -8,10 +8,10 @@ class User{
   final String mUsername;
   final String mEmail;
   final String mNote;
-  String GI = "";
-  String SO = "";
+  final String mGI;
+  final String mSO;
 
-User({required this.mId, required this.mUsername, required this.mEmail, required this.mNote});
+User({required this.mId, required this.mUsername, required this.mEmail, required this.mNote, required this.mGI, required this.mSO});
 
 factory User.fromJson(Map<String, dynamic> json){
   return User(
@@ -19,8 +19,8 @@ factory User.fromJson(Map<String, dynamic> json){
     mUsername: json['mUsername'],
     mEmail: json['mEmail'],
     mNote: json['mNote'],
-    //GI: json['GI'],
-    //SO: json['SO']
+    mGI: json['mGI'],
+    mSO: json['mSO']
   );
 }
 
@@ -30,8 +30,8 @@ Map<String, dynamic> toJson() =>{
   'mUsername': mUsername,
   'mEmail': mEmail,
   'mNote': mNote,
-  //'GI': GI,
-  //'SO': SO
+  'mGI': mGI,
+  'mSO': mSO
 };
 
 }

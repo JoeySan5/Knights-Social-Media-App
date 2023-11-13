@@ -6,32 +6,17 @@ import 'package:knights/models/idea.dart';
 import 'package:knights/models/User.dart';
 import 'package:knights/models/DetailedPost.dart';
 
-//const String userId = '1234567890abcdef1234567890abcdef';
-
-
-// web function togetuser profile data
+// web function to get user profile data
 // View User
 // /users/:id
 // GET
 // View a User’s Profile Page
-
-// /// post
-// Future<String> verifyLogin(String token) async{
-//   developer.log('sending token to backend...');
-//   var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/login');
-//   var headers = {"Accept":"application/json"};
-
-// }
-
-
-
-
-Future<User> fetchUsers(String userId, String sessionKey) async{
+Future<User> fetchUsers(String sessionKey) async{
   developer.log('Making web request for user data...');
-  var url = Uri.parse('http://10.0.2.2:8998/users/$userId?sessionKey=$sessionKey');
+  var url = Uri.parse('http://10.0.2.2:8998/users/?sessionKey=$sessionKey');
   var headers = {"Accept":"application/json"};
   // garbage user that gets returned if sopmething goes wrong
-  User garb = User(mId: "", mUsername: 'garbage', mEmail: 'nonExistent', mNote: 'garbage');
+  User garb = User(mId: "", mUsername: 'garbage', mEmail: 'nonExistent', mNote: 'garbage', mGI: '', mSO: '');
 
   var response = await http.get(url, headers: headers);
 
@@ -93,14 +78,15 @@ Future<DetailedPost> fetchDetailedPost(int mId) async{
 
 
 ///Web Function to send put request to respective idea ID, and *decrement* mLikeCount
-Future<bool> onDislikeButtonTapped(int id) async{
+Future<bool> onDislikeButtonTapped(int id, String sessionKey) async{
   ///Can safely ignore isLiked
   bool isLiked = true;
 
     developer.log('Making web request...');
-    var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/$id');
+    //var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/$id/likes');
+    var url = Uri.parse('http://10.0.2.2:8998/ideas/$id/likes');
     var headers = {"Accept": "application/json"};
-    var body = {'mLikeIncrement': '-1'};
+    var body = {'sessionKey': sessionKey, 'value': -1};
 
     var response = await http.put(url, headers: headers, body: jsonEncode(body));
 
@@ -114,21 +100,27 @@ Future<bool> onDislikeButtonTapped(int id) async{
   }
 
   ///Web Function to send put request to respective idea ID, and *increment* mLikeCount    
-  Future<bool> onLikeButtonTapped(int id) async{
+  Future<bool> onLikeButtonTapped(int id, String sessionKey) async{
     bool isLiked = true;
 
 
     developer.log('Making web request...');
-    var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/$id');
+    //var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/$id/likes');
+    var url = Uri.parse('http://10.0.2.2:8998/ideas/$id/likes');
     var headers = {"Accept": "application/json"};
-    var body = {'mLikeIncrement': '1'};
+    var body = {'sessionKey': sessionKey, 'value': 1};
 
     var response = await http.put(url, headers: headers, body: jsonEncode(body));
-
-    developer.log('Response status: ${response.statusCode}');
+    if(response.statusCode == 200){
+      developer.log('Response status: ${response.statusCode}');
     developer.log('Response headers: ${response.headers}');
     developer.log('Response body: ${response.body}');
     developer.log(await http.read(url));
+    } else {
+      print('error,  did  not get status code of 200 when trying to like');
+      throw Exception('Did not receive syccess status(200) from request');
+    }
+    
 
     return !isLiked;
   }
@@ -159,9 +151,10 @@ Future<bool> onDislikeButtonTapped(int id) async{
 
     ///This web function fetches json data from dokku, and then 
     ///parses each json object into an idea object(model)
-    Future<List<Idea>> fetchIdeas() async{
+    Future<List<Idea>> fetchIdeas(String sessionKey) async{
       developer.log('Making web request...');
-      var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas');
+      //var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas?sessionKey=$sessionKey');
+      var url = Uri.parse('http://10.0.2.2:8998/ideas?sessionKey=$sessionKey');
       var headers = {"Accept": "application/json"};
 
       var response = await http.get(url, headers: headers);
@@ -185,7 +178,6 @@ Future<bool> onDislikeButtonTapped(int id) async{
           developer.log('ERROR: Unexpected json response type (was not a List or Map).');
           returnData = List.empty();
         }
-
         developer.log('$returnData');
         return returnData;
       } 

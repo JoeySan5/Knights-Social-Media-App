@@ -79,7 +79,6 @@ class MyLoginPage extends StatelessWidget {
   final user = await GoogleSignInApi.login();
   // map to hold userId and session key
   Map<String, dynamic> userSeshInfo = {'userId': "", 'sessionKey': ""};
-    
     if (user != null) {
       print(user.id);
       final GoogleSignInAuthentication googleAuth = await user.authentication;
@@ -96,7 +95,7 @@ class MyLoginPage extends StatelessWidget {
   }
 
 
-  /// having problem of sending token to backend within this method
+  
   Future<String> _sendTokenToServer(String? token) async {
     var backendUrl =
         //Uri.parse('https://team-knights.dokku.cse.lehigh.edu/login');

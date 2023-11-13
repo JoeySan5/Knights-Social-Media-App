@@ -22,8 +22,7 @@ class MyHomePage extends StatelessWidget{
   MyHomePage({super.key, required this.userId, this.sessionKey});
     
     @override
-    Widget build(BuildContext context) {
-      print('home page sessionKey: $userId');  
+    Widget build(BuildContext context) {  
       return   Scaffold(
         // app bar for the profile icon that takes you to profile
         appBar: AppBar(
@@ -76,9 +75,9 @@ class MyHomePage extends StatelessWidget{
                 ),
                 ),
               ),
-              const SizedBox(
+              SizedBox(
                 height: 400,
-                child: IdeaList(),
+                child: IdeaList(sessionKey: sessionKey),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 35.0),

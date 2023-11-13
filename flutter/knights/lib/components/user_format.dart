@@ -4,7 +4,6 @@ import 'package:knights/net/web_requests.dart';
 import 'package:knights/models/User.dart';
 import 'package:knights/pages/home_page.dart';
 
-
 /// this class is format to  display current userinformation
 ///
 /// component includers user id, username, email, note, SO, GI
@@ -29,147 +28,102 @@ class _UserFormat extends State<UserFormat> {
   void initState() {
     super.initState();
     print('user format sessionKey: ${widget.sessionKey}');
-    _futureUserFormat = fetchUsers(widget.userId, widget.sessionKey);
-    
+    _futureUserFormat = fetchUsers(widget.sessionKey);
   }
 
   void retry() {
     setState(() {
-      _futureUserFormat = fetchUsers(widget.userId, widget.sessionKey);
+      _futureUserFormat = fetchUsers(widget.sessionKey);
     });
   }
 
-  
-
-  
-
-  
-  // @override
-  // Widget build(BuildContext context) {
-  //   var fb = FutureBuilder<User>(
-  //     future: _futureUserFormat,
-  //     builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
-  //       Widget child;
-  //       if (snapshot.hasData) {
-  //         return Container(
-  //             margin: const EdgeInsets.all(15.0),
-  //             //decoration is to make borders look different
-  //             decoration: BoxDecoration(
-  //               border: Border.all(
-  //                 color: Colors.green,
-  //                 width: 1.5,
-  //               ),
-  //               borderRadius: const BorderRadius.all(Radius.circular(10)),
-  //             ),
-  //             child: Column(
-  //               mainAxisAlignment: MainAxisAlignment.center,
-  //               children: [
-  //                 ///Sets up the user message.
-  //                 Padding(
-  //                     padding: const EdgeInsets.all(8.0),
-  //                     child: Text(
-  //                       'User ID: ${snapshot.data!.mId}',
-  //                       style: const TextStyle(fontSize: 40, color: Colors.white, fontFamily: 'roboto'),
-  //                     )),
-  //                 Padding(
-  //                     padding: const EdgeInsets.all(8.0),
-  //                     child: Text(
-  //                       'Username: ${snapshot.data!.mUsername}',
-  //                       style: const TextStyle(fontSize: 40, color: Colors.white, fontFamily: 'roboto'),
-  //                     )),
-  //                 Padding(
-  //                     padding: const EdgeInsets.all(8.0),
-  //                     child: Text(
-  //                       'User Email: ${snapshot.data!.mEmail}',
-  //                       style: const TextStyle(fontSize: 40, color: Colors.white, fontFamily: 'roboto'),
-  //                     )),
-  //                 Padding(
-  //                     padding: const EdgeInsets.all(8.0),
-  //                     child: Text(
-  //                       'User Note: ${snapshot.data!.mNote}',
-  //                       style: const TextStyle(fontSize: 40, color: Colors.white, fontFamily: 'roboto'),
-  //                     )),
-  //               ],
-  //             ));
-  //       } else if (snapshot.hasError) {
-  //         child = Text('${snapshot.error}');
-  //       } else {
-  //         ///This awaits snapshot data, displaying a loading spinner
-  //         child = const CircularProgressIndicator();
-  //       }
-        
-  //       return child;
-  //     },
-      
-  //   );
-  //   return fb;
-  
-  //} // end of widget
-@override
-Widget build(BuildContext context) {
-  return Center(
-    child: Padding(
-      padding: const EdgeInsets.all(16.0),
+  @override
+  Widget build(BuildContext context) {
+    return Center(
       child: Container(
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.green,
-            width: 1.5,
+        width: 500,
+        height: 500,
+        child: Padding(
+          padding: const EdgeInsets.only(
+              left: 24.0, top: 100.0, right: 24.0, bottom: 200),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.green,
+                width: 1.5,
+              ),
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
+            ),
+            child: FutureBuilder<User>(
+              future: _futureUserFormat,
+              builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
+                if (snapshot.hasData) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Username: ${snapshot.data!.mUsername}',
+                          style: const TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontFamily: 'roboto'),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'User Email: ${snapshot.data!.mEmail}',
+                          style: const TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontFamily: 'roboto'),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'User Note: ${snapshot.data!.mNote}',
+                          style: const TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontFamily: 'roboto'),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Gender Id: ${snapshot.data!.mGI}',
+                          style: const TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontFamily: 'roboto'),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Sexual Or: ${snapshot.data!.mSO}',
+                          style: const TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontFamily: 'roboto'),
+                        ),
+                      ),
+                    ],
+                  );
+                } else if (snapshot.hasError) {
+                  return Text('${snapshot.error}');
+                } else {
+                  return CircularProgressIndicator();
+                }
+              },
+            ),
           ),
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-        ),
-        child: FutureBuilder<User>(
-          future: _futureUserFormat,
-          builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
-            if (snapshot.hasData) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'User ID: ${snapshot.data!.mId}',
-                      style: const TextStyle(fontSize: 20, color: Colors.white, fontFamily: 'roboto'),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'Username: ${snapshot.data!.mUsername}',
-                      style: const TextStyle(fontSize: 20, color: Colors.white, fontFamily: 'roboto'),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'User Email: ${snapshot.data!.mEmail}',
-                      style: const TextStyle(fontSize: 20, color: Colors.white, fontFamily: 'roboto'),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'User Note: ${snapshot.data!.mNote}',
-                      style: const TextStyle(fontSize: 20, color: Colors.white, fontFamily: 'roboto'),
-                    ),
-                  ),
-                ],
-              );
-            } else if (snapshot.hasError) {
-              return Text('${snapshot.error}');
-            } else {
-              return CircularProgressIndicator();
-            }
-          },
         ),
       ),
-    ),
-  );
-}
-
-
-
-
+    );
+  }
 }

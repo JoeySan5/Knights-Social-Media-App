@@ -11,7 +11,8 @@ import 'package:knights/pages/detailed_post_page.dart';
       final int mId;
       final String mContent;
       final int mLikeCount;
-      const IdeaFormat({super.key, required this.mId, required this.mContent, required this.mLikeCount});
+      final String sessionKey;
+      const IdeaFormat({super.key, required this.sessionKey, required this.mId, required this.mContent, required this.mLikeCount});
 
       @override
       State<IdeaFormat> createState() => _IdeaFormat();
@@ -83,7 +84,7 @@ import 'package:knights/pages/detailed_post_page.dart';
                       setState(() {
                         likeCount++;
                       });
-                      return onLikeButtonTapped(widget.mId);
+                      return onLikeButtonTapped(widget.mId, widget.sessionKey);
                     },
                     likeBuilder:(bool isLiked){
                       return const Icon(
@@ -98,7 +99,7 @@ import 'package:knights/pages/detailed_post_page.dart';
                       setState(() {
                         likeCount--;
                       });
-                      return onDislikeButtonTapped(widget.mId);
+                      return onDislikeButtonTapped(widget.mId, widget.sessionKey);
                     },
                     likeBuilder:(bool isLiked){
                       return const Icon(

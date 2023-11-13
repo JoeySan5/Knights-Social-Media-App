@@ -11,7 +11,7 @@ class ProfilePage extends StatelessWidget{
 final String userId;
 final String sessionKey;
 // final String sessionKey = 'ocm8tRf3Kabd'; // hardcoded session key for Tommy
-  const ProfilePage({super.key, required this.userId, required this.sessionKey});
+  const ProfilePage({super.key,required this.userId, required this.sessionKey});
   
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ final String sessionKey;
           children: <Widget>[
             //UserList(userId, sessionKey), // used to get and display user information
             //UserFormat(mId: mId, mUsername: mUsername, mEmail: mEmail, mNote: mNote, GI: GI, SO: SO)
-            UserFormat(userId: userId,sessionKey: sessionKey),
+            UserFormat(userId:userId, sessionKey: sessionKey),
             ElevatedButton(
               style: const ButtonStyle(
                   backgroundColor: MaterialStatePropertyAll(Colors.green),
@@ -29,9 +29,17 @@ final String sessionKey;
               onPressed: (){
                 Navigator.pop(context);
               },
-              child: const Text('Edit Profile.')
+              child: const Text('Edit Profile')
               ),
-             
+                         ElevatedButton(
+              style: const ButtonStyle(
+                  backgroundColor: MaterialStatePropertyAll(Colors.green),
+                ),
+              onPressed: (){
+                Navigator.pop(context);
+              },
+              child: const Text('Home Page')
+              ),
           ],
         ),
       )
