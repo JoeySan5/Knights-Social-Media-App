@@ -36,9 +36,10 @@ public class DatabaseTest extends TestCase {
         MockDatabase mockDB = new MockDatabase();
         // Try to add the first Idea
         String content = "sample content";
-        assertTrue(mockDB.createEntry(content) == 1);
+        String userID = "sample user";
+        assertTrue(mockDB.createIdeaEntry(content, userID) == 1);
         // Try to add the second Idea
-        assertTrue(mockDB.createEntry(content) == 2);
+        assertTrue(mockDB.createIdeaEntry(content, userID) == 2);
     }
 
     /**
@@ -53,14 +54,15 @@ public class DatabaseTest extends TestCase {
         assertTrue(ideas.size() == 0);
         // GET with exactly 1 post
         String content1 = "first content";
-        mockDB.createEntry(content1);
+        String userID = "sample user";
+        mockDB.createIdeaEntry(content1, userID);
         ideas = mockDB.readAll();
         assertTrue(ideas.get(0).mId == 1);
         assertTrue(ideas.get(0).mContent.equals(content1));
         assertTrue(ideas.get(0).mLikeCount == 0);
         // GET with more than 1 post
         String content2 = "second content";
-        mockDB.createEntry(content2);
+        mockDB.createIdeaEntry(content2, userID);
         ideas = mockDB.readAll();
         assertTrue(ideas.get(0).mId == 1);
         assertTrue(ideas.get(0).mContent.equals(content1));
@@ -81,7 +83,8 @@ public class DatabaseTest extends TestCase {
         assertTrue(idea == null);
         // GET an entry after it's added
         String content = "example content";
-        mockDB.createEntry(content);
+        String userID = "sample user";
+        mockDB.createIdeaEntry(content, userID);
         idea = mockDB.readOne(1);
         assertTrue(idea.mId == 1);
         assertTrue(idea.mContent.equals(content));
@@ -91,7 +94,7 @@ public class DatabaseTest extends TestCase {
         assertTrue(idea == null);
         // GET arbitrary entry out of many entries
         for(int i=2; i<content.length(); i++){
-            mockDB.createEntry(content.substring(0, i));
+            mockDB.createIdeaEntry(content.substring(0, i), userID);
         }
         int arbitraryID = 5;
         idea = mockDB.readOne(arbitraryID);
@@ -109,7 +112,8 @@ public class DatabaseTest extends TestCase {
      */
     public void testPUTLikes(){
         MockDatabase mockDB = new MockDatabase();
-        mockDB.createEntry("example content");
+        String userID = "sample user";
+        mockDB.createIdeaEntry("example content", userID);
         // PUT with invalid increment values (0, < -1, > 1)
         assert(mockDB.updateOneLikeCount(1, 0) == -1);
         assert(mockDB.updateOneLikeCount(1, -11) == -1);
@@ -137,9 +141,10 @@ public class DatabaseTest extends TestCase {
      */
     public void testDELETE(){
         MockDatabase mockDB = new MockDatabase();
+        String userID = "sample user";
         // DELETE a nonexistent entry
         assertFalse(mockDB.deleteOne(1));
-        mockDB.createEntry("example content");
+        mockDB.createIdeaEntry("example content", userID);
         assertTrue(mockDB.readOne(1) != null);
         // DELETE an entry, then try again
         assertTrue(mockDB.deleteOne(1));

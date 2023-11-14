@@ -2,6 +2,9 @@ package edu.lehigh.cse216.knights.backend;
 
 import java.util.ArrayList;
 
+import org.checkerframework.checker.units.qual.A;
+import org.checkerframework.checker.units.qual.m;
+
 /**
  * A mock database that stores a list of Ideas in memory.
  * Used for unit testing in a controlled environment.
@@ -17,40 +20,68 @@ public class MockDatabase {
     /**
      * Rows in the MockDatabase, where each row is an Idea entry
      */
-    private ArrayList<Idea> mRows;
+    private ArrayList<Idea> mIdeaRows;
+
+    private ArrayList<User> mUserRows;
+
+    private ArrayList<Comment> mCommentRows;
+
+    private ArrayList<Like> mLikeRows;
 
     /**
      * A counter for keeping track of the next ID to assign to a new Idea
      */
-    private int mCounter;
+    private int mIdeaCounter;
+
+    private int mUserCounter;
+
+    private int mCommentCounter;
 
     /**
      * Construct the MockDatabase by resetting its counter and creating the
      * ArrayList for the rows of data.
      */
     MockDatabase() {
-        mCounter = 0;
-        mRows = new ArrayList<>();
+        mIdeaCounter = 0;
+        mCommentCounter = 0;
+        mIdeaRows = new ArrayList<>();
+        mUserRows = new ArrayList<>();
+        mCommentRows = new ArrayList<>();
     }
 
-    /**
-     * Add a new row to the DataStore. Currently adjusted so that the first entry
-     * in the table has ID = 1. (not 0).
-     * 
-     * @param content The content for the new Idea
-     * @return the ID associated with the row, or -1 if no row was created
-     */
-    public synchronized int createEntry(String content) {
+
+    public synchronized String createUserEntry(String userID, String username, String email, String GI, String SO, String note) {
+        if (username == null || email == null || GI == null || SO == null || note == null)
+            return null;
+        // id will be unique since mCounter is incremented on every successful call
+        String id = userID;
+        User user = new User(id, username, email, GI, SO, note, true);
+        mUserRows.add(user);
+        return id;
+    } 
+
+    public synchronized int createIdeaEntry(String content, String userID) {
         if (content == null)
             return -1;
         // id will be unique since mCounter is incremented on every successful call
-        mCounter++;
-        int id = mCounter;
-        Idea idea = new Idea(id, content);
-        mRows.add(id-1, idea);
+        mIdeaCounter++;
+        int id = mIdeaCounter;
+        Idea idea = new Idea(id, content, userID);
+        mIdeaRows.add(id-1, idea);
         return id;
     }
 
+    public synchronized int createCommentEntry(String content, String userID, int ideaID) {
+        if (content == null)
+            return -1;
+        // id will be unique since mCounter is incremented on every successful call
+        mCommentCounter++;
+        int id = mCommentCounter;
+        Comment comment = new Comment(id, userID, ideaID, content);
+        mCommentRows.add(id-1, comment);
+        return id;
+    }
+    
      /**
      * Get one complete row from the MockDatabase using its ID to select it
      * 
@@ -58,9 +89,9 @@ public class MockDatabase {
      * @return A copy of the data in the row, if it exists, or null otherwise
      */
     public synchronized Idea readOne(int id) {
-        if (id > mRows.size() || id <= 0)
+        if (id > mIdeaRows.size() || id <= 0)
             return null;
-        Idea idea = mRows.get(id-1);
+        Idea idea = mIdeaRows.get(id-1);
         if (idea == null)
             return null;
         return new Idea(idea);
@@ -72,7 +103,7 @@ public class MockDatabase {
      */
     public synchronized ArrayList<Idea> readAll() {
         ArrayList<Idea> data = new ArrayList<>();
-        for (Idea row : mRows) {
+        for (Idea row : mIdeaRows) {
             if (row != null)
                 data.add(new Idea(row));
         }
@@ -90,10 +121,10 @@ public class MockDatabase {
         if (!(likeDelta == 1 || likeDelta == -1))
             return -1; // default error return value
         // only update if the current entry is valid (not null)
-        if (id > mRows.size() || id <= 0)
+        if (id > mIdeaRows.size() || id <= 0)
             return 0;   // implying 0 rows updated
-        Idea data = mRows.get(id-1);
-        if (data == null || id > mCounter)
+        Idea data = mIdeaRows.get(id-1);
+        if (data == null || id > mIdeaCounter)
             return 0;   // implying 0 rows updated
         // Update and then return 1, since 1 row is updated
         data.mLikeCount += likeDelta;
@@ -109,11 +140,11 @@ public class MockDatabase {
      */
     public synchronized boolean deleteOne(int id) {
         // Deletion fails for an invalid Id or an Id that has already been deleted
-        if (id > mRows.size() || id <= 0)
+        if (id > mIdeaRows.size() || id <= 0)
             return false;
-        if (mRows.get(id-1) == null)
+        if (mIdeaRows.get(id-1) == null)
             return false;
-        mRows.set(id-1, null);
+        mIdeaRows.set(id-1, null);
         return true;
     }
 

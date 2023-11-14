@@ -31,7 +31,7 @@ public class IdeaTest extends TestCase {
     public void testConstructor() {
         int id = 99;
         String content = "Test Content";
-        Idea idea = new Idea(id, content);
+        Idea idea = new Idea(id, content, "temp");
 
         assertTrue(idea.mContent.equals(content));
         assertTrue(idea.mId == id);
@@ -44,7 +44,7 @@ public class IdeaTest extends TestCase {
     public void testCopyconstructor() {
         String content = "Test Content For Copy";
         int id = 101;
-        Idea idea1 = new Idea(id, content);
+        Idea idea1 = new Idea(id, content, "temp");
         idea1.mLikeCount += 10; // add by some amount so it's not the default value
         Idea idea2 = new Idea(idea1);
         assertTrue(idea2.mContent.equals(idea1.mContent));
