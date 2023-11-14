@@ -7,7 +7,8 @@ import 'package:knights/components/ideas_form.dart';
 ///Features a centered column with an Ideas Form and a button to 
 ///navigate back home (pop current message_page)
 class MessagePage extends StatelessWidget{
-  const MessagePage({super.key});
+  final String sessionKey;
+  const MessagePage({super.key, required this.sessionKey});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,7 @@ class MessagePage extends StatelessWidget{
       body:Center(
         child: Column(
           children: <Widget>[
-            const IdeasForm(),
+            IdeasForm(sessionKey: sessionKey),
             
             ElevatedButton(
               style: const ButtonStyle(

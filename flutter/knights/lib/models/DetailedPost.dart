@@ -1,15 +1,16 @@
 /// model class for detailed  IDea
 /// 
 /// ideas must contain mID, mContent, mLikeCount, mUserId, mPosterName, mComments
+import 'package:knights/models/Comments.dart';
 class DetailedPost{
   final int mId;
   final String mContent;
   final int mLikeCount;
   final String mUserId;
-  final String mPosterUserName;
-  // TODO: add comments model
-//  final String mCommentsX
-  DetailedPost({required this.mId, required this.mContent, required this.mLikeCount, required this.mUserId, required this.mPosterUserName});
+  final String mPosterUsername;
+  /// comments object
+  //final Comments mComments;
+  DetailedPost({required this.mId, required this.mContent, required this.mLikeCount, required this.mUserId, required this.mPosterUsername});
 
 
 factory DetailedPost.fromJson(Map<String, dynamic> json){
@@ -18,7 +19,8 @@ factory DetailedPost.fromJson(Map<String, dynamic> json){
     mContent: json['mContent'],
     mLikeCount: json['mLikeCount'],
     mUserId: json['mUserId'],
-    mPosterUserName: json['mPosterUserName']
+    mPosterUsername: json['mPosterUsername'],
+    //mComments: json['mComments']
   );
 }
 
@@ -27,6 +29,7 @@ Map<String, dynamic>toJson() =>{
   'mContent': mContent,
   'mLikeCount': mLikeCount,
   'mUserId': mUserId,
-  'mPosterUserName': mPosterUserName,
+  'mPosterUserName': mPosterUsername,
+  //'mComments': mComments
 };
 }

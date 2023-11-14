@@ -98,8 +98,8 @@ class MyLoginPage extends StatelessWidget {
   
   Future<String> _sendTokenToServer(String? token) async {
     var backendUrl =
-        //Uri.parse('https://team-knights.dokku.cse.lehigh.edu/login');
-        Uri.parse("http://10.0.2.2:8998/login");
+        Uri.parse('https://team-knights.dokku.cse.lehigh.edu/login');
+        //Uri.parse("http://10.0.2.2:8998/login");
     var headers = {"Accept": "application/json"};
     var body = {'credential': token};
     try {

@@ -1,10 +1,12 @@
 import 'package:http/http.dart' as http;
+import 'package:knights/models/Comments.dart';
 import 'dart:convert';
 import 'dart:developer' as developer;
 
-import 'package:knights/models/idea.dart';
+import 'package:knights/models/Idea.dart';
 import 'package:knights/models/User.dart';
 import 'package:knights/models/DetailedPost.dart';
+import 'package:knights/models/Poster.dart';
 
 // web function to get user profile data
 // View User
@@ -13,7 +15,8 @@ import 'package:knights/models/DetailedPost.dart';
 // View a User’s Profile Page
 Future<User> fetchUsers(String sessionKey) async{
   developer.log('Making web request for user data...');
-  var url = Uri.parse('http://10.0.2.2:8998/users/?sessionKey=$sessionKey');
+  var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/users?sessionKey=$sessionKey');
+  //var url = Uri.parse('http://10.0.2.2:8998/users?sessionKey=$sessionKey');
   var headers = {"Accept":"application/json"};
   // garbage user that gets returned if sopmething goes wrong
   User garb = User(mId: "", mUsername: 'garbage', mEmail: 'nonExistent', mNote: 'garbage', mGI: '', mSO: '');
@@ -42,16 +45,72 @@ Future<User> fetchUsers(String sessionKey) async{
 }
 
 
-/// GET request for detailed view of post
-Future<DetailedPost> fetchDetailedPost(int mId) async{
-  developer.log('Making web request for detailed post data...');
-  var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/$mId');
+
+Future<Poster> fetchPoster(String id, String sessionKey) async{
+  developer.log('Making web request for user data...');
+  var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/users/$id?sessionKey=$sessionKey');
+  //var url = Uri.parse('http://10.0.2.2:8998/users?sessionKey=$sessionKey');
   var headers = {"Accept":"application/json"};
-  // garbage DetailedPost that gets returned if sopmething goes wrong
-  
+  // garbage user that gets returned if sopmething goes wrong
+  Poster garb = Poster(mId: "", mUsername: 'garbage', mEmail: 'nonExistent', mNote: 'garbage');
 
   var response = await http.get(url, headers: headers);
 
+  if(response.statusCode == 200){
+    final Poster returnData;
+
+    var res = jsonDecode(response.body);
+    developer.log('json decode: $res');
+    developer.log('resmdata: ${res['mData']}');
+    if(res['mData'] is Map){
+      returnData = Poster.fromJson(res['mData'] as Map<String,dynamic>);
+    } else {
+      developer.log('ERROR: Unexpected json response type (was not user). Using garb');
+      returnData = garb;
+    }
+
+        developer.log('$returnData');
+        return returnData;
+
+  } else{
+    throw Exception('Did not receive success status code from request.');
+  }
+}
+
+
+/// edit user profile
+/// put method
+Future updateUserProfile(String sessionKey, String mUsername, String mEmail, String mSO, String mGI, String mNote) async{
+  developer.log('Making web request...');
+      var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/users');
+      var headers = {"Accept": "application/json"};
+      var body = {'sessionKey':sessionKey, 'mUsername': mUsername, 'mEmail': mEmail, 'mGI':mGI, 'mSO': mSO, 'mNote': mNote};
+      var response = await http.put(url, headers: headers, body: jsonEncode(body));
+      print('updating user profile: ${response.body}');
+      if (response.statusCode == 200){
+        developer.log('response headers: ${response.headers}');
+        developer.log('response body: ${response.body}');        
+      }
+      else{
+        ///If the server did not return a 200 OK response,
+        ///then throw an exception.
+        throw Exception('Did not receive success status(200) code from request.');
+      }
+
+}
+
+
+/// GET request for detailed view of post
+Future<DetailedPost> fetchDetailedPost(int mId, String sessionKey) async{
+  developer.log('Making web request for detailed post data...');
+  var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/$mId?sessionKey=$sessionKey');
+  var headers = {"Accept":"application/json"};
+  // garbage DetailedPost that gets returned if sopmething goes wrong
+  Comments garb = Comments(mCommentId: 999, mContent: 'garbage', mUserId: 'garbage', mCommenterUsername: 'garbage');
+
+
+  var response = await http.get(url, headers: headers);
+  print(response.body);
   if(response.statusCode == 200){
     final DetailedPost returnData;
 
@@ -59,13 +118,15 @@ Future<DetailedPost> fetchDetailedPost(int mId) async{
     developer.log('json decode: $res');
     developer.log('resmdata: ${res['mData']}');
     if(res['mData'] is Map){
+      print('returning detailed post');
       returnData = DetailedPost.fromJson(res['mData'] as Map<String, dynamic>);
     } else {
       developer.log('ERROR: Unexpected json response type (was not ideas/id). Check web_requests and that proper data is passed.');
-      returnData = DetailedPost(mId: -1, mContent: "error", mLikeCount: 0, mUserId: "notValid123", mPosterUserName: "DNE123");
+      returnData = DetailedPost(mId: -1, mContent: "error", mLikeCount: 0, mUserId: "notValid123", mPosterUsername: "DNE123");
     }
 
         developer.log('$returnData');
+        print(returnData);
         return returnData;
 
   } else{
@@ -83,18 +144,15 @@ Future<bool> onDislikeButtonTapped(int id, String sessionKey) async{
   bool isLiked = true;
 
     developer.log('Making web request...');
-    //var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/$id/likes');
-    var url = Uri.parse('http://10.0.2.2:8998/ideas/$id/likes');
+    var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/$id/likes');
+    //var url = Uri.parse('http://10.0.2.2:8998/ideas/$id/likes');
     var headers = {"Accept": "application/json"};
     var body = {'sessionKey': sessionKey, 'value': -1};
 
+    developer.log('json encode body: $sessionKey');
+    
+
     var response = await http.put(url, headers: headers, body: jsonEncode(body));
-
-    developer.log('Response status: ${response.statusCode}');
-    developer.log('Response headers: ${response.headers}');
-    developer.log('Response body: ${response.body}');
-    developer.log(await http.read(url));
-
 
     return !isLiked;
   }
@@ -105,35 +163,28 @@ Future<bool> onDislikeButtonTapped(int id, String sessionKey) async{
 
 
     developer.log('Making web request...');
-    //var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/$id/likes');
-    var url = Uri.parse('http://10.0.2.2:8998/ideas/$id/likes');
+    var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/$id/likes');
+    //var url = Uri.parse('http://10.0.2.2:8998/ideas/$id/likes');
     var headers = {"Accept": "application/json"};
     var body = {'sessionKey': sessionKey, 'value': 1};
 
     var response = await http.put(url, headers: headers, body: jsonEncode(body));
-    if(response.statusCode == 200){
-      developer.log('Response status: ${response.statusCode}');
-    developer.log('Response headers: ${response.headers}');
-    developer.log('Response body: ${response.body}');
-    developer.log(await http.read(url));
-    } else {
-      print('error,  did  not get status code of 200 when trying to like');
-      throw Exception('Did not receive syccess status(200) from request');
-    }
-    
+    print(response.body);
+    developer.log(response.body);
 
     return !isLiked;
   }
 
   ///Web Function to send post request to dokku backend. Creates idea with userText
-  Future<String> postIdeas(String userText) async{
+  Future<String> postIdeas(String userText, String sessionKey) async{
       developer.log('Making web request...');
       var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas');
       var headers = {"Accept": "application/json"};
-      var body = {'mContent': userText};
-
+      var body = {'mContent': userText, 'sessionKey': sessionKey};
+      print(sessionKey);
+      print(userText);
       var response = await http.post(url, headers: headers, body: jsonEncode(body));
-
+      print(response.body);
       if (response.statusCode == 200){
         developer.log('response headers: ${response.headers}');
         developer.log('response body: ${response.body}');
@@ -153,8 +204,8 @@ Future<bool> onDislikeButtonTapped(int id, String sessionKey) async{
     ///parses each json object into an idea object(model)
     Future<List<Idea>> fetchIdeas(String sessionKey) async{
       developer.log('Making web request...');
-      //var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas?sessionKey=$sessionKey');
-      var url = Uri.parse('http://10.0.2.2:8998/ideas?sessionKey=$sessionKey');
+      var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas?sessionKey=$sessionKey');
+      //var url = Uri.parse('http://10.0.2.2:8998/ideas?sessionKey=$sessionKey');
       var headers = {"Accept": "application/json"};
 
       var response = await http.get(url, headers: headers);

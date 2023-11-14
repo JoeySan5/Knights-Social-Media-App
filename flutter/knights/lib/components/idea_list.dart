@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
-import 'package:knights/models/idea.dart';
+import 'package:knights/models/Idea.dart';
 import 'package:knights/components/idea_format.dart';
 import 'package:knights/net/web_requests.dart';
 
@@ -61,7 +61,7 @@ class IdeaList extends StatefulWidget{
             itemBuilder: (context, index) {
               developer.log('building with context & $index');
 
-              return IdeaFormat(sessionKey: widget.sessionKey,mId: snapshot.data![index].mId, mContent:snapshot.data![index].mContent, mLikeCount: snapshot.data![index].mLikeCount);
+              return IdeaFormat(sessionKey: widget.sessionKey,mId: snapshot.data![index].mId, mContent:snapshot.data![index].mContent, mLikeCount: snapshot.data![index].mLikeCount, mPosterUsername: snapshot.data![index].mPosterUsername, mUserId: snapshot.data![index].mUserId);
             },
             );
             

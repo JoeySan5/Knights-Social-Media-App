@@ -4,14 +4,6 @@ import 'package:knights/components/idea_list.dart';
 import 'package:knights/pages/message_page.dart';
 import 'package:knights/pages/profile_page.dart';
 
-//import 'package:bignum/bignum.dart';
-
-// global variable to test out profile page features
-              //112569610817039937158
-// BigInt userId = 3431212323615612355 as BigInt;
-
-// const String userId = '101136375578726959533';
-// const String sessionKey = 'ocm8tRf3Kabd';
 ///This class is the Home Page for the app.
 ///
 ///Features a centered column with a title, sub title, idea list,
@@ -30,14 +22,13 @@ class MyHomePage extends StatelessWidget{
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.account_circle),
-              // when pressed will go to profile page
-              // currently hardcoded
-              // TODO: get rid of hard coded access token
+              /// goes to profile page when profile icon is tapped
+              /// passes through 
               onPressed: (){
                 Navigator.push(
                     context, 
                     MaterialPageRoute(
-                      builder: (context) => ProfilePage(userId: userId, sessionKey: sessionKey)
+                      builder: (context) => ProfilePage(sessionKey: sessionKey)
                       )
                   );
               },
@@ -89,7 +80,7 @@ class MyHomePage extends StatelessWidget{
                   Navigator.push(
                     context, 
                     MaterialPageRoute(
-                      builder: (context) => const MessagePage()
+                      builder: (context) => MessagePage(sessionKey: sessionKey)
                       )
                   );
                 }, 

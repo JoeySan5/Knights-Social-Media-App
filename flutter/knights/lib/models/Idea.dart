@@ -5,11 +5,15 @@ class Idea{
   final int mId;
   final String mContent;
   final int mLikeCount;
+  final String mPosterUsername;
+  final String mUserId;
 
   const Idea({
     required this.mId,
     required this.mContent,
     required this.mLikeCount,
+    required this.mPosterUsername,
+    required this.mUserId
   });
 
   ///This is a factory constructor that creates an idea instance from json objects.
@@ -17,7 +21,9 @@ class Idea{
     return Idea(
       mId: json['mId'],
       mContent: json['mContent'],
-      mLikeCount: json['mLikeCount']
+      mLikeCount: json['mLikeCount'],
+      mPosterUsername: json['mPosterUsername'],
+      mUserId: json['mUserId']
     );
   }
 
@@ -25,7 +31,9 @@ class Idea{
   Map<String, dynamic> toJson() =>{
     'mId' : mId,
     'mContent' : mContent,
-    'mLikeCount': mLikeCount
+    'mLikeCount': mLikeCount,
+    'mPosterUsername': mPosterUsername,
+    'mUserId': mUserId
   };
 
 
