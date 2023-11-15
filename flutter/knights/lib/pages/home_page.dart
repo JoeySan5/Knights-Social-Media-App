@@ -11,16 +11,18 @@ import 'package:knights/pages/profile_page.dart';
 class MyHomePage extends StatelessWidget{
   final userId;
   final sessionKey;
+  /// parameters are userId and sessionKey to be used for later pages
   MyHomePage({super.key, required this.userId, this.sessionKey});
     
     @override
     Widget build(BuildContext context) {  
       return   Scaffold(
-        // app bar for the profile icon that takes you to profile
+        /// app bar for the profile icon that takes you to profile when clicked
         appBar: AppBar(
-          title: Text('Profile'),
+          title: Text(''),
           actions: <Widget>[
             IconButton(
+              /// profile 
               icon: Icon(Icons.account_circle),
               /// goes to profile page when profile icon is tapped
               /// passes through 
@@ -28,6 +30,7 @@ class MyHomePage extends StatelessWidget{
                 Navigator.push(
                     context, 
                     MaterialPageRoute(
+                      /// takes user to profile page and passed the sessionKey 
                       builder: (context) => ProfilePage(sessionKey: sessionKey)
                       )
                   );
@@ -68,6 +71,7 @@ class MyHomePage extends StatelessWidget{
               ),
               SizedBox(
                 height: 400,
+                /// IdeaList displays all ideas in neat list format and uses sessionKey
                 child: IdeaList(sessionKey: sessionKey),
               ),
               Padding(
@@ -80,6 +84,7 @@ class MyHomePage extends StatelessWidget{
                   Navigator.push(
                     context, 
                     MaterialPageRoute(
+                      /// Allows user to post a message, uses sessionKey
                       builder: (context) => MessagePage(sessionKey: sessionKey)
                       )
                   );

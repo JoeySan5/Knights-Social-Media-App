@@ -3,6 +3,7 @@
 /// model class for a poster user
 /// 
 /// User must contain mUserId, username, email, note
+/// Must match up with what is returned from backend
 class Poster{
   final String mId;
   final String mUsername;
@@ -11,6 +12,7 @@ class Poster{
 
 Poster({required this.mId, required this.mUsername, required this.mEmail, required this.mNote});
 
+// determines what is assigned upon return from backend
 factory Poster.fromJson(Map<String, dynamic> json){
   return Poster(
     mId: json['mId'],
@@ -20,7 +22,7 @@ factory Poster.fromJson(Map<String, dynamic> json){
   );
 }
 
-///Converts user object into jsopn object (map)
+///Converts Poster object into jsopn object (map)
 Map<String, dynamic> toJson() =>{
   'mId': mId,
   'mUsername': mUsername,

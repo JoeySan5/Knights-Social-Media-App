@@ -11,10 +11,13 @@ import 'package:knights/pages/home_page.dart';
 
 import 'package:knights/api/google_signin_api.dart';
 
-/**
- * This is the login page for the app
- */
-
+/// login page
+/// has single login button
+/// calls google_signin_api.dart which kickstarts signin process
+/// that returns a GoogleSignInAccount object which allows the authentication process to begin
+/// after that it gets validated on Google's end and returns a key, email, and userId info
+/// this gets passed to our backend to get validated and upon success, a session key for current session is returned
+/// uerId and sessionKey are stored in a map and passed to homepage which then distrubutes it to other pages for use
 class MyLoginPage extends StatelessWidget {
   const MyLoginPage({super.key});
 
@@ -74,7 +77,9 @@ class MyLoginPage extends StatelessWidget {
     ))));
   }
 
-
+/// takes GoogleSignInAccount object from api and uses it to authenitcate on googles end
+/// then it passes that to the backend through the _sendTokenToServer method and gets the session key in return
+/// then passes back a map of session key and userId
  Future <Map<String, dynamic>> signIn() async {
   final user = await GoogleSignInApi.login();
   // map to hold userId and session key
@@ -95,7 +100,7 @@ class MyLoginPage extends StatelessWidget {
   }
 
 
-  
+  /// gets SignInAuthentication and sends to backend to get credential or token which is session key
   Future<String> _sendTokenToServer(String? token) async {
     var backendUrl =
         Uri.parse('https://team-knights.dokku.cse.lehigh.edu/login');

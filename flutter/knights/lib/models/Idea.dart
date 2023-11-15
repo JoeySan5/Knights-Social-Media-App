@@ -1,6 +1,7 @@
 ///This is the model class for an Idea.
 ///
 ///Idea's must contain mID, mContent, and mLikeCount.
+///Must matchup with JSOn returned from backend
 class Idea{
   final int mId;
   final String mContent;

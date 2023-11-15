@@ -3,6 +3,7 @@
 /// model class for a User
 /// 
 /// User must contain mUserId, username, email, note, GI, SO
+/// Must matchup with JSOn coming in from backend
 class User{
   final String mId;
   final String mUsername;
@@ -13,6 +14,7 @@ class User{
 
 User({required this.mId, required this.mUsername, required this.mEmail, required this.mNote, required this.mGI, required this.mSO});
 
+// what is assigned from the JSOn returned from backend
 factory User.fromJson(Map<String, dynamic> json){
   return User(
     mId: json['mId'],

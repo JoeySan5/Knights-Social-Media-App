@@ -1,34 +1,39 @@
 /// Model class for Comments
 /// 
-/// Comments must contain content, commentId, userId, commenterUsername
+/// Comments must contain content, commentId, userId, commenterUsername, ideaId
 
 class Comments{
   String mContent;
-  int mCommentId;
+  int mId;
   String mUserId;
   String mCommenterUsername;
+  int mIdeaId;
 
   Comments({
-    required this.mCommentId,
+    required this.mId,
     required this.mContent,
     required this.mUserId,
-    required this.mCommenterUsername
+    required this.mCommenterUsername,
+    required this.mIdeaId
   });
 
+///This is a factory constructor that creates an Comment instance from json objects.
   factory Comments.fromJson(Map<String, dynamic>json){
     return Comments(
-      mCommentId: json['mCommentId'],
+      mId: json['mId'],
       mContent: json['mContent'],
       mUserId: json['mUserId'],
-      mCommenterUsername: json['mCommenterUsername']
+      mCommenterUsername: json['mCommenterUsername'],
+      mIdeaId : json['mIdeaId']
     );
   }
-
+///Converts idea object into json object (map).
   Map<String, dynamic> toJson()=>{
-    'mCommentId': mCommentId,
+    'mId': mId,
     'mContent': mContent,
     'mUserId': mUserId,
-    'mCommenterUsername': mCommenterUsername
+    'mCommenterUsername': mCommenterUsername,
+    'mIdeaId': mIdeaId
   };
 
 }

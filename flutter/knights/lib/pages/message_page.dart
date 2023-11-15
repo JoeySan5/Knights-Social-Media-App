@@ -16,8 +16,9 @@ class MessagePage extends StatelessWidget{
       body:Center(
         child: Column(
           children: <Widget>[
+            /// component that allows userto input new idea  and submit
             IdeasForm(sessionKey: sessionKey),
-            
+            /// button takes you back home
             ElevatedButton(
               style: const ButtonStyle(
                   backgroundColor: MaterialStatePropertyAll(Colors.green),
@@ -27,7 +28,6 @@ class MessagePage extends StatelessWidget{
               },
               child: const Text('Go Back Home')
               ),
-             
           ],
         ),
       )

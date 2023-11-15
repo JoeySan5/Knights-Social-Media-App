@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'package:knights/net/web_requests.dart';
-import 'package:knights/models/User.dart';
-import 'package:knights/pages/poster_user_profile_page.dart';
 import 'package:knights/models/Poster.dart';
 
 /// this class is format to  display current userinformation
 ///
-/// component includers user id, username, email, note, SO, GI
+/// component includers user id, username, email, note
 class PosterFormat extends StatefulWidget {
   final String userId;
   final String sessionKey;
@@ -21,11 +19,11 @@ class _PosterFormat extends State<PosterFormat> {
   // controller for allowing text to be editable
   TextEditingController textController = TextEditingController();
 
-  /// now we want to read in data from dokku using get and parse json into user_format objects
+  /// now we want to read in data from dokku using get and parse json into poster_format objects
   ///
   /// initState called to initalize data that depends on a build,
   /// once the widget is inserted inside the widgettree. In this case the
-  /// widget is the list of user_formats
+  /// widget is the list of poster_formats
   @override
   void initState() {
     super.initState();
@@ -39,6 +37,7 @@ class _PosterFormat extends State<PosterFormat> {
     });
   }
 
+/// similar to user compnent except that it is not editable
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -94,7 +93,6 @@ class _PosterFormat extends State<PosterFormat> {
                               fontFamily: 'roboto'),
                         ),
                       ),
-                                                // Other TextFormField widgets with similar structure
                           ElevatedButton(
                             style: const ButtonStyle(
                               backgroundColor:

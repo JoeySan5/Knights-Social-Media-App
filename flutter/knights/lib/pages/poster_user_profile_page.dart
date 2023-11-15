@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:knights/components/poster_format.dart';
-import 'package:knights/components/user_format.dart';
 
+
+
+///Profilepage for other user 
+///seen when username is clicked on post
+///displays similar information to current user's profile page except that 
+///the GI and SO are not displayed
+///Calls the PosterFormat component to display info
 class PosterProfilePage extends StatelessWidget{
 final String userId;
 final String sessionKey;
-// final String sessionKey = 'ocm8tRf3Kabd'; // hardcoded session key for Tommy
   const PosterProfilePage({super.key,required this.userId, required this.sessionKey});
   
   @override
@@ -14,18 +19,8 @@ final String sessionKey;
       body:Center(
         child: Column( 
           children: <Widget>[
-            //UserList(userId, sessionKey), // used to get and display user information
-            //UserFormat(mId: mId, mUsername: mUsername, mEmail: mEmail, mNote: mNote, GI: GI, SO: SO)
+            /// component displays poster's information
             PosterFormat(userId:userId, sessionKey: sessionKey),
-                         ElevatedButton(
-              style: const ButtonStyle(
-                  backgroundColor: MaterialStatePropertyAll(Colors.green),
-                ),
-              onPressed: (){
-                Navigator.pop(context);
-              },
-              child: const Text('Home Page')
-              ),
           ],
         ),
       )

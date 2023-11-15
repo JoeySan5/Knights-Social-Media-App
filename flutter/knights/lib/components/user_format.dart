@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'package:knights/net/web_requests.dart';
 import 'package:knights/models/User.dart';
-import 'package:knights/pages/home_page.dart';
 
 /// this class is format to  display current userinformation
 ///
 /// component includers user id, username, email, note, SO, GI
+/// Uses sessionKey as parameter to make TTP GET request
 class UserFormat extends StatefulWidget {
   final String sessionKey;
   const UserFormat({super.key, required this.sessionKey});
@@ -15,7 +15,9 @@ class UserFormat extends StatefulWidget {
   State<UserFormat> createState() => _UserFormat();
 }
 
+/// what is created when _UserFormat is called after createState()  method
 class _UserFormat extends State<UserFormat> {
+  /// future object for async calls
   late Future<User> _futureUserFormat;
   // controller for allowing text to be editable
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -38,6 +40,7 @@ class _UserFormat extends State<UserFormat> {
     });
   }
 
+/// widget that displays profile
   @override
   Widget build(BuildContext context) {
     String mUsername = "";
@@ -45,10 +48,12 @@ class _UserFormat extends State<UserFormat> {
     String mNote = "";
     String mGI = "";
     String mSO = "";
+    /// form is to allow the informationto be editable
     return Form(
       key:
           _formKey, // Create a GlobalKey<FormState> _formKey in your State class
       child: Column(
+        /// all children are in this container
         children: [
           Container(
             width: 700,
@@ -68,6 +73,7 @@ class _UserFormat extends State<UserFormat> {
                   future: _futureUserFormat,
                   builder:
                       (BuildContext context, AsyncSnapshot<User> snapshot) {
+                        /// if data is returned, construct and fill column and children
                     if (snapshot.hasData) {
                       return Column(
                         mainAxisSize: MainAxisSize.min,
@@ -75,9 +81,9 @@ class _UserFormat extends State<UserFormat> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(8.0),
+                            /// TextFormField allows for data to be editable
                             child: TextFormField(
-                              initialValue:
-                                  '${snapshot.data!.mUsername}',
+                              initialValue: '${snapshot.data!.mUsername}',
                               style: const TextStyle(
                                   fontSize: 20,
                                   color: Colors.white,
@@ -86,6 +92,10 @@ class _UserFormat extends State<UserFormat> {
                                 icon: Icon(Icons.person),
                                 hintText: '${snapshot.data!.mUsername}',
                                 labelText: 'Username',
+                                labelStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'roboto',
+                                    fontSize: 20),
                                 hintStyle: const TextStyle(
                                     color: Colors.white,
                                     fontFamily: 'roboto',
@@ -105,6 +115,7 @@ class _UserFormat extends State<UserFormat> {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
+                            /// TextFormField allows for data to be editable
                             child: TextFormField(
                               initialValue: '${snapshot.data!.mEmail}',
                               style: const TextStyle(
@@ -115,6 +126,10 @@ class _UserFormat extends State<UserFormat> {
                                 icon: Icon(Icons.person),
                                 hintText: '${snapshot.data!.mEmail}',
                                 labelText: 'Email',
+                                labelStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'roboto',
+                                    fontSize: 20),
                                 hintStyle: const TextStyle(
                                     color: Colors.white,
                                     fontFamily: 'roboto',
@@ -134,6 +149,7 @@ class _UserFormat extends State<UserFormat> {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
+                            /// TextFormField allows for data to be editable
                             child: TextFormField(
                               initialValue: '${snapshot.data!.mNote}',
                               style: const TextStyle(
@@ -144,6 +160,10 @@ class _UserFormat extends State<UserFormat> {
                                 icon: Icon(Icons.person),
                                 hintText: '${snapshot.data!.mNote}',
                                 labelText: 'Note',
+                                labelStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'roboto',
+                                    fontSize: 20),
                                 hintStyle: const TextStyle(
                                     color: Colors.white,
                                     fontFamily: 'roboto',
@@ -163,6 +183,7 @@ class _UserFormat extends State<UserFormat> {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
+                            /// TextFormField allows for data to be editable
                             child: TextFormField(
                               initialValue: '${snapshot.data!.mGI}',
                               style: const TextStyle(
@@ -173,6 +194,10 @@ class _UserFormat extends State<UserFormat> {
                                 icon: Icon(Icons.person),
                                 hintText: '${snapshot.data!.mGI}',
                                 labelText: 'GI',
+                                labelStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'roboto',
+                                    fontSize: 20),
                                 hintStyle: const TextStyle(
                                     color: Colors.white,
                                     fontFamily: 'roboto',
@@ -192,6 +217,7 @@ class _UserFormat extends State<UserFormat> {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
+                            /// TextFormField allows for data to be editable
                             child: TextFormField(
                               initialValue: '${snapshot.data!.mSO}',
                               style: const TextStyle(
@@ -200,8 +226,12 @@ class _UserFormat extends State<UserFormat> {
                                   fontFamily: 'roboto'),
                               decoration: InputDecoration(
                                 icon: Icon(Icons.person),
-                                hintText: '${snapshot.data!.mSO}',
+                                hintText: 'SO: ${snapshot.data!.mSO}',
                                 labelText: 'SO',
+                                labelStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'roboto',
+                                    fontSize: 20),
                                 hintStyle: const TextStyle(
                                     color: Colors.white,
                                     fontFamily: 'roboto',
@@ -219,7 +249,6 @@ class _UserFormat extends State<UserFormat> {
                               },
                             ),
                           ),
-                          // Other TextFormField widgets with similar structure
                           ElevatedButton(
                             style: const ButtonStyle(
                               backgroundColor:
@@ -229,28 +258,27 @@ class _UserFormat extends State<UserFormat> {
                               // Validate and save the form
                               if (_formKey.currentState!.validate()) {
                                 _formKey.currentState!.save();
-                                // Do something with the collected data
                                 print('Form saved!');
-                                updateUserProfile(widget.sessionKey, mUsername , mEmail, mSO, mGI, mNote);
+                                /// update user profile if information is valid
+                                updateUserProfile(widget.sessionKey, mUsername,
+                                    mEmail, mSO, mGI, mNote);
                                 print('updated user profile!');
                               }
                             },
                             child: const Text('Submit'),
                           ),
-                                                    // Other TextFormField widgets with similar structure
                           ElevatedButton(
                             style: const ButtonStyle(
                               backgroundColor:
                                   MaterialStatePropertyAll(Colors.green),
                             ),
                             onPressed: () {
-                              // Validate and save the form
+                              // send user back to homepage
                               Navigator.pop(context);
                             },
                             child: const Text('Home Page'),
                           ),
                         ],
-                        
                       );
                     } else if (snapshot.hasError) {
                       return Text('${snapshot.error}');
@@ -266,171 +294,4 @@ class _UserFormat extends State<UserFormat> {
       ),
     );
   }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Column(children: [
-  //     Container(
-  //       width: 700,
-  //       height: 700,
-  //       child: Padding(
-  //         padding: const EdgeInsets.only(
-  //             left: 24.0, top: 100.0, right: 24.0, bottom: 0),
-  //         child: Container(
-  //           decoration: BoxDecoration(
-  //             border: Border.all(
-  //               color: Colors.green,
-  //               width: 1.5,
-  //             ),
-  //             borderRadius: const BorderRadius.all(Radius.circular(10)),
-  //           ),
-  //           child: FutureBuilder<User>(
-  //             future: _futureUserFormat,
-  //             builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
-  //               if (snapshot.hasData) {
-  //                 return Column(
-  //                   mainAxisSize: MainAxisSize.min,
-  //                   crossAxisAlignment: CrossAxisAlignment.center,
-  //                   children: [
-  //                     Padding(
-  //                       padding: const EdgeInsets.all(8.0),
-  //                       child: TextFormField(
-  //                         initialValue: 'Username: ${snapshot.data!.mUsername}',
-  //                         style: const TextStyle(
-  //                             fontSize: 20,
-  //                             color: Colors.white,
-  //                             fontFamily: 'roboto'),
-  //                         decoration: InputDecoration(
-  //                           icon: Icon(Icons.person),
-  //                           hintText: '${snapshot.data!.mUsername}',
-  //                           labelText: 'Username',
-  //                           hintStyle: const TextStyle(
-  //                             color: Colors.white,
-  //                             fontFamily: 'roboto',
-  //                             fontSize: 20
-  //                           ),
-  //                         ),
-  //                         onSaved: (String? value) {
-  //                           print(value);
-  //                         },
-  //                       ),
-  //                     ),
-  //                     Padding(
-  //                       padding: const EdgeInsets.all(8.0),
-  //                       child: TextFormField(
-  //                         initialValue: 'Email: ${snapshot.data!.mEmail}',
-  //                         style: const TextStyle(
-  //                             fontSize: 20,
-  //                             color: Colors.white,
-  //                             fontFamily: 'roboto'),
-  //                         decoration: InputDecoration(
-  //                           icon: Icon(Icons.person),
-  //                           hintText: '${snapshot.data!.mEmail}',
-  //                           labelText: 'Email',
-  //                           hintStyle: const TextStyle(
-  //                             color: Colors.white,
-  //                             fontFamily: 'roboto',
-  //                             fontSize: 20
-  //                           ),
-  //                         ),
-  //                         onSaved: (String? value) {
-  //                           print(value);
-  //                         },
-  //                       ),
-  //                     ),
-  //                     Padding(
-  //                       padding: const EdgeInsets.all(8.0),
-  //                       child: TextFormField(
-  //                         initialValue: 'Note: ${snapshot.data!.mNote}',
-  //                         style: const TextStyle(
-  //                             fontSize: 20,
-  //                             color: Colors.white,
-  //                             fontFamily: 'roboto'),
-  //                         decoration: InputDecoration(
-  //                           icon: Icon(Icons.person),
-  //                           hintText: '${snapshot.data!.mNote}',
-  //                           labelText: 'Note',
-  //                           hintStyle: const TextStyle(
-  //                             color: Colors.white,
-  //                             fontFamily: 'roboto',
-  //                             fontSize: 20
-  //                           ),
-  //                         ),
-  //                         onSaved: (String? value) {
-  //                           print(value);
-  //                         },
-  //                       ),
-  //                     ),
-  //                     Padding(
-  //                       padding: const EdgeInsets.all(8.0),
-  //                       child: TextFormField(
-  //                         initialValue: 'GI: ${snapshot.data!.mGI}',
-  //                         style: const TextStyle(
-  //                             fontSize: 20,
-  //                             color: Colors.white,
-  //                             fontFamily: 'roboto'),
-  //                         decoration: InputDecoration(
-  //                           icon: Icon(Icons.person),
-  //                           hintText: '${snapshot.data!.mGI}',
-  //                           labelText: 'GI',
-  //                           hintStyle: const TextStyle(
-  //                             color: Colors.white,
-  //                             fontFamily: 'roboto',
-  //                             fontSize: 20
-  //                           ),
-  //                         ),
-  //                         onSaved: (String? value) {
-  //                           print(value);
-  //                         },
-  //                       ),
-  //                     ),
-  //                     Padding(
-  //                       padding: const EdgeInsets.all(8.0),
-  //                       child: TextFormField(
-  //                         initialValue: 'SO: ${snapshot.data!.mSO}',
-  //                         style: const TextStyle(
-  //                             fontSize: 20,
-  //                             color: Colors.white,
-  //                             fontFamily: 'roboto'),
-  //                         decoration: InputDecoration(
-  //                           icon: Icon(Icons.person),
-  //                           hintText: '${snapshot.data!.mSO}',
-  //                           labelText: 'SO',
-  //                           hintStyle: const TextStyle(
-  //                             color: Colors.white,
-  //                             fontFamily: 'roboto',
-  //                             fontSize: 20
-  //                           ),
-  //                         ),
-  //                         onSaved: (String? value) {
-  //                           print(value);
-  //                         },
-  //                       ),
-  //                     ),
-  //                     ElevatedButton(
-  //                         style: const ButtonStyle(
-  //                           backgroundColor:
-  //                               MaterialStatePropertyAll(Colors.green),
-  //                         ),
-  //                         //the arrow function ()=> allows for postIdeas to return a future
-  //                         //this is done because onPressed accepts only voids, not future
-  //                         onPressed: () => {
-  //                               print(),
-  //                               Navigator.pop(context)
-  //                             },
-  //                         child: const Text('Submit')),
-  //                   ],
-  //                 );
-  //               } else if (snapshot.hasError) {
-  //                 return Text('${snapshot.error}');
-  //               } else {
-  //                 return CircularProgressIndicator();
-  //               }
-  //             },
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   ]);
-  // }
 }
