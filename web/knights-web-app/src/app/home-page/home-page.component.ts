@@ -10,6 +10,7 @@ var newEntryForm: IdeaSubmission;
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.css']
 })
+
 export class HomePageComponent {
   onProfile = false;
 
