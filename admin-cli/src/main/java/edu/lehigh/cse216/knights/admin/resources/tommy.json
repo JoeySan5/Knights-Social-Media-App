@@ -1,0 +1,15 @@
+{
+    "sampleUsers" : [
+        {
+          "userId": "112569610817031234567",
+          "username": "Tommy2",
+          "email": "tjp22222@lehigh.edu",
+          "GI": "gi3",
+          "note": "",
+          "valid": true
+        }
+    ],
+    "sampleIdeas" : [ ],
+    "sampleComments" : [  ],
+    "sampleLikes" : [  ]
+}
