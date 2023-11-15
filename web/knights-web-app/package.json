@@ -6,7 +6,12 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "doc": "typedoc --out docs",
+    "compodoc:build": "compodoc -p tsconfig.doc.json",
+    "compodoc:build-and-serve": "compodoc -p tsconfig.doc.json -s",
+    "compodoc:serve": "compodoc -s",
+    "compodoc": "npx compodoc -p tsconfig.doc.json"
   },
   "private": true,
   "dependencies": {
@@ -26,6 +31,7 @@
     "@angular-devkit/build-angular": "^16.2.9",
     "@angular/cli": "^16.2.9",
     "@angular/compiler-cli": "^16.2.0",
+    "@compodoc/compodoc": "^1.1.22",
     "@types/jasmine": "~4.3.0",
     "jasmine-core": "~4.6.0",
     "karma": "~6.4.0",
@@ -33,6 +39,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "typedoc": "^0.25.3",
     "typescript": "~5.1.3"
   }
 }
