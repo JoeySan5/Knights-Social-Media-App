@@ -4,11 +4,11 @@
 - **Team Number**: 25
 - **Team Name**: Knights
 - **Members**:
-  - Tommy Parisi - Backend Developer - Contact Email: tjp225@lehigh.edu
-  - Joseph Sanchez - Mobile Developer - Contact Email: jrs225@lehigh.edu
-  - Adivi Karawat - Admin Developer - Contact Email: adk225@lehigh.edu
-  - Eric Osterman - Web Developer - Contact Email: ejo223@lehigh.edu
-  - Sehyoun Jang - Project Manager - Contact Email: sej324@lehigh.edu
+  - Tommy Parisi - Admin Developer - Contact Email: tjp225@lehigh.edu
+  - Joseph Sanchez - Web Developer - Contact Email: jrs225@lehigh.edu
+  - Adivi Karawat - Project Manager - Contact Email: adk225@lehigh.edu
+  - Eric Osterman - Mobile Developer - Contact Email: ejo223@lehigh.edu
+  - Sehyoun Jang - Backend Manager - Contact Email: sej324@lehigh.edu
 
 ## URLs
 - **Git Repository**: <https://bitbucket.org/cse216-2023fa-team-25/cse216-2023fa-team-25/src/master/>

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: app.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: app.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use strict";
+var __awaiter = (this &amp;&amp; this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this &amp;&amp; this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] &amp; 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" &amp;&amp; (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (g &amp;&amp; (g = 0, op[0] &amp;&amp; (_ = 0)), _) try {
+            if (f = 1, y &amp;&amp; (t = op[0] &amp; 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) &amp;&amp; t.call(y), 0) : y.next) &amp;&amp; !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] &amp; 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 &amp;&amp; t[t.length - 1]) &amp;&amp; (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 &amp;&amp; (!t || (op[1] > t[0] &amp;&amp; op[1] &lt; t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 &amp;&amp; _.label &lt; t[1]) { _.label = t[1]; t = op; break; }
+                    if (t &amp;&amp; _.label &lt; t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] &amp; 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+/**
+ * a lot of code and comments was taken from tutorials like both web fornt ends as well as CORS tutorial
+*/
+/**
+ * Prevent compiler errors when using jQuery.  "$" will be given a type of
+ * "any", so that we can use it anywhere, and assume it has any fields or
+ * methods, without the compiler producing an error.
+*/
+var $;
+/**
+ * The 'this' keyword does not behave in JavaScript/TypeScript like it does in
+ * Java.  Since there is only one NewEntryForm, we will save it to a global, so
+ * that we can reference it from methods of the NewEntryForm in situations where
+ * 'this' won't work correctly.
+*/
+var newEntryForm;
+/**
+ * a global for the main ElementList of the program.  See newEntryForm for
+ * explanation
+*/
+var mainList;
+// variable to keep track of if like was clicked
+var likeClicked = false;
+// global for the backend url
+var backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
+/**
+ * NewEntryForm encapsulates all of the code for the form for adding an entry
+ */
+var NewEntryForm = /** @class */ (function () {
+    /**
+     * To initialize the object, we say what method of NewEntryForm should be
+     * run in response to each of the form's buttons being clicked.
+     */
+    function NewEntryForm() {
+        var _a, _b;
+        // event listeners for adding a post and canceling
+        (_a = document.getElementById("addCancel")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", function (e) { newEntryForm.clearForm(); });
+        (_b = document.getElementById("addButton")) === null || _b === void 0 ? void 0 : _b.addEventListener("click", function (e) { newEntryForm.submitForm(); });
+    }
+    /**
+     * Clear the form's input fields
+     */
+    NewEntryForm.prototype.clearForm = function () {
+        document.getElementById("newIdea").value = "";
+        // reset the UI
+        document.getElementById("addElement").style.display = "none";
+        document.getElementById("ideaList").style.display = "block";
+    };
+    /**
+     * Check if the input fields are both valid, and if so, do an AJAX call.
+     */
+    NewEntryForm.prototype.submitForm = function () {
+        var _this = this;
+        // get the values of the idea field, force them to be strings, and check 
+        // that neither is empty
+        var idea = "" + document.getElementById("newIdea").value;
+        if (idea === "") {
+            window.alert("Error: idea is not valid");
+            return;
+        }
+        // set up an AJAX POST. 
+        // When the server replies, the result will go to onSubmitResponse
+        var doAjax = function () { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, fetch("".concat(backendUrl, "/ideas"), {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                mContent: idea,
+                                mLikeCount: 0
+                            }),
+                            headers: {
+                                'Content-type': 'application/json; charset=UTF-8'
+                            }
+                        }).then(function (response) {
+                            // If we get an "ok" message, return the json
+                            if (response.ok) {
+                                return Promise.resolve(response.json());
+                            }
+                            // Otherwise, handle server errors with a detailed popup message
+                            else {
+                                window.alert("The server replied not ok: ".concat(response.status, "\n") + response.statusText);
+                            }
+                            return Promise.reject(response);
+                        }).then(function (data) {
+                            newEntryForm.onSubmitResponse(data);
+                            console.log(data);
+                        }).catch(function (error) {
+                            console.warn('Something went wrong with POST.', error);
+                            window.alert("Unspecified error, in fetch for submitForm, in NewEntryForm");
+                        })];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        }); };
+        // make the AJAX post and output value or error message to console
+        doAjax().then(console.log).catch(console.log);
+    };
+    /**
+     * onSubmitResponse runs when the AJAX call in submitForm() returns a
+     * result.
+     *
+     * @param data The object returned by the server
+     */
+    NewEntryForm.prototype.onSubmitResponse = function (data) {
+        // If we get an "ok" message, clear the form
+        if (data.mStatus === "ok") {
+            //window.alert("onSubmitResponse = ok" + data);
+            newEntryForm.clearForm();
+            mainList.refresh();
+        }
+        // Handle explicit errors with a detailed popup message
+        else if (data.mStatus === "error") {
+            window.alert("The server replied with an error:\n" + data.ideas);
+        }
+        // Handle other errors with a less-detailed popup message
+        else {
+            window.alert("Unspecified error returned, in onSubmitResponse, in NewEntryForm");
+        }
+    };
+    return NewEntryForm;
+}()); // end class NewEntryForm
+/**
+ * ElementList provides a way of seeing all of the data stored on the server.
+ */
+var ElementList = /** @class */ (function () {
+    function ElementList() {
+    }
+    /**
+     * refresh is the public method for updating ideaList
+     */
+    ElementList.prototype.refresh = function () {
+        var _this = this;
+        // Issue an AJAX GET and then pass the result to update(). 
+        var doAjax = function () { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, fetch("".concat(backendUrl, "/ideas"), {
+                            method: 'GET',
+                            headers: {
+                                'Content-type': 'application/json; charset=UTF-8'
+                            }
+                        }).then(function (response) {
+                            // If we get an "ok" idea, clear the form
+                            if (response.ok) {
+                                console.log("made it this far");
+                                return Promise.resolve(response.json());
+                            }
+                            // Otherwise, handle server errors with a detailed popup idea
+                            else {
+                                window.alert("The server replied not ok: ".concat(response.status, "\n") + response.statusText);
+                            }
+                            return Promise.reject(response);
+                        }).then(function (data) {
+                            mainList.update(data);
+                            console.log(data);
+                        }).catch(function (error) {
+                            console.warn('Something went wrong with GET.', error);
+                            window.alert("Unspecified error with refresh()");
+                        })];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        }); };
+        // make the AJAX post and output value or error message to console
+        doAjax().then(console.log).catch(console.log);
+    };
+    /**
+     * update method that builds the table displaying the list of ideas
+     * @param data the object used to build the table (ideas)
+     */
+    ElementList.prototype.update = function (data) {
+        var elem_ideaList = document.getElementById("ideaList");
+        if (elem_ideaList !== null) {
+            elem_ideaList.innerHTML = "";
+            // table that contains all of the ideas
+            var fragment = document.createDocumentFragment();
+            var table = document.createElement('table');
+            table.setAttribute('id', 'ideaTable');
+            for (var i = 0; i &lt; data.mData.length; ++i) {
+                var tr = document.createElement('tr');
+                var td_message = document.createElement('td');
+                var td_like = document.createElement('td');
+                td_message.innerHTML = data.mData[i].mContent;
+                td_like.innerHTML = data.mData[i].mLikeCount;
+                tr.appendChild(td_message);
+                tr.appendChild(this.likeButtons(data.mData[i].mId));
+                tr.appendChild(td_like);
+                tr.appendChild(this.deleteButtons(data.mData[i].mId));
+                table.appendChild(tr);
+            }
+            fragment.appendChild(table);
+            elem_ideaList.appendChild(fragment);
+        }
+        // Find all of the delete buttons, and set their behavior
+        var all_delbtns = document.getElementsByClassName("delbtn");
+        for (var i = 0; i &lt; all_delbtns.length; ++i) {
+            all_delbtns[i].setAttribute('id', 'deleteId');
+            all_delbtns[i].addEventListener("click", function (e) { mainList.clickDelete(e); });
+        }
+        // Find all of the like buttons, and set their behavior
+        var all_likebtns = document.getElementsByClassName("likebtn");
+        for (var i = 0; i &lt; all_likebtns.length; ++i) {
+            all_likebtns[i].setAttribute('id', 'likeId');
+            all_likebtns[i].addEventListener("click", function (e) { mainList.addLike(e); });
+        }
+        // Find all of the dislike buttons, and set their behavior
+        var all_dislikebtns = document.getElementsByClassName("dislikebtn");
+        for (var i = 0; i &lt; all_dislikebtns.length; ++i) {
+            all_dislikebtns[i].setAttribute('id', 'dislikeId');
+            all_dislikebtns[i].addEventListener("click", function (e) { mainList.addDisLike(e); });
+        }
+    };
+    /**
+     * clickDelete is the code we run in response to a click of a delete button
+     */
+    ElementList.prototype.clickDelete = function (e) {
+        var _this = this;
+        var id = e.target.getAttribute("data-value");
+        // Issue an AJAX DELETE and then invoke refresh()
+        var doAjax = function () { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, fetch("".concat(backendUrl, "/ideas/").concat(id), {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-type': 'application/json; charset=UTF-8'
+                            }
+                        }).then(function (response) {
+                            if (response.ok) {
+                                return Promise.resolve(response.json());
+                            }
+                            else {
+                                window.alert("The server replied not ok: ".concat(response.status, "\n") + response.statusText);
+                            }
+                            return Promise.reject(response);
+                        }).then(function (data) {
+                            // refresh after each delete
+                            mainList.refresh();
+                            console.log(data);
+                        }).catch(function (error) {
+                            console.warn('Something went wrong.', error);
+                            window.alert("Unspecified error, in clickDelete function");
+                        })];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        }); };
+        // make the AJAX post and output value or error message to console
+        doAjax().then(console.log).catch(console.log);
+    };
+    /**
+     * addLike is the code we run in response to a click of a like button
+     */
+    ElementList.prototype.addLike = function (e) {
+        var _this = this;
+        console.log("addLike");
+        // as in clickDelete, we need the ID of the row
+        var id = e.target.getAttribute("data-value");
+        // Issue an AJAX GET and then pass the result to editEntryForm.init()
+        var doAjax = function () { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, fetch("".concat(backendUrl, "/ideas/").concat(id), {
+                            method: 'PUT',
+                            body: JSON.stringify({
+                                mLikeIncrement: 1
+                            }),
+                            headers: {
+                                'Content-type': 'application/json; charset=UTF-8'
+                            }
+                        }).then(function (response) {
+                            if (response.ok) {
+                                return Promise.resolve(response.json());
+                            }
+                            else {
+                                window.alert("The server replied not ok: ".concat(response.status, "\n") + response.statusText);
+                            }
+                            return Promise.reject(response);
+                        }).then(function (data) {
+                            console.log(data);
+                            mainList.refresh();
+                        }).catch(function (error) {
+                            console.warn('Something went wrong.', error);
+                            window.alert("Unspecified error, on addLike");
+                        })];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        }); };
+        // make the AJAX post and output value or error message to console
+        doAjax().then(console.log).catch(console.log);
+    };
+    /**
+     * addDisLike is the code we run in response to a click of a dislike button
+     */
+    ElementList.prototype.addDisLike = function (e) {
+        var _this = this;
+        console.log("disLike");
+        // as in clickDelete, we need the ID of the row
+        var id = e.target.getAttribute("data-value");
+        // Issue an AJAX GET and then pass the result to editEntryForm.init()
+        var doAjax = function () { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, fetch("".concat(backendUrl, "/ideas/").concat(id), {
+                            method: 'PUT',
+                            body: JSON.stringify({
+                                mLikeIncrement: -1
+                            }),
+                            headers: {
+                                'Content-type': 'application/json; charset=UTF-8'
+                            }
+                        }).then(function (response) {
+                            if (response.ok) {
+                                return Promise.resolve(response.json());
+                            }
+                            else {
+                                window.alert("The server replied not ok: ".concat(response.status, "\n") + response.statusText);
+                            }
+                            return Promise.reject(response);
+                        }).then(function (data) {
+                            console.log(data);
+                            mainList.refresh();
+                        }).catch(function (error) {
+                            console.warn('Something went wrong.', error);
+                            window.alert("Unspecified error, on addDislike");
+                        })];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        }); };
+        // make the AJAX post and output value or error message to console
+        doAjax().then(console.log).catch(console.log);
+    };
+    /**
+     * likeButtons() adds a button to the HTML for each row
+     * adds like and dislike buttons
+     * gets id of each row
+     * @param id is the id of the idea
+     */
+    ElementList.prototype.likeButtons = function (id) {
+        var fragment = document.createDocumentFragment();
+        var td = document.createElement('td');
+        // create like button, add to new td, add td to returned fragment
+        var btn = document.createElement('button');
+        btn.classList.add("likebtn");
+        btn.setAttribute('data-value', id);
+        btn.innerHTML = 'like';
+        td.appendChild(btn);
+        fragment.appendChild(td);
+        // create dislike button
+        btn = document.createElement('button');
+        btn.classList.add("dislikebtn");
+        btn.setAttribute('data-value', id);
+        btn.innerHTML = 'dislike';
+        td.appendChild(btn);
+        fragment.appendChild(td);
+        return fragment;
+    };
+    /**
+     * deleteButtons() adds a button to the HTML for each row
+     * adds like and dislike buttons
+     * gets id of each row
+     * @param id is the id of the idea
+     */
+    ElementList.prototype.deleteButtons = function (id) {
+        var fragment = document.createDocumentFragment();
+        var td = document.createElement('td');
+        var btn = document.createElement('button');
+        // create delete button, add to new td, add td to returned fragment
+        td = document.createElement('td');
+        btn = document.createElement('button');
+        btn.classList.add("delbtn");
+        btn.setAttribute('data-value', id);
+        btn.innerHTML = 'Delete';
+        td.appendChild(btn);
+        fragment.appendChild(td);
+        return fragment;
+    };
+    return ElementList;
+}()); // end class ElementList
+/**
+ * configurations for when the page loads
+ * initially shows idea list and does not make add element visible
+ * controls when add post6 is clicked reverses intialy configuiration
+ */
+document.addEventListener('DOMContentLoaded', function () {
+    var _a;
+    // display idea lists, block add element
+    document.getElementById("addElement").style.display = "none";
+    document.getElementById("ideaList").style.display = "block";
+    // having add feature show when clicked, block all ideas list
+    (_a = document.getElementById("addButtonFooter")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", function (e) {
+        document.getElementById("addElement").style.display = "block";
+        document.getElementById("ideaList").style.display = "none";
+    });
+    // Create the object that controls the "New Entry" form
+    newEntryForm = new NewEntryForm();
+    // Create the object for the main data list, and populate it with data from the server
+    mainList = new ElementList();
+    // Create the object that controls the "Edit Entry" form
+    mainList.refresh();
+}, false);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#$">$</a></li><li><a href="global.html#ElementList">ElementList</a></li><li><a href="global.html#NewEntryForm">NewEntryForm</a></li><li><a href="global.html#mainList">mainList</a></li><li><a href="global.html#newEntryForm">newEntryForm</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Thu Nov 02 2023 18:00:22 GMT-0400 (Eastern Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
