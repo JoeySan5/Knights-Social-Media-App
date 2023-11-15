@@ -86,7 +86,7 @@
 ## Developer Documentation
 
 ### Artifacts
-[Artifacts](docs/README-phase1.md)
+[Artifacts](docs/backend-apidocs/apidocs)
 
 ### Mobile
 [Mobile Dartdocs](docs/mobile_artifacts/api/index.html)
