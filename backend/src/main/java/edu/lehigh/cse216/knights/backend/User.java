@@ -79,6 +79,8 @@ public class User {
      * @param gi The GI for this User
      * @param so The SO for this User
      * @param note The note for this User
+     * @param valid The validity of this User
+     * 
      */
 
     public User(String id, String username, String email, String gi, String so, String note, boolean valid) {
@@ -99,6 +101,9 @@ public class User {
      * @param id The id to associate with the User in this row. Assumed to be unique 
      *               throughout the whole program.
      * @param email The email for this User
+     * @param username The username for this User
+     * @param note The note for this User
+     * @param valid The validity of this User
      */
 
     public User(String id, String username, String email, String note, boolean valid) {

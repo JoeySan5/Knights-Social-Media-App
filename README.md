@@ -4,11 +4,11 @@
 - **Team Number**: 25
 - **Team Name**: Knights
 - **Members**:
-  - Tommy Parisi - Admin Developer - Contact Email: tjp225@lehigh.edu
-  - Joseph Sanchez - Web Developer - Contact Email: jrs225@lehigh.edu
-  - Adivi Karawat - Project Manager - Contact Email: adk225@lehigh.edu
-  - Eric Osterman - Mobile Developer - Contact Email: ejo223@lehigh.edu
-  - Sehyoun Jang - Backend Manager - Contact Email: sej324@lehigh.edu
+  - Tommy Parisi - Backend Developer - Contact Email: tjp225@lehigh.edu
+  - Joseph Sanchez - Mobile Developer - Contact Email: jrs225@lehigh.edu
+  - Adivi Karawat - Admin Developer - Contact Email: adk225@lehigh.edu
+  - Eric Osterman - Web Developer - Contact Email: ejo223@lehigh.edu
+  - Sehyoun Jang - Project Manager - Contact Email: sej324@lehigh.edu
 
 ## URLs
 - **Git Repository**: <https://bitbucket.org/cse216-2023fa-team-25/cse216-2023fa-team-25/src/master/>
@@ -63,7 +63,7 @@
 
 #### Locally
 1. From the backend maven project root, run mvn exec:java with the `PORT` and `DATABASE_URL` environment variables specified
-    * `PORT=8998 DATABASE_URL=postgres://pfdcoetq:VMXXrjrJtMXqzP6JwpjnapwpOVpk6e9o@peanut.db.elephantsql.com/pfdcoetq mvn exec:java`
+    * `PORT=8998 CLIENT_ID=1019349198762-463i1tt2naq9ipll3f9ade5u7nli7gju.apps.googleusercontent.com DATABASE_URL=postgres://pfdcoetq:VMXXrjrJtMXqzP6JwpjnapwpOVpk6e9o@peanut.db.elephantsql.com/pfdcoetq mvn exec:java`
     * The address is `http://localhost:PORT/`
 
 #### On Dokku
