@@ -81,9 +81,14 @@ public class Database {
     /** Sets the likeCount of all Ideas to 0. To be called when dropping the likes table. */
     private PreparedStatement mZeroAllLikes;
 
+    /** Set a User's valid field to a specified value */
     private PreparedStatement mSetUserValidation;
 
+    /** Set an Idea's valid field to a specified value */    
     private PreparedStatement mSetIdeaValidation;
+
+    /** Incremenet likeCount by some value. Should be called when an Like is added/removed. */
+    private PreparedStatement mUpdateIdeaLikeCount;
 
     /**
      * The Database constructor is private: we only create Database objects 
@@ -97,16 +102,17 @@ public class Database {
         try {
             // CREATE TABLE statements very importantly must be consistent between admin and backend.
             this.mCreateUsersTable = this.mConnection.prepareStatement(
-                "CREATE TABLE users ( userID VARCHAR(256) PRIMARY KEY, username VARCHAR(32) NOT NULL, "+
+                "CREATE TABLE users (userID VARCHAR(256) PRIMARY KEY, username VARCHAR(32) NOT NULL, "+
                 "email VARCHAR(64), GI VARCHAR(16), SO VARCHAR(16), note VARCHAR(128), valid BOOLEAN NOT NULL);");
             this.mCreateIdeasTable = this.mConnection.prepareStatement(
-                "CREATE TABLE ideas ( ideaID SERIAL PRIMARY KEY, userID VARCHAR(256) REFERENCES users(userID), "+
+                "CREATE TABLE ideas (ideaID SERIAL PRIMARY KEY, userID VARCHAR(256) REFERENCES users(userID), "+
                 "content VARCHAR(2048), likeCount INT, valid BOOLEAN NOT NULL)");
             this.mCreateCommentsTable = this.mConnection.prepareStatement(
                 "CREATE TABLE comments (commentID SERIAL PRIMARY KEY, ideaID INT REFERENCES ideas(ideaID), "+
                 "userID VARCHAR(256) REFERENCES users(userID), content VARCHAR(2048))");
             this.mCreateLikesTable = this.mConnection.prepareStatement(
-                "CREATE TABLE likes (ideaID INT, userID VARCHAR(256), value INT, PRIMARY KEY (ideaID, userID))");
+                "CREATE TABLE likes (ideaID INT REFERENCES ideas(ideaID), userID VARCHAR(256) REFERENCES users(userID), "+
+                "value INT, PRIMARY KEY(ideaID, userID))");
             // DROP TABLE statements for each table. Use carefully- these will permanently delete table data
             this.mDropUsersTable = this.mConnection.prepareStatement("DROP TABLE users");
             this.mDropIdeasTable = this.mConnection.prepareStatement("DROP TABLE ideas");
@@ -117,12 +123,14 @@ public class Database {
             // Statements for adding new data
             this.mInsertOneLike = this.mConnection.prepareStatement(
                 "INSERT INTO likes (ideaId, userId, value) VALUES (?, ?, ?)");
+            this.mUpdateIdeaLikeCount = this.mConnection
+                .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE ideaID = ?");
             this.mInsertOneComment = this.mConnection.prepareStatement(
-                "INSERT INTO comments (commentId, ideaId, userId, content) VALUES (?, ?, ?, ?)");
+                "INSERT INTO comments (ideaId, userId, content) VALUES (?, ?, ?)");
             this.mInsertOneUser = this.mConnection.prepareStatement(
                 "INSERT INTO users (userId, username, email, GI, SO, note, valid) VALUES (?, ?, ?, ?, ?, ?, ?)");      
             this.mInsertOneIdea = this.mConnection.prepareStatement(
-                "INSERT INTO ideas (ideaId, userId, content, likeCount, valid) VALUES (?, ?, ?, ?, ?)");
+                "INSERT INTO ideas (userId, content, likeCount, valid) VALUES (?, ?, ?, ?)");
 
             // Statements for getting values from tables
             this.mSelectAllUsers = this.mConnection.prepareStatement(
@@ -257,17 +265,25 @@ public class Database {
 
     /**
      * Add an idea to the ideas table
-     * @param idea the idea to add, with all desired fields initialized
+     * @param idea the idea to add, with all desired fields initialized. 
+     * likeCount should be set to 0 for normal use.
      * @return the number of rows added. Will be 0 if a SQLException occurs.
      */
     int insertIdea(Entity.Idea idea){
         int count = 0;
         try {
-            mInsertOneIdea.setInt(1, idea.ideaId);
-            mInsertOneIdea.setString(2, idea.userId);
-            mInsertOneIdea.setString(3, idea.content);
-            mInsertOneIdea.setInt(4, idea.likeCount);
-            mInsertOneIdea.setBoolean(5, idea.valid);
+            // ideaID is type SERIAL, will increment automatically
+            mInsertOneIdea.setString(1, idea.userId);
+            mInsertOneIdea.setString(2, idea.content);
+            // Could hard-code likeCount to be 0, but instead this control lets an admin test edge cases
+            if(idea.likeCount == null){
+                // Allow it to be not specified in sample data too
+                mInsertOneIdea.setInt(3, 0);
+            } else{
+                // Backwards compatible with old sample data formatting with likeConut specified
+                mInsertOneIdea.setInt(3, idea.likeCount);
+            }
+            mInsertOneIdea.setBoolean(4, idea.valid);
             count += mInsertOneIdea.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -283,10 +299,10 @@ public class Database {
     int insertComment(Entity.Comment comment){
         int count = 0;
         try {
-            mInsertOneComment.setInt(1, comment.commentId);
-            mInsertOneComment.setInt(2, comment.ideaId);
-            mInsertOneComment.setString(3, comment.userId);
-            mInsertOneComment.setString(4, comment.content);
+            // commentID is type SERIAL, will increment automatically
+            mInsertOneComment.setInt(1, comment.ideaId);
+            mInsertOneComment.setString(2, comment.userId);
+            mInsertOneComment.setString(3, comment.content);
             count += mInsertOneComment.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -295,7 +311,7 @@ public class Database {
     }
 
     /**
-     * Add a like to the likes table
+     * Add a like to the likes table, and increments the related idea appropriately.
      * @param like the like to add, with all desired fields initialized
      * @return the number of likes added. Will be 0 if a SQLException occurs.
      */
@@ -306,6 +322,9 @@ public class Database {
             mInsertOneLike.setString(2, like.userId);
             mInsertOneLike.setInt(3, like.value);
             count += mInsertOneLike.executeUpdate();
+            mUpdateIdeaLikeCount.setInt(1, like.value);
+            mUpdateIdeaLikeCount.setInt(2, like.ideaId);
+            mUpdateIdeaLikeCount.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
