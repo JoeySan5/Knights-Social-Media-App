@@ -4,7 +4,7 @@ import { IdeaListComponent } from '../idea-list/idea-list.component';
 var newEntryForm: IdeaSubmission;
 var mainList: IdeaListComponent;
 const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
-const sehyounID = "101136375578726959533";
+const sessionKey = localStorage.getItem('sessionKey');
 
 @Component({
     selector: 'idea-submission',
@@ -56,7 +56,7 @@ const sehyounID = "101136375578726959533";
               method: 'POST',
               body: JSON.stringify({
                   mContent: idea,
-                  mUserId: sehyounID
+                  sessionKey: sessionKey
               }),
               headers: {
                   'Content-type': 'application/json; charset=UTF-8'
@@ -74,7 +74,7 @@ const sehyounID = "101136375578726959533";
           }).then((data) => {
             console.log('this is data: ', data);
 
-              newEntryForm.onSubmitResponse(data);
+              //newEntryForm.onSubmitResponse(data);
           }).catch((error) => {
               console.warn('Something went wrong with POST.', error);
               window.alert("Unspecified error, in fetch for submitForm, in NewEntryForm");
@@ -85,27 +85,6 @@ const sehyounID = "101136375578726959533";
       doAjax().then(console.log).catch(console.log);
   }
 
-  /**
-   * onSubmitResponse runs when the AJAX call in submitForm() returns a 
-   * result.
-   * 
-   * @param data The object returned by the server
-   */
-  private onSubmitResponse(data: any) {
-      // If we get an "ok" message, clear the form
-      if (data.mStatus === "ok") {
-          //window.alert("onSubmitResponse = ok" + data);
-          newEntryForm.clearForm();
-          mainList.refresh();
-      }
-      // Handle explicit errors with a detailed popup message
-      else if (data.mStatus === "error") {
-          window.alert("The server replied with an error:\n" + data.ideas);
-      }
-      // Handle other errors with a less-detailed popup message
-      else {
-          window.alert("Unspecified error returned, in onSubmitResponse, in NewEntryForm");
-      }
-  }
+  
   }
   

@@ -1,19 +1,30 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { DetailedPostInfoService } from '../detailed-post-info.service';
+import { Router } from '@angular/router';
+
 
 
 var mainList: IdeaListComponent;
 var $: any;
 const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
-const sehyounKey = "k0kyOGwPlod5";
+const sessionKey = localStorage.getItem('sessionKey');
+
+
 
 @Component({
   selector: 'idea-list',
   templateUrl: './idea-list.component.html',
   styleUrls: ['./idea-list.component.css']
 })
-export class IdeaListComponent {
+export class IdeaListComponent implements OnInit{
+    private data: any;
 
-    constructor(){
+    
+    //this constructor id's and injection site for the service. setting detailedPost... as an instance of DetailedPost...
+    constructor(private detailedPostInfoService: DetailedPostInfoService, private router: Router){
+    }
+
+    ngOnInit(){
         this.refresh();
     }
   /**
@@ -22,15 +33,18 @@ export class IdeaListComponent {
   refresh() {
     // Issue an AJAX GET and then pass the result to update(). 
     const doAjax = async () => {
-        await fetch(`${backendUrl}/ideas`, {
+        await fetch(`${backendUrl}/ideas?sessionKey=${sessionKey}`, {
             method: 'GET',
             headers: {
                 'Content-type': 'application/json; charset=UTF-8'
             }
-        }).then((response) => {
+        }).then( (response) => {
             // If we get an "ok" idea, clear the form
             if (response.ok) {
-                console.log("recieved response from server for get");
+                console.log("recieved 'ok' from server in refresh()");
+                //Essentially, a promise is a returned object to which you attach callbacks, instead of passing callbacks into a function
+                //whatever is returned is passed onto the next 'then()'
+                //resolve() method 'resolves' a given value to a promise. Returns a resolved promise indicating resolution of await/async
                 return Promise.resolve(response.json());
 
             }
@@ -38,10 +52,11 @@ export class IdeaListComponent {
             else {
                 window.alert(`The server replied not ok: ${response.status}\n` + response.statusText);
             }
+            //opposite of resolve(). reject() throws an error when reached here
             return Promise.reject(response);
         }).then((data) => {
-            this.update(data);
             console.log('here is data:', data);
+            this.update(data);
         }).catch((error) => {
             console.warn('Something went wrong with GET.', error);
             console.log("Unspecified error with refresh()");
@@ -60,6 +75,8 @@ private update(data: any) {
     console.log('in update')
     let elem_ideaList = document.getElementById("ideaList");
 
+
+    //THE JOB IS TO NOW MAKE TR CLICKABLE SO THAT WE CAN ACCESS THE FULL DETAILED PAGE VIEW
     if (elem_ideaList !== null) {
         elem_ideaList.innerHTML = "";
         // table that contains all of the ideas
@@ -68,15 +85,25 @@ private update(data: any) {
         table.setAttribute('id', 'ideaTable');
         for (let i = 0; i < data.mData.length; ++i) {
             let tr = document.createElement('tr');
+            
             let td_message = document.createElement('td');
+            
             let td_like = document.createElement('td');
+            let user_name = document.createElement('userN')
             td_message.innerHTML = data.mData[i].mContent;
             td_like.innerHTML = data.mData[i].mLikeCount;
+            user_name.innerHTML = data.mData[i].mPosterUsername;
+            user_name.style.display = "block";
+            td_message.prepend(user_name);
             tr.appendChild(td_message);
             tr.appendChild(this.likeButtons(data.mData[i].mId));
             tr.appendChild(td_like);
             tr.appendChild(this.deleteButtons(data.mData[i].mId));
             table.appendChild(tr);
+            tr.addEventListener("click", (e) => { this.trClicK(data.mData[i].mId) });
+            user_name.addEventListener("click", (e) => { 
+                e.stopPropagation();
+                this.userNClick(data.mData[i].mUserId); });
         }
         fragment.appendChild(table);
 
@@ -94,14 +121,102 @@ private update(data: any) {
     const all_likebtns = (<HTMLCollectionOf<HTMLInputElement>>document.getElementsByClassName("likebtn"));
     for (let i = 0; i < all_likebtns.length; ++i) {
         all_likebtns[i].setAttribute('id', 'likeId');
-        all_likebtns[i].addEventListener("click", (e) => { this.addLike(e); });
+        all_likebtns[i].addEventListener("click", (e) => { 
+            e.stopPropagation();
+
+            this.addLike(e); });
     }
     // Find all of the dislike buttons, and set their behavior
     const all_dislikebtns = (<HTMLCollectionOf<HTMLInputElement>>document.getElementsByClassName("dislikebtn"));
     for (let i = 0; i < all_dislikebtns.length; ++i) {
         all_dislikebtns[i].setAttribute('id', 'dislikeId');
-        all_dislikebtns[i].addEventListener("click", (e) => { this.addDisLike(e); });
+        all_dislikebtns[i].addEventListener("click", (e) => { 
+            e.stopPropagation();
+            this.addDisLike(e); });
     }
+}
+
+private userNClick(userId: String){
+    
+  //  curl -s http://localhost:8998/users/101136375578726959533?sessionKey=String -X GET
+  const doAjax = async () => {
+    await fetch(`${backendUrl}/users/${userId}?sessionKey=${sessionKey}`, {
+        method: 'GET',
+        headers: {
+            'Content-type': 'application/json; charset=UTF-8'
+        }
+    }).then( (response) => {
+        // If we get an "ok" idea, clear the form
+        if (response.ok) {
+            console.log("recieved 'ok' from server in trClick()");
+            //Essentially, a promise is a returned object to which you attach callbacks, instead of passing callbacks into a function
+            //whatever is returned is passed onto the next 'then()'
+            //resolve() method 'resolves' a given value to a promise. Returns a resolved promise indicating resolution of await/async
+            return Promise.resolve(response.json());
+
+        }
+        // Otherwise, handle server errors with a detailed popup idea
+        else {
+            window.alert(`The server replied not ok: ${response.status}\n` + response.statusText);
+        }
+        //opposite of resolve(). reject() throws an error when reached here
+        return Promise.reject(response);
+    }).then((data) => {
+        
+        console.log('here is data:', data);
+        this.data = data;
+        this.detailedPostInfoService.setData(this.data.mData);
+        this.router.navigate(["/other-profile"]);
+                //this.update(data);
+    }).catch((error) => {
+        console.warn('Something went wrong with GET.', error);
+        console.log("Unspecified error with trClick()");
+    });
+}
+
+// make the AJAX post and output value or error message to console
+doAjax().then(console.log).catch(console.log);
+
+}
+
+private trClicK(Id: String){
+    const doAjax = async () => {
+        await fetch(`${backendUrl}/ideas/${Id}?sessionKey=${sessionKey}`, {
+            method: 'GET',
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8'
+            }
+        }).then( (response) => {
+            // If we get an "ok" idea, clear the form
+            if (response.ok) {
+                console.log("recieved 'ok' from server in trClick()");
+                //Essentially, a promise is a returned object to which you attach callbacks, instead of passing callbacks into a function
+                //whatever is returned is passed onto the next 'then()'
+                //resolve() method 'resolves' a given value to a promise. Returns a resolved promise indicating resolution of await/async
+                return Promise.resolve(response.json());
+
+            }
+            // Otherwise, handle server errors with a detailed popup idea
+            else {
+                window.alert(`The server replied not ok: ${response.status}\n` + response.statusText);
+            }
+            //opposite of resolve(). reject() throws an error when reached here
+            return Promise.reject(response);
+        }).then((data) => {
+            
+            console.log('here is data:', data);
+            this.data = data;
+            this.detailedPostInfoService.setData(this.data.mData);
+            this.router.navigate(["/detailed-post"]);
+            //this.update(data);
+        }).catch((error) => {
+            console.warn('Something went wrong with GET.', error);
+            console.log("Unspecified error with trClick()");
+        });
+    }
+
+    // make the AJAX post and output value or error message to console
+    doAjax().then(console.log).catch(console.log);
 }
 
 /**
@@ -151,7 +266,7 @@ private addLike(e: Event) {
         await fetch(`${backendUrl}/ideas/${id}/likes`, {
             method: 'PUT',
             body: JSON.stringify({
-                sessionKey: sehyounKey,
+                sessionKey: sessionKey,
                 value: 1
             }),
             headers: {
@@ -191,7 +306,7 @@ private addDisLike(e: Event) {
         await fetch(`${backendUrl}/ideas/${id}/likes`, {
             method: 'PUT',
             body: JSON.stringify({
-                sessionKey: sehyounKey,
+                sessionKey: sessionKey,
                 value: -1
             }),
             headers: {

@@ -37,7 +37,7 @@ function handleCredentialResponse(response) {
     console.log("Encoded JWT ID token: " + response.credential);
     // Send the ID token to your backend for verification
     // Here we use the Fetch API to post to our backend
-    fetch("http://localhost:8998/login", {
+    fetch("https://team-knights.dokku.cse.lehigh.edu/login", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',

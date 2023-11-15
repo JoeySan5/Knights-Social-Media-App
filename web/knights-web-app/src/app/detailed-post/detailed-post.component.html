@@ -1,0 +1,20 @@
+<div class="tr"> 
+    <div class="usern">{{data.mPosterUsername}}</div>
+    <div >{{data.mContent}}</div>
+</div>
+
+<h2 *ngIf="data.mComments.length >0" class="tagline" > Comments people have left:</h2>
+<h2 *ngIf="data.mComments.length == 0" class="tagline" > No comments left :(</h2>
+
+<!-- This is the angular way of creating divs based off of an array
+Additionally, I am initializing each element of mComments array to be set to variable mComment -->
+<div *ngFor="let mComment of data.mComments"  class="comments">
+    <div class="usern" routerLink="/profile-page">{{mComment.mCommenterUsername}}</div>
+    <div >{{mComment.mContent}}</div>
+</div>
+
+
+<button id="showAdd" routerLink="/add-comment-page">Add a comment</button>
+<button id="showHome" routerLink="/home-page">Home</button>
+    
+
