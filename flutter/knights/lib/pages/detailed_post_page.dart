@@ -1,39 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:knights/components/detailed_post_format.dart';
-import 'package:knights/components/user_format.dart';
-import 'package:knights/components/user_list.dart';
 
 
-class DetailedPostPage extends StatelessWidget{
-  final String userId = '1234567890abcdef1234567890abcdef';
-  final String sessionKey = 'lGaJjDO8kdNq'; // hardcoded session key for Tommy  
-  int mId = 0;
-
-  DetailedPostPage(mId, {super.key});
+/// page that shows the detailed view of a post
+/// calls the component DetailedPostFormat which needs the Id of the post and the session key
+class DetailedPostPage extends StatelessWidget {
+  /// post ID given by Idea when clicked
+  final int mId;
+  /// sessionKey
+  final String sessionKey;
+  DetailedPostPage({super.key, required this.mId, required this.sessionKey});
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
-      body:Center(
-        child: Column( 
-          children: <Widget>[
-            //UserList(userId, sessionKey), // used to get and display user information
-            //UserFormat(mId: mId, mUsername: mUsername, mEmail: mEmail, mNote: mNote, GI: GI, SO: SO)
-            DetailedPostFormat(mId),
-            ElevatedButton(
-              style: const ButtonStyle(
-                  backgroundColor: MaterialStatePropertyAll(Colors.green),
-                ),
-              onPressed: (){
-                Navigator.pop(context);
-              },
-              child: const Text('Edit Profile.')
-              ),
-             
-          ],
-        ),
-      )
-    );
+    return Scaffold(
+        body: Center(
+      child: Column(
+        children: <Widget>[
+          // calls compnent to display detailed view of individual idea
+          DetailedPostFormat(mId: mId, sessionKey: sessionKey),
+        ],
+      ),
+    ));
   }
-
 }
