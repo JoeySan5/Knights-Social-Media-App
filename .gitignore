@@ -2,5 +2,4 @@ target/
 .vscode/
 flutter/
 docs/
-admin-cli/
 web/
