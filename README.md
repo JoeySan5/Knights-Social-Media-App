@@ -4,11 +4,11 @@
 - **Team Number**: 25
 - **Team Name**: Knights
 - **Members**:
-  - Tommy Parisi - Backend Developer - Contact Email: tjp225@lehigh.edu
-  - Joseph Sanchez - Mobile Developer - Contact Email: jrs225@lehigh.edu
-  - Adivi Karawat - Admin Developer - Contact Email: adk225@lehigh.edu
-  - Eric Osterman - Web Developer - Contact Email: ejo223@lehigh.edu
-  - Sehyoun Jang - Project Manager - Contact Email: sej324@lehigh.edu
+  - Tommy Parisi - Project Manager (Phase 3)  - Contact Email: tjp225@lehigh.edu
+  - Joseph Sanchez - Backend Developer (Phase 3) - Contact Email: jrs225@lehigh.edu
+  - Adivi Karawat - Mobile Developer (Phase 3) - Contact Email: adk225@lehigh.edu
+  - Eric Osterman - Admin Developer (Phase 3) - Contact Email: ejo223@lehigh.edu
+  - Sehyoun Jang - Web Developer (Phase 3)  - Contact Email: sej324@lehigh.edu
 
 ## URLs
 - **Git Repository**: <https://bitbucket.org/cse216-2023fa-team-25/cse216-2023fa-team-25/src/master/>
@@ -21,7 +21,6 @@
 ### Initial Setup (Version 0.1.0)
 - Repository has been set up with the essential directories and branches.
 - README file has been created and updated with team information, key URLs, and initial project description.
-<<<<<<< HEAD
 
 
 ### Tagged Release
@@ -87,7 +86,7 @@
 ## Developer Documentation
 
 ### Artifacts
-[Artifacts](docs/backend-apidocs/apidocs)
+[Artifacts List](docs/README-phase3.md)
 
 ### Mobile
 [Mobile Dartdocs](docs/mobile_artifacts/api/index.html)
@@ -99,5 +98,5 @@
 [Backend Javadoc](docs/backend-apidocs/site/apidocs/index.html)
 
 ### Admin
-[Admin Javadoc](docs/admin-apidocs/index.html)
+[Admin Javadoc](docs/admin-apidocs/site/apidocs/index.html)
 
