@@ -20,16 +20,57 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 
+//For memeCachier
+import net.rubyeye.xmemcached.MemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClientBuilder;
+import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.auth.AuthInfo;
+import net.rubyeye.xmemcached.command.BinaryCommandFactory;
+import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.utils.AddrUtil;
+
+import java.lang.InterruptedException;
+import java.net.InetSocketAddress;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.TimeoutException;
+
 /**
  * App creates an HTTP server capable of interacting with the Database.
  */
 public class App {
+
+    private static MemcachedClient createMemcachedClient() throws IOException {
+        List<InetSocketAddress> servers = AddrUtil.getAddresses(System.getenv("MEMCACHIER_SERVERS").replace(",", " "));
+        AuthInfo authInfo = AuthInfo.plain(System.getenv("MEMCACHIER_USERNAME"), System.getenv("MEMCACHIER_PASSWORD"));
+
+        // this builds the memcache client
+        MemcachedClientBuilder builder = new XMemcachedClientBuilder(servers);
+
+        // Configure SASL auth for each server
+        for (InetSocketAddress server : servers) {
+            builder.addAuthInfo(server, authInfo);
+        }
+
+        // Use binary protocol
+        builder.setCommandFactory(new BinaryCommandFactory());
+        // Connection timeout in milliseconds (default: )
+        builder.setConnectTimeout(1000);
+        // Reconnect to servers (default: true)
+        builder.setEnableHealSession(true);
+        // Delay until reconnect attempt in milliseconds (default: 2000)
+        builder.setHealSessionInterval(2000);
+        MemcachedClient mc = builder.build();
+        return mc;
+    }
+
     /**
      * Sets up the database and server ports.
      * 
      * @param args The command line arguments, (unused)
      */
     public static void main(String[] args) {
+
         /**
          * Key = sessionKey
          * String = userId
@@ -55,6 +96,7 @@ public class App {
         // NB: it must be final, so that it can be accessed from our lambdas
         //
         // NB: Gson is thread-safe. See
+        //
         // https://stackoverflow.com/questions/10380835/is-it-ok-to-use-gson-instance-as-a-static-field-in-a-model-bean-reuse
         final Gson gson = new Gson();
 
@@ -76,12 +118,13 @@ public class App {
             final String acceptCrossOriginRequestsFrom = "*";
             final String acceptedCrossOriginRoutes = "GET,PUT,POST,DELETE,OPTIONS";
             final String supportedRequestHeaders = "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin,Access-Control-Allow-Origin";
-            enableCORS(acceptCrossOriginRequestsFrom, acceptedCrossOriginRoutes, supportedRequestHeaders);
+            enableCORS(acceptCrossOriginRequestsFrom, acceptedCrossOriginRoutes,
+                    supportedRequestHeaders);
         }
 
         // Set up a route for serving the main page
         // tjp: this 'main page' of 'index.html' is just a placeholder. It also leads
-        // to a 404 error since the page doesn't exist. Maybe in future phases we should
+        // to a 404 error since the page doesn't exist. Maybe in future phases weshould
         // go to some specific page.
         Spark.get("/", (req, res) -> {
             res.redirect("/index.html");
@@ -97,9 +140,10 @@ public class App {
         Spark.get("/ideas", (request, response) -> {
             // ensure status 200 OK, with a MIME type of JSON
             String key = request.queryParams("sessionKey");
-                if (!sessionKeyTable.containsKey(key)) {
-                    return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
-                }
+            if (!sessionKeyTable.containsKey(key)) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            }
             response.status(200);
             response.type("application/json");
             return gson.toJson(new StructuredResponse("ok", null, db.selectAllIdeas()));
@@ -115,14 +159,16 @@ public class App {
             int idx = Integer.parseInt(request.params("id"));
             // ensure status 200 OK, with a MIME type of JSON
             String key = request.queryParams("sessionKey");
-                if (!sessionKeyTable.containsKey(key)) {
-                    return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
-                }
+            if (!sessionKeyTable.containsKey(key)) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            }
             response.status(200);
             response.type("application/json");
             Idea.ExtendedIdea idea = db.selectOneIdea(idx);
             if (idea == null) {
-                return gson.toJson(new StructuredResponse("error", idx + " not found", null));
+                return gson.toJson(new StructuredResponse("error", idx + " not found",
+                        null));
             } else {
                 return gson.toJson(new StructuredResponse("ok", null, idea));
             }
@@ -135,29 +181,33 @@ public class App {
         Spark.post("/ideas", (request, response) -> {
             // NB: if gson.Json fails, Spark will reply with status 500 Internal
             // Server Error
-            Request.IdeaRequest req = gson.fromJson(request.body(), Request.IdeaRequest.class);
+            Request.IdeaRequest req = gson.fromJson(request.body(),
+                    Request.IdeaRequest.class);
             // ensure status 200 OK, with a MIME type of JSON
             // NB: even on error, we return 200, but with a JSON object that
             // describes the error.
 
             String key = req.sessionKey;
             String userID = null;
-                if (!sessionKeyTable.containsKey(key)) {
-                    return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
-                } else{
-                    userID = sessionKeyTable.get(key);
-                    if (userID == null) {
-                        return gson.toJson(new StructuredResponse("error", "authentication failed", null));
-                    }
+            if (!sessionKeyTable.containsKey(key)) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            } else {
+                userID = sessionKeyTable.get(key);
+                if (userID == null) {
+                    return gson.toJson(new StructuredResponse("error", "authentication failed",
+                            null));
                 }
+            }
 
             response.status(200);
             response.type("application/json");
             int rowsInserted = db.insertIdea(req.mContent, userID);
             if (rowsInserted <= 0) {
-                return gson.toJson(new StructuredResponse("error", "error creating idea", null));
+                return gson.toJson(new StructuredResponse("error", "error creating idea",
+                        null));
             } else {
-                return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + " idea(s)", null));
+                return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + "idea(s)", null));
             }
         });
 
@@ -167,13 +217,15 @@ public class App {
             // If we can't get an ID or can't parse the JSON, Spark will send
             // a status 500
             int idx = Integer.parseInt(request.params("id"));
-            Request.LikeRequest req = gson.fromJson(request.body(), Request.LikeRequest.class);
+            Request.LikeRequest req = gson.fromJson(request.body(),
+                    Request.LikeRequest.class);
 
             String key = req.sessionKey;
             System.out.println("sessionKey: " + key);
 
             if (!sessionKeyTable.containsKey(key)) {
-                return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
             }
             String userID = sessionKeyTable.get(key);
             System.out.println("userID: " + userID);
@@ -189,7 +241,8 @@ public class App {
             response.status(200);
             response.type("application/json");
 
-            System.out.println("sessionKey: " + key + "userID: " + userID + "likeIncrement: " + likeIncrement);
+            System.out.println("sessionKey: " + key + "userID: " + userID +
+                    "likeIncrement: " + likeIncrement);
 
             int rowsUpdated = db.updateIdeaLikeCount(userID, idx, likeIncrement);
 
@@ -215,7 +268,8 @@ public class App {
             // message sent on a successful delete
             int rowsDeleted = db.deleteIdea(idx);
             if (rowsDeleted <= 0) {
-                return gson.toJson(new StructuredResponse("error", "unable to delete idea #" + idx, null));
+                return gson.toJson(new StructuredResponse("error", "unable to delete idea #"
+                        + idx, null));
             } else {
                 return gson.toJson(new StructuredResponse("ok", null, null));
             }
@@ -242,7 +296,8 @@ public class App {
             NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
-            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport,
+                    jsonFactory)
                     // Specify the CLIENT_ID of the app that accesses the backend:
                     .setAudience(Collections.singletonList(CLIENT_ID))
                     // Or, if multiple clients access the backend:
@@ -254,7 +309,8 @@ public class App {
 
             System.out.println(request);
             // System.out.println(request.body());
-            Request.LoginRequest req = gson.fromJson(request.body(), Request.LoginRequest.class);
+            Request.LoginRequest req = gson.fromJson(request.body(),
+                    Request.LoginRequest.class);
 
             // String idTokenString = request.params();
             Set<String> paramSet = request.queryParams();
@@ -291,13 +347,15 @@ public class App {
             } else {
                 // Case for authentication failed
                 System.out.println("Invalid ID token. please check the Client_ID or process of getting token");
-                return gson.toJson(new StructuredResponse("error", "authentication failed", null));
+                return gson.toJson(new StructuredResponse("error", "authentication failed",
+                        null));
             }
             // This case should never occur, but it might if authentication is successful
             // but provides no subjectID
             if (userId == null) {
                 System.out.println("For testing backend - UserId is null on 'successful' authentication");
-                return gson.toJson(new StructuredResponse("error", "authentication failed", null));
+                return gson.toJson(new StructuredResponse("error", "authentication failed",
+                        null));
             }
 
             // If no user exists, add a new user to the users table in the database
@@ -305,33 +363,51 @@ public class App {
             if (res == null) {
                 int rowsInserted = db.insertNewUser(userId);
                 if (rowsInserted <= 0) {
-                    return gson.toJson(new StructuredResponse("error", "error creating user", null));
+                    return gson.toJson(new StructuredResponse("error", "error creating user",
+                            null));
                 }
             } else if (res.mValid == false) {
                 return gson.toJson(new StructuredResponse("error", "user has been invalidated to login", null));
             }
 
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+
             // generate a new session key-a random string.
             String sessionKey = SessionKeyGenerator.generateRandomString(12);
-            sessionKeyTable.put(sessionKey, userId);
+            mc.set(sessionKey, 1000, userId);
             // show up the sessionKey and sessionKeyTable
             System.out.println("session Key is " + sessionKey);
             System.out.println("sessionKeyTable: " + sessionKeyTable);
-            return gson.toJson(new StructuredResponse("ok", "authentication success", sessionKey));
+            return gson.toJson(new StructuredResponse("ok", "authentication success",
+                    sessionKey));
         });
 
         // Post route for adding a new user to the database
         // The new user only has a userId and a valid status
         // The other information will be 'unknown'
         Spark.post("/users", (request, response) -> {
-            Request.UserRequest req = gson.fromJson(request.body(), Request.UserRequest.class);
+            Request.UserRequest req = gson.fromJson(request.body(),
+                    Request.UserRequest.class);
 
             response.status(200);
             response.type("application/json");
 
             int rowsInserted = db.insertNewUser(req.mId);
             if (rowsInserted <= 0) {
-                return gson.toJson(new StructuredResponse("error", "error creating user", null));
+                return gson.toJson(new StructuredResponse("error", "error creating user",
+                        null));
             } else {
                 return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + " user(s)", null));
             }
@@ -340,7 +416,8 @@ public class App {
         // Put route for updating a user's information
         // The user can only update his/her own information
         Spark.put("/users", (request, response) -> {
-            Request.UserRequest req = gson.fromJson(request.body(), Request.UserRequest.class);
+            Request.UserRequest req = gson.fromJson(request.body(),
+                    Request.UserRequest.class);
             response.status(200);
             response.type("application/json");
 
@@ -348,11 +425,13 @@ public class App {
             String key = req.sessionKey;
             String userId;
             if (!sessionKeyTable.containsKey(key)) {
-                return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
             } else {
                 userId = sessionKeyTable.get(key);
                 if (userId == null) {
-                    return gson.toJson(new StructuredResponse("error", "authentication failed", null));
+                    return gson.toJson(new StructuredResponse("error", "authentication failed",
+                            null));
                 }
             }
 
@@ -360,7 +439,8 @@ public class App {
 
             int rowsUpdated = db.updateOneUser(req);
             if (rowsUpdated <= 0) {
-                return gson.toJson(new StructuredResponse("error", "error updating user", null));
+                return gson.toJson(new StructuredResponse("error", "error updating user",
+                        null));
             } else {
                 return gson.toJson(new StructuredResponse("ok", "updated " + rowsUpdated + " user(s)", null));
             }
@@ -403,7 +483,8 @@ public class App {
             System.out.println("Reqeusted userId: " + requestedUserId);
 
             if (!sessionKeyTable.containsKey(key)) {
-                return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
             }
             String userId = sessionKeyTable.get(key);
             boolean restrictInfo = !(userId.equals(requestedUserId));
@@ -429,14 +510,16 @@ public class App {
             String key = request.queryParams("sessionKey");
             System.out.println("Requested sessionKey: " + key);
             if (!sessionKeyTable.containsKey(key)) {
-                return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
             }
             String userId = sessionKeyTable.get(key);
             boolean restrictInfo = false;
 
             User user = db.selectOneUser(userId, restrictInfo);
             if (user == null) {
-                return gson.toJson(new StructuredResponse("error", userId + " not found", null));
+                return gson.toJson(new StructuredResponse("error", userId + " not found",
+                        null));
             } else {
                 return gson.toJson(new StructuredResponse("ok", null, user));
             }
@@ -447,24 +530,28 @@ public class App {
         // object, extract the (content, UserID, IdeaID) insert them, and return the
         // ID of the newly created row.
         Spark.post("/comments", (request, response) -> {
-            Request.CommentRequest req = gson.fromJson(request.body(), Request.CommentRequest.class);
+            Request.CommentRequest req = gson.fromJson(request.body(),
+                    Request.CommentRequest.class);
             response.status(200);
             response.type("application/json");
 
             String key = req.sessionKey;
             String userID = null;
-                if (!sessionKeyTable.containsKey(key)) {
-                    return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
-                } else{
-                    userID = sessionKeyTable.get(key);
-                    if (userID == null) {
-                        return gson.toJson(new StructuredResponse("error", "authentication failed", null));
-                    }
+            if (!sessionKeyTable.containsKey(key)) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            } else {
+                userID = sessionKeyTable.get(key);
+                if (userID == null) {
+                    return gson.toJson(new StructuredResponse("error", "authentication failed",
+                            null));
                 }
+            }
 
             int rowsInserted = db.insertNewComment(req.mContent, userID, req.mIdeaId);
             if (rowsInserted <= 0) {
-                return gson.toJson(new StructuredResponse("error", "error creating comment", null));
+                return gson.toJson(new StructuredResponse("error", "error creating comment",
+                        null));
             } else {
                 return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + " comment(s)", null));
             }
@@ -473,22 +560,25 @@ public class App {
         // Put route for updating a comment's content
         // The user can only update his/her own comment
         Spark.put("/comments", (request, response) -> {
-            Request.CommentRequest req = gson.fromJson(request.body(), Request.CommentRequest.class);
+            Request.CommentRequest req = gson.fromJson(request.body(),
+                    Request.CommentRequest.class);
             response.status(200);
             response.type("application/json");
 
             String key = req.sessionKey;
             String userID = null;
-                if (!sessionKeyTable.containsKey(key)) {
-                    return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
-                } else{
-                    userID = sessionKeyTable.get(key);
-                    if (userID == null) {
-                        return gson.toJson(new StructuredResponse("error", "authentication failed", null));
-                    }
+            if (!sessionKeyTable.containsKey(key)) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            } else {
+                userID = sessionKeyTable.get(key);
+                if (userID == null) {
+                    return gson.toJson(new StructuredResponse("error", "authentication failed",
+                            null));
                 }
+            }
             System.out.println("mid: " + req.mId);
-            
+
             String CommenterID = db.getCommenterUserID(req.mId);
             System.out.println("CommenterID: " + CommenterID);
             System.out.println("userID: " + userID);
@@ -496,10 +586,11 @@ public class App {
             if (!userID.equals(CommenterID)) {
                 return gson.toJson(new StructuredResponse("error", "You can only edit your own comment", null));
             }
-                
+
             int rowsUpdated = db.updateOneComment(req.mContent, req.mId);
             if (rowsUpdated <= 0) {
-                return gson.toJson(new StructuredResponse("error", "error updating comment", null));
+                return gson.toJson(new StructuredResponse("error", "error updating comment",
+                        null));
             } else {
                 return gson.toJson(new StructuredResponse("ok", "updated " + rowsUpdated + " comment(s)", null));
             }
