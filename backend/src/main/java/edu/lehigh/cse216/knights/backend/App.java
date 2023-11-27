@@ -40,48 +40,12 @@ import java.util.concurrent.TimeoutException;
  */
 public class App {
 
-    private static MemcachedClient createMemcachedClient() throws IOException {
-        List<InetSocketAddress> servers = AddrUtil.getAddresses(System.getenv("MEMCACHIER_SERVERS").replace(",", " "));
-        AuthInfo authInfo = AuthInfo.plain(System.getenv("MEMCACHIER_USERNAME"), System.getenv("MEMCACHIER_PASSWORD"));
-
-        // this builds the memcache client
-        MemcachedClientBuilder builder = new XMemcachedClientBuilder(servers);
-
-        // Configure SASL auth for each server
-        for (InetSocketAddress server : servers) {
-            builder.addAuthInfo(server, authInfo);
-        }
-
-        // Use binary protocol
-        builder.setCommandFactory(new BinaryCommandFactory());
-        // Connection timeout in milliseconds (default: )
-        builder.setConnectTimeout(1000);
-        // Reconnect to servers (default: true)
-        builder.setEnableHealSession(true);
-        // Delay until reconnect attempt in milliseconds (default: 2000)
-        builder.setHealSessionInterval(2000);
-        MemcachedClient mc = builder.build();
-        return mc;
-    }
-
     /**
      * Sets up the database and server ports.
      * 
      * @param args The command line arguments, (unused)
      */
     public static void main(String[] args) {
-
-        /**
-         * Key = sessionKey
-         * String = userId
-         */
-        Hashtable<String, String> sessionKeyTable = new Hashtable<>();
-
-        // Testing hash Table
-        // sessionKeyTable.put("lGaJjDO8kdNq", "112569610817039937158"); // Tommy
-        // sessionKeyTable.put("HPfj41XbfAx0", "107106171889739877350"); // Sehyoun
-        // sessionKeyTable.put("YMtxeMIRXi5o", "115632613034941022740"); // Eric
-        // sessionKeyTable.put("FEkVssi4WBk2F", "101136375578726959533"); // Joseph
 
         staticFiles.location("/public");
 
@@ -138,9 +102,30 @@ public class App {
         // return it. If there's no data, we return "[]", so there's no need
         // for error handling.
         Spark.get("/ideas", (request, response) -> {
-            // ensure status 200 OK, with a MIME type of JSON
+
             String key = request.queryParams("sessionKey");
-            if (!sessionKeyTable.containsKey(key)) {
+            System.out.println("here is sess key:" + key);
+
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+
+            // ensure status 200 OK, with a MIME type of JSON
+
+            // check if stored in cache
+            String sesskey = mc.get(key);
+            System.out.println("here is mc getting key" + "\n" + mc.get(key) + "\n");
+            if (sesskey == null) {
                 return gson.toJson(new StructuredResponse("error", "Invalid session key",
                         null));
             }
@@ -156,10 +141,25 @@ public class App {
         // Server Error. Otherwise, we have an integer, and the only possible
         // error is that it doesn't correspond to a row with data.
         Spark.get("/ideas/:id", (request, response) -> {
+
             int idx = Integer.parseInt(request.params("id"));
             // ensure status 200 OK, with a MIME type of JSON
             String key = request.queryParams("sessionKey");
-            if (!sessionKeyTable.containsKey(key)) {
+
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+            if (mc.get(key) == null) {
                 return gson.toJson(new StructuredResponse("error", "Invalid session key",
                         null));
             }
@@ -179,6 +179,7 @@ public class App {
         // object, extract the title and content, insert them, and return the
         // ID of the newly created row.
         Spark.post("/ideas", (request, response) -> {
+
             // NB: if gson.Json fails, Spark will reply with status 500 Internal
             // Server Error
             Request.IdeaRequest req = gson.fromJson(request.body(),
@@ -189,11 +190,25 @@ public class App {
 
             String key = req.sessionKey;
             String userID = null;
-            if (!sessionKeyTable.containsKey(key)) {
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+
+            if (mc.get(key) == null) {
                 return gson.toJson(new StructuredResponse("error", "Invalid session key",
                         null));
             } else {
-                userID = sessionKeyTable.get(key);
+                userID = mc.get(key);
                 if (userID == null) {
                     return gson.toJson(new StructuredResponse("error", "authentication failed",
                             null));
@@ -223,11 +238,25 @@ public class App {
             String key = req.sessionKey;
             System.out.println("sessionKey: " + key);
 
-            if (!sessionKeyTable.containsKey(key)) {
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+
+            if (mc.get(key) == null) {
                 return gson.toJson(new StructuredResponse("error", "Invalid session key",
                         null));
             }
-            String userID = sessionKeyTable.get(key);
+            String userID = mc.get(key);
             System.out.println("userID: " + userID);
 
             int likeIncrement = req.value;
@@ -386,10 +415,10 @@ public class App {
 
             // generate a new session key-a random string.
             String sessionKey = SessionKeyGenerator.generateRandomString(12);
-            mc.set(sessionKey, 1000, userId);
+            mc.set(sessionKey, 500, userId);
             // show up the sessionKey and sessionKeyTable
             System.out.println("session Key is " + sessionKey);
-            System.out.println("sessionKeyTable: " + sessionKeyTable);
+            System.out.println("sessionKey value in cache: " + mc.get(sessionKey));
             return gson.toJson(new StructuredResponse("ok", "authentication success",
                     sessionKey));
         });
@@ -424,11 +453,24 @@ public class App {
             // Check the session key
             String key = req.sessionKey;
             String userId;
-            if (!sessionKeyTable.containsKey(key)) {
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+            if (mc.get(key) == null) {
                 return gson.toJson(new StructuredResponse("error", "Invalid session key",
                         null));
             } else {
-                userId = sessionKeyTable.get(key);
+                userId = mc.get(key);
                 if (userId == null) {
                     return gson.toJson(new StructuredResponse("error", "authentication failed",
                             null));
@@ -482,11 +524,25 @@ public class App {
             System.out.println("Requested sessionKey: " + key);
             System.out.println("Reqeusted userId: " + requestedUserId);
 
-            if (!sessionKeyTable.containsKey(key)) {
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+
+            if (mc.get(key) == null) {
                 return gson.toJson(new StructuredResponse("error", "Invalid session key",
                         null));
             }
-            String userId = sessionKeyTable.get(key);
+            String userId = mc.get(key);
             boolean restrictInfo = !(userId.equals(requestedUserId));
 
             User user = db.selectOneUser(requestedUserId, restrictInfo);
@@ -509,11 +565,31 @@ public class App {
 
             String key = request.queryParams("sessionKey");
             System.out.println("Requested sessionKey: " + key);
-            if (!sessionKeyTable.containsKey(key)) {
+
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+
+            if (mc.get(key) == null) {
                 return gson.toJson(new StructuredResponse("error", "Invalid session key",
                         null));
             }
-            String userId = sessionKeyTable.get(key);
+
+            if (mc.get(key) == null) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            }
+            String userId = mc.get(key);
             boolean restrictInfo = false;
 
             User user = db.selectOneUser(userId, restrictInfo);
@@ -537,11 +613,29 @@ public class App {
 
             String key = req.sessionKey;
             String userID = null;
-            if (!sessionKeyTable.containsKey(key)) {
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+
+            if (mc.get(key) == null) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            }
+            if (mc.get(key) == null) {
                 return gson.toJson(new StructuredResponse("error", "Invalid session key",
                         null));
             } else {
-                userID = sessionKeyTable.get(key);
+                userID = mc.get(key);
                 if (userID == null) {
                     return gson.toJson(new StructuredResponse("error", "authentication failed",
                             null));
@@ -553,7 +647,7 @@ public class App {
                 return gson.toJson(new StructuredResponse("error", "error creating comment",
                         null));
             } else {
-                return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + " comment(s)", null));
+                return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + "comment(s)", null));
             }
         });
 
@@ -567,11 +661,29 @@ public class App {
 
             String key = req.sessionKey;
             String userID = null;
-            if (!sessionKeyTable.containsKey(key)) {
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+
+            if (mc.get(key) == null) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            }
+            if (mc.get(key) == null) {
                 return gson.toJson(new StructuredResponse("error", "Invalid session key",
                         null));
             } else {
-                userID = sessionKeyTable.get(key);
+                userID = mc.get(key);
                 if (userID == null) {
                     return gson.toJson(new StructuredResponse("error", "authentication failed",
                             null));
@@ -592,10 +704,34 @@ public class App {
                 return gson.toJson(new StructuredResponse("error", "error updating comment",
                         null));
             } else {
-                return gson.toJson(new StructuredResponse("ok", "updated " + rowsUpdated + " comment(s)", null));
+                return gson.toJson(new StructuredResponse("ok", "updated " + rowsUpdated + "comment(s)", null));
             }
         });
 
+    }
+
+    private static MemcachedClient createMemcachedClient() throws IOException {
+        List<InetSocketAddress> servers = AddrUtil.getAddresses(System.getenv("MEMCACHIER_SERVERS").replace(",", " "));
+        AuthInfo authInfo = AuthInfo.plain(System.getenv("MEMCACHIER_USERNAME"), System.getenv("MEMCACHIER_PASSWORD"));
+
+        // this builds the memcache client
+        MemcachedClientBuilder builder = new XMemcachedClientBuilder(servers);
+
+        // Configure SASL auth for each server
+        for (InetSocketAddress server : servers) {
+            builder.addAuthInfo(server, authInfo);
+        }
+
+        // Use binary protocol
+        builder.setCommandFactory(new BinaryCommandFactory());
+        // Connection timeout in milliseconds (default: )
+        builder.setConnectTimeout(1000);
+        // Reconnect to servers (default: true)
+        builder.setEnableHealSession(true);
+        // Delay until reconnect attempt in milliseconds (default: 2000)
+        builder.setHealSessionInterval(2000);
+        MemcachedClient mc = builder.build();
+        return mc;
     }
 
     private static final String DEFAULT_PORT_DB = "5432";
