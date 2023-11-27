@@ -27,7 +27,8 @@ public class Database {
 
     // ******************************************************************************
 
-    // The functionality to create and drop tables is the responsibility of the admin,
+    // The functionality to create and drop tables is the responsibility of the
+    // admin,
     // and these prepared statements are not typically used in ordinary cases
     /**
      * A prepared statement for creating the table in our database
@@ -63,7 +64,8 @@ public class Database {
 
     /**
      * A prepared statement for deleting an idea from the database
-     * But, this functionality is unlikely to be used in practice. Phase 2 guidelines do not provide instructions for implementing this feature
+     * But, this functionality is unlikely to be used in practice. Phase 2
+     * guidelines do not provide instructions for implementing this feature
      */
     private PreparedStatement mDeleteOneIdea;
 
@@ -103,7 +105,8 @@ public class Database {
     private PreparedStatement mUpdateOneLike;
 
     /**
-     * A prepared statement for inserting a new user into the database with default profile
+     * A prepared statement for inserting a new user into the database with default
+     * profile
      */
     private PreparedStatement mInsertNewUser;
 
@@ -119,7 +122,8 @@ public class Database {
 
     /**
      * A prepared statement for getting information of a specific user
-     * Based on the user's session key request, limited information can be provided, or all information can be provided.
+     * Based on the user's session key request, limited information can be provided,
+     * or all information can be provided.
      */
     private PreparedStatement mSelectOneUser;
 
@@ -174,8 +178,10 @@ public class Database {
             // ******************************************************************************
 
             // tjp Question: should we use 'id' or 'ID'? Really a choice for admin to make
-            // sej Answer:n PostgreSQL, identifiers (table names, column names, etc.) are case-insensitive by default. 
-            // If you don't enclose identifiers in double quotes (""), PostgreSQL will convert them to lowercase.
+            // sej Answer:n PostgreSQL, identifiers (table names, column names, etc.) are
+            // case-insensitive by default.
+            // If you don't enclose identifiers in double quotes (""), PostgreSQL will
+            // convert them to lowercase.
             // We will still use 'ID' for the sake of team convention.
 
             // ******************************************************************************
@@ -186,6 +192,26 @@ public class Database {
                     "CREATE TABLE ideas (ID SERIAL PRIMARY KEY, content VARCHAR(2048) NOT NULL, likeCount INT)");
 
             this.mDropIdeaTable = this.mConnection.prepareStatement("DROP TABLE ideas");
+
+            // Standard CRUD operations
+            // tjp: these SQL prepared statement are essential for understanding exactly
+            // what the backend is asking the database
+            this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE ideaid = ?"); // Not
+            // implemented in
+            // Phase 1?
+            this.mInsertOneIdea = this.mConnection
+                    .prepareStatement("INSERT INTO ideas (content, userid, likeCount, valid) VALUES (?, ?, 0, true)");
+
+            this.mSelectAllIdeas = this.mConnection
+                    .prepareStatement("SELECT ideaid, content, likeCount, userid FROM ideas " +
+                            "WHERE valid IS TRUE " +
+                            "ORDER BY ideaid DESC");
+
+            this.mSelectOneIdea = this.mConnection
+                    .prepareStatement("SELECT * from ideas WHERE ideaid=? AND valid IS TRUE");
+
+            this.mUpdateIdeaLikeCount = this.mConnection
+                    .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE ideaid = ?");
 
             this.mCreateUserTable = this.mConnection.prepareStatement(
                     "CREATE TABLE users (" +
@@ -201,8 +227,8 @@ public class Database {
             this.mDropUserTable = this.mConnection.prepareStatement("DROP TABLE users");
 
             this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE ideaID = ?"); // Not
-                                                                                                       // implemented in
-                                                                                                       // Phase 1? - Yes, also in phase 2. 
+            // implemented in
+            // Phase 1? - Yes, also in phase 2.
             // ******************************************************************************
 
             // Standard CRUD operations
@@ -214,11 +240,12 @@ public class Database {
             // Get all ideas in the database
             this.mSelectAllIdeas = this.mConnection
                     .prepareStatement("SELECT ideaID, content, likeCount, userID FROM ideas " +
-                                        "WHERE valid IS TRUE " +
-                                        "ORDER BY ideaID DESC");
+                            "WHERE valid IS TRUE " +
+                            "ORDER BY ideaID DESC");
 
             // Get one idea information from the database
-            this.mSelectOneIdea = this.mConnection.prepareStatement("SELECT * from ideas WHERE ideaID=? AND valid IS TRUE");
+            this.mSelectOneIdea = this.mConnection
+                    .prepareStatement("SELECT * from ideas WHERE ideaID=? AND valid IS TRUE");
 
             // Update the likeCount of a single idea in the database
             this.mUpdateIdeaLikeCount = this.mConnection
@@ -279,7 +306,7 @@ public class Database {
             // Insert a new like into the table
             this.mInsertNewLike = this.mConnection.prepareStatement(
                     "INSERT INTO likes (ideaID, userID, value) VALUES (?, ?, ?)");
-            
+
             // Delete a like from the table
             this.mDeleteOneLike = this.mConnection.prepareStatement(
                     "DELETE FROM likes WHERE ideaID = ? AND userID = ?");
@@ -540,7 +567,6 @@ public class Database {
         return res;
     }
 
-
     // ******************************************************************************
     // unused in phase 1, 2
     /**
@@ -562,29 +588,28 @@ public class Database {
     }
     // ******************************************************************************
 
-
     /**
      * Get the previous like value of a user for an idea
      * 
      * @param userID The id of the user
      * @param ideaID The id of the idea
      * 
-     * @return The previous like value of the user for the idea. 0 indicates that the user has netural position about this idea
+     * @return The previous like value of the user for the idea. 0 indicates that
+     *         the user has netural position about this idea
      */
-    int previousLikeValue(String userID, int ideaID){
-        try{
-        mCheckIfLikeExists.setString(1, userID);
-        mCheckIfLikeExists.setInt(2, ideaID);
-        
-        // Return true if the user has (dis)liked the post before
-        ResultSet res = mCheckIfLikeExists.executeQuery();
-        if(res.next()){
-            return res.getInt("value"); // The value will be 1 or -1.
-        } else{
-            return 0;
-        }
-        }
-        catch(SQLException e){
+    int previousLikeValue(String userID, int ideaID) {
+        try {
+            mCheckIfLikeExists.setString(1, userID);
+            mCheckIfLikeExists.setInt(2, ideaID);
+
+            // Return true if the user has (dis)liked the post before
+            ResultSet res = mCheckIfLikeExists.executeQuery();
+            if (res.next()) {
+                return res.getInt("value"); // The value will be 1 or -1.
+            } else {
+                return 0;
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return -1;
@@ -680,7 +705,7 @@ public class Database {
             return 0;
         }
     }
-    
+
     /**
      * Get the poster name of an idea
      * 
@@ -706,8 +731,8 @@ public class Database {
      * Insert a new comment into the database
      * 
      * @param content The content of the comment
-     * @param userId The id of the user
-     * @param ideaId The id of the idea
+     * @param userId  The id of the user
+     * @param ideaId  The id of the idea
      * 
      * @return The number of comments that were inserted. 0 indicates an error.
      */
@@ -727,7 +752,7 @@ public class Database {
     /**
      * Update a comment in the database
      * 
-     * @param content The content of the comment
+     * @param content   The content of the comment
      * @param commentId The id of the comment
      * 
      * @return The number of comments that were updated. 0 indicates an error.
@@ -778,7 +803,7 @@ public class Database {
      * @return The commenter username. null indicates an error.
      */
 
-    String getCommenterUserID(int commentID){
+    String getCommenterUserID(int commentID) {
         String CommenterUserID = "default";
         try {
             mGetCommenterUserID.setInt(1, commentID);
@@ -794,7 +819,6 @@ public class Database {
         return CommenterUserID;
 
     }
-
 
     // ******************************************************************************
     // unused functions in Backend. in phase 1, 2
