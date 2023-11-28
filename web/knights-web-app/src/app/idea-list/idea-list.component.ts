@@ -348,6 +348,7 @@ private likeButtons(id: string): DocumentFragment {
     btn.classList.add("likebtn");
     btn.setAttribute('data-value', id);
     btn.innerHTML = 'like';
+    btn.style.cursor = 'pointer';
     td.appendChild(btn);
     fragment.appendChild(td);
 
@@ -356,6 +357,7 @@ private likeButtons(id: string): DocumentFragment {
     btn.classList.add("dislikebtn");
     btn.setAttribute('data-value', id);
     btn.innerHTML = 'dislike';
+    btn.style.cursor = 'pointer';
     td.appendChild(btn);
     fragment.appendChild(td);
 
@@ -380,6 +382,7 @@ private deleteButtons(id: string): DocumentFragment {
     btn.classList.add("delbtn");
     btn.setAttribute('data-value', id);
     btn.innerHTML = 'Delete';
+    btn.style.cursor = 'pointer';
     btn.addEventListener('click', (e) => {
         e.stopPropagation();
     });
