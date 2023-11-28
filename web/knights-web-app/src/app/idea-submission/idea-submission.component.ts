@@ -19,8 +19,7 @@ export class IdeaSubmission {
      * To initialize the object, we say what method of NewEntryForm should be
      * run in response to each of the form's buttons being clicked.
      */
-    constructor(private router: Router)
-    {
+    constructor(private router: Router) {
         // event listeners for adding a post and canceling
         //   document.getElementById("addCancel")?.addEventListener("click", (e) => { newEntryForm.clearForm(); });
         //   document.getElementById("addButton")?.addEventListener("click", (e) => { newEntryForm.submitForm(); });
@@ -37,30 +36,50 @@ export class IdeaSubmission {
         (<HTMLElement>document.getElementById("addElement")).style.display = "none";
         (<HTMLElement>document.getElementById("ideaList")).style.display = "block";
     }
-    
+
+    // Declaring a variable to hold the selected file, it can be of type File or undefined
     selectedFile: File | undefined;
+
+    // Declaring a variable to store the file data as a string, it can also be undefined
     fileData: string | undefined;
-  
+
+    /**
+     * This method is triggered when a file is selected in the input field.
+     * It processes the selected file and converts it to a Base64 encoded string.
+     * @param event - The event triggered on file selection, containing the file data.
+     */
     onFileSelected(event: any): void {
-      const file: File = event.target.files[0];
-      if (file) {
-        this.selectedFile = file;
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-          const base64 = reader.result as string;
-          const fileData = {
-            fileName: file.name,
-            fileType: file.type,
-            base64File: base64.split(',')[1]
-          };
-          this.fileData = JSON.stringify(fileData, null, 2);
-          console.log(this.fileData); // console json
-        };
-        reader.onerror = (error) => {
-          console.error('Error reading file:', error);
-        };
-      }
+        // Extracting the first file from the file input event
+        const file: File = event.target.files[0];
+        if (file) {
+            // Storing the selected file in the component's state
+            this.selectedFile = file;
+
+            // Creating a FileReader to read the file content
+            const reader = new FileReader();
+
+            // Reading the file as a data URL (which will result in a Base64 encoded string)
+            reader.readAsDataURL(file);
+
+            // This function is called once the FileReader finishes reading the file
+            reader.onload = () => {
+                const base64 = reader.result as string;
+                // Creating an object with the file's name, type, and the Base64 encoded content
+                const fileData = {
+                    fileName: file.name,
+                    fileType: file.type,
+                    base64File: base64.split(',')[1] // Splitting the result to get only the Base64 part
+                };
+                // Converting the file data object to a JSON string for further processing
+                this.fileData = JSON.stringify(fileData, null, 2);
+                console.log(this.fileData); // Logging the JSON string to the console
+            };
+
+            // Error handling for the FileReader
+            reader.onerror = (error) => {
+                console.error('Error reading file:', error);
+            };
+        }
     }
 
     /**
@@ -71,32 +90,31 @@ export class IdeaSubmission {
         // that neither is empty
         let idea = "" + (<HTMLInputElement>document.getElementById("newIdea")).value;
         if (idea === "") {
-            window.alert("Error: idea is not valid");
+            window.alert("Error: you must enter an idea");
             return;
         }
+        // get the values of the link field, force them to be strings, and check
+        // But if the link is empty, set it to null
         let link: string | null = (<HTMLInputElement>document.getElementById("newLink")).value;
         if (link === "") {
             link = null;
         }
-        // interface FileData {
-        //     mfileType: string | null;
-        //     base64: string | null;
-        //     mfileName: string | null;
-        // }
-        // let file: FileData | null = null;
-              
-        // let base64 = (<HTMLInputElement>document.getElementById("newBase64")).value || null;
 
-        // if (base64) { // if base64 is null, then file is null
-        //     let fileType = (<HTMLInputElement>document.getElementById("newFileType")).value || null;
-        //     let fileName = (<HTMLInputElement>document.getElementById("newFileName")).value || null;
-        
-        //     file = {
-        //         mfileType: fileType,
-        //         base64: base64,
-        //         mfileName: fileName
-        //     };
-        // }
+        interface ServerFileData {
+            mfileType: string;
+            base64: string;
+            mfileName: string;
+        }
+        let serverFileData: ServerFileData | null = null;
+
+        if (this.fileData) {
+            const fileDataObject = JSON.parse(this.fileData);
+            serverFileData = {
+                mfileType: fileDataObject.fileType,
+                base64: fileDataObject.base64File,
+                mfileName: fileDataObject.fileName
+            };
+        }
 
         console.log(idea);
 
@@ -108,9 +126,9 @@ export class IdeaSubmission {
                 body: JSON.stringify({
                     mContent: idea,
                     sessionKey: sessionKey,
-                    // link: link,
-                    // file: file
-              }),
+                    link: link,
+                    file: serverFileData
+                }),
                 headers: {
                     'Content-type': 'application/json; charset=UTF-8'
                 }
@@ -119,7 +137,7 @@ export class IdeaSubmission {
                 if (response.ok) {
                     this.router.navigate(['/home-page']);
                     return Promise.resolve(response.json());
-                    
+
                 }
                 // Otherwise, handle server errors with a detailed popup message
                 else {

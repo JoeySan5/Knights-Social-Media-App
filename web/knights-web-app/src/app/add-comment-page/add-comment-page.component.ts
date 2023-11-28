@@ -11,22 +11,22 @@ const sessionKey = localStorage.getItem('sessionKey');
   templateUrl: './add-comment-page.component.html',
   styleUrls: ['./add-comment-page.component.css']
 })
-export class AddCommentPageComponent implements OnInit{
+export class AddCommentPageComponent implements OnInit {
 
   data: any;
 
-  constructor(private detailedPostInfoService: DetailedPostInfoService, private router: Router){
+  constructor(private detailedPostInfoService: DetailedPostInfoService, private router: Router) {
   }
 
   ngOnInit(): void {
-      this.getData();
+    this.getData();
   }
 
-  getData(): any{
+  getData(): any {
     this.data = this.detailedPostInfoService.getData();
     console.log("here is data in comment submission component:", this.data);
   }
-  
+
   selectedFile: File | undefined;
   fileData: string | undefined;
 
@@ -53,72 +53,67 @@ export class AddCommentPageComponent implements OnInit{
   }
 
   // /ideas/:id/comments POST '{"mContent": "Hello This is comment written by Sehyoun", "sessionKey": "String", "mIdeaId": 10}'
-  onSubmit(){
+  onSubmit() {
     // get the values of the idea field, force them to be strings, and check 
-      // that neither is empty
-      let comment = "" + (<HTMLInputElement>document.getElementById("newComment")).value;
-      if (comment === "") {
-          window.alert("Error: comment is not valid");
-          return;
-      }
-        // interface FileData {
-        //     mfileType: string | null;
-        //     base64: string | null;
-        //     mfileName: string | null;
-        // }
-        // let file: FileData | null = null;
-              
-        // let base64 = (<HTMLInputElement>document.getElementById("newBase64")).value || null;
+    // that neither is empty
+    let comment = "" + (<HTMLInputElement>document.getElementById("newComment")).value;
+    if (comment === "") {
+      window.alert("Error: comment is not valid");
+      return;
+    }
 
-        // if (base64) { // if base64 is null, then file is null
-        //     let fileType = (<HTMLInputElement>document.getElementById("newFileType")).value || null;
-        //     let fileName = (<HTMLInputElement>document.getElementById("newFileName")).value || null;
-        
-        //     file = {
-        //         mfileType: fileType,
-        //         base64: base64,
-        //         mfileName: fileName
-        //     };
-        // }
+    let link: string | null = (<HTMLInputElement>document.getElementById("newLink")).value;
+    if (link === "") {
+      link = null;
+    }
+
+    if (this.fileData) {
+      const fileDataObject = JSON.parse(this.fileData);
+      var fileData = {
+        mfileType: fileDataObject.fileType,
+        base64: fileDataObject.base64File,
+        mfileName: fileDataObject.fileName
+      };
       console.log(comment);
 
       // set up an AJAX POST. 
       // When the server replies, the result will go to onSubmitResponse
       const doAjax = async () => {
-          await fetch(`${backendUrl}/comments`, {
-              method: 'POST',
-              body: JSON.stringify({
-                  mContent: comment,
-                  sessionKey: sessionKey,
-                  mIdeaId: this.data.mId
-                    // link: link,
-                    // file: file
-              }),
-              headers: {
-                  'Content-type': 'application/json; charset=UTF-8'
-              }
-          }).then((response) => {
-              // If we get an "ok" message, return the json
-              if (response.ok) {
-                  return Promise.resolve(response.json());
-              }
-              // Otherwise, handle server errors with a detailed popup message
-              else {
-                  window.alert(`The server replied not ok: ${response.status}\n` + response.statusText);
-              }
-              return Promise.reject(response);
-          }).then((data) => {
-            console.log('this is data: ', data);
-            this.router.navigate(['home-page/']);
+        await fetch(`${backendUrl}/comments`, {
+          method: 'POST',
+          body: JSON.stringify({
+            mContent: comment,
+            sessionKey: sessionKey,
+            mIdeaId: this.data.mId,
+            link: link,
+            file: fileData
+          }),
+          headers: {
+            'Content-type': 'application/json; charset=UTF-8'
+          }
+        }).then((response) => {
+          // If we get an "ok" message, return the json
+          if (response.ok) {
+            return Promise.resolve(response.json());
+          }
+          // Otherwise, handle server errors with a detailed popup message
+          else {
+            window.alert(`The server replied not ok: ${response.status}\n` + response.statusText);
+          }
+          return Promise.reject(response);
+        }).then((data) => {
+          console.log('this is data: ', data);
+          this.router.navigate(['home-page/']);
 
-             // newEntryForm.onSubmitResponse(data);
-          }).catch((error) => {
-              console.warn('Something went wrong with POST.', error);
-              window.alert("Unspecified error, in fetch for onSubmit for comments");
-          });
+          // newEntryForm.onSubmitResponse(data);
+        }).catch((error) => {
+          console.warn('Something went wrong with POST.', error);
+          window.alert("Unspecified error, in fetch for onSubmit for comments");
+        });
       }
 
       // make the AJAX post and output value or error message to console
       doAjax().then(console.log).catch(console.log);
+    }
   }
 }
