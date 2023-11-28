@@ -109,7 +109,7 @@ export class AddCommentPageComponent implements OnInit{
               return Promise.reject(response);
           }).then((data) => {
             console.log('this is data: ', data);
-
+            this.router.navigate(['home-page/']);
 
              // newEntryForm.onSubmitResponse(data);
           }).catch((error) => {
