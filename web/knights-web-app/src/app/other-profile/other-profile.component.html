@@ -1,6 +1,17 @@
 <h2 class="tagline">Welcome to {{data.mUsername}}'s profile page!</h2>
-<textarea placeholder="Email" class="inputField" id="emailTextarea" readonly>Email: {{data.mEmail}}</textarea>
-<textarea placeholder="Note About User" class="inputField" id="noteTextarea" readonly>User Note: {{data.mNote}}</textarea>
+
+<div class="profile-grid">
+<table class="form-table">
+  <tr>
+      <td>Email</td>
+      <td><textarea placeholder="Email" class="inputField" id="emailTextarea" readonly>Email: {{data.mEmail}}</textarea></td>
+  </tr>
+  <tr>
+      <td>Note</td>
+      <td><textarea placeholder="Note About User" class="inputField" id="noteTextarea" readonly>User Note: {{data.mNote}}</textarea></td>
+  </tr>
+</table>
+</div>
 
 <div id="addButtonFooter">
     <button id="showAdd" routerLink="/home-page">Go back home</button>
