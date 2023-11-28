@@ -85,9 +85,7 @@ private update(data: any) {
         table.setAttribute('id', 'ideaTable');
         for (let i = 0; i < data.mData.length; ++i) {
             let tr = document.createElement('tr');
-            
             let td_message = document.createElement('td');
-            
             let td_like = document.createElement('td');
             let user_name = document.createElement('userN')
             td_message.innerHTML = data.mData[i].mContent;
@@ -382,6 +380,10 @@ private deleteButtons(id: string): DocumentFragment {
     btn.classList.add("delbtn");
     btn.setAttribute('data-value', id);
     btn.innerHTML = 'Delete';
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
     td.appendChild(btn);
     fragment.appendChild(td);
 
