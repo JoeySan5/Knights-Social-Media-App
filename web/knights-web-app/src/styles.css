@@ -97,7 +97,7 @@ body {
 
 #ideaList{
     font-family: 'Roboto', sans-serif;
-    max-height: 300px;
+    max-height: 500px;
     display:flex;
     flex-direction: column;
 
@@ -107,6 +107,13 @@ body {
     overflow-y: scroll;
     width: 50%;
     margin: auto;
+    width: 80vw; /* or 100% if it should be relative to its parent container */
+    
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+
 }
 
 table {
@@ -115,6 +122,7 @@ table {
     border-collapse: separate;
     border-spacing: 0 0.5em;
     max-height: 399px;
+
 }
 
 .inputField{
@@ -138,6 +146,10 @@ tr td {
   border-style: solid;
   border-width: 2px;
   border-color: #CFFA7C;
+  min-width: 100px; 
+  min-height: 50px;
+  text-align: center;
+
 }
 
 usern {
@@ -145,7 +157,7 @@ usern {
     margin-top: 1px;
     margin-bottom: 10px;
     font-size: 20px;
-    
+    cursor : pointer;
 }
 
 .usern {
@@ -153,7 +165,7 @@ usern {
     margin-top: 1px;
     margin-bottom: 10px;
     font-size: 20px;
-    
+    cursor : pointer;
 }
 
 .tr{
@@ -202,3 +214,4 @@ tr td:last-of-type {
     text-align: center;
 
 }
+

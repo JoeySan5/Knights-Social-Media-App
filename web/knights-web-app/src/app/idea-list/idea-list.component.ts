@@ -87,15 +87,19 @@ private update(data: any) {
             let tr = document.createElement('tr');
             let td_message = document.createElement('td');
             let td_like = document.createElement('td');
-            let user_name = document.createElement('userN')
+            let user_name = document.createElement('td')
+            user_name.className = "usern";
+
             td_message.innerHTML = data.mData[i].mContent;
             td_like.innerHTML = data.mData[i].mLikeCount;
             user_name.innerHTML = data.mData[i].mPosterUsername;
-            user_name.style.display = "block";
-            td_message.prepend(user_name);
+            td_message.style.cursor = 'pointer';
+
+            tr.appendChild(user_name);
             tr.appendChild(td_message);
             tr.appendChild(this.likeButtons(data.mData[i].mId));
             tr.appendChild(td_like);
+
             tr.appendChild(this.deleteButtons(data.mData[i].mId));
             table.appendChild(tr);
             tr.addEventListener("click", (e) => { this.trClicK(data.mData[i].mId) });
