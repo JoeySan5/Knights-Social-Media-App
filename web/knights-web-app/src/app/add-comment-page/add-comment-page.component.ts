@@ -36,7 +36,25 @@ export class AddCommentPageComponent implements OnInit{
           window.alert("Error: comment is not valid");
           return;
       }
+        // interface FileData {
+        //     mfileType: string | null;
+        //     base64: string | null;
+        //     mfileName: string | null;
+        // }
+        // let file: FileData | null = null;
+              
+        // let base64 = (<HTMLInputElement>document.getElementById("newBase64")).value || null;
 
+        // if (base64) { // if base64 is null, then file is null
+        //     let fileType = (<HTMLInputElement>document.getElementById("newFileType")).value || null;
+        //     let fileName = (<HTMLInputElement>document.getElementById("newFileName")).value || null;
+        
+        //     file = {
+        //         mfileType: fileType,
+        //         base64: base64,
+        //         mfileName: fileName
+        //     };
+        // }
       console.log(comment);
 
       // set up an AJAX POST. 
@@ -48,6 +66,8 @@ export class AddCommentPageComponent implements OnInit{
                   mContent: comment,
                   sessionKey: sessionKey,
                   mIdeaId: this.data.mId
+                    // link: link,
+                    // file: file
               }),
               headers: {
                   'Content-type': 'application/json; charset=UTF-8'
