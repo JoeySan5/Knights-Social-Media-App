@@ -100,22 +100,29 @@ export class IdeaSubmission {
             link = null;
         }
 
+        // Defining an interface for the structure of file data to be sent to the server.
         interface ServerFileData {
-            mfileType: string;
-            base64: string;
-            mfileName: string;
+            mfileType: string;  // Type of the file, e.g., 'image/jpeg'
+            base64: string;     // Base64 encoded string of the file content
+            mfileName: string;  // Name of the file
         }
+
+        // Declaring a variable to store the file data for the server.
+        // Initially, it's set to null to handle cases where no file is selected.
         let serverFileData: ServerFileData | null = null;
 
+        // Check if there is any file data present (this.fileData is not undefined)
         if (this.fileData) {
+            // Parsing the JSON string to an object to easily access its properties
             const fileDataObject = JSON.parse(this.fileData);
+
+            // Assigning the parsed data to the serverFileData with the correct structure
             serverFileData = {
-                mfileType: fileDataObject.fileType,
-                base64: fileDataObject.base64File,
-                mfileName: fileDataObject.fileName
+                mfileType: fileDataObject.fileType, // Assigning file type
+                base64: fileDataObject.base64File,  // Assigning base64 encoded content
+                mfileName: fileDataObject.fileName  // Assigning file name
             };
         }
-
         console.log(idea);
 
         // set up an AJAX POST. 
