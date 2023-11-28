@@ -14,6 +14,7 @@ import { DetailedPostComponent } from './detailed-post/detailed-post.component';
 import { DetailedPostInfoService } from './detailed-post-info.service';
 import { AddCommentPageComponent } from './add-comment-page/add-comment-page.component';
 import { OtherProfileComponent } from './other-profile/other-profile.component';
+import { TestComponent } from './test/test.component';
 
 
 //Here we write all possible routes to components. This is useful when you want to 
@@ -27,6 +28,7 @@ const routes: Routes = [
   {  path: 'detailed-post', component: DetailedPostComponent},
   {  path: 'add-comment-page', component: AddCommentPageComponent},
   {  path: 'other-profile', component: OtherProfileComponent},
+  { path: 'test', component: TestComponent }, 
 
   
 ]; // sets up routes constant where you define your routes
@@ -42,7 +44,8 @@ const routes: Routes = [
     HomePageComponent,
     DetailedPostComponent,
     AddCommentPageComponent,
-    OtherProfileComponent
+    OtherProfileComponent,
+    TestComponent
   ],
   imports: [
     BrowserModule,
