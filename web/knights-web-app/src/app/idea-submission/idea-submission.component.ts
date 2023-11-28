@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { IdeaListComponent } from '../idea-list/idea-list.component';
+import { Router } from '@angular/router';
 
 var newEntryForm: IdeaSubmission;
 var mainList: IdeaListComponent;
@@ -18,7 +19,8 @@ export class IdeaSubmission {
      * To initialize the object, we say what method of NewEntryForm should be
      * run in response to each of the form's buttons being clicked.
      */
-    constructor() {
+    constructor(private router: Router)
+    {
         // event listeners for adding a post and canceling
         //   document.getElementById("addCancel")?.addEventListener("click", (e) => { newEntryForm.clearForm(); });
         //   document.getElementById("addButton")?.addEventListener("click", (e) => { newEntryForm.submitForm(); });
@@ -34,6 +36,31 @@ export class IdeaSubmission {
         // reset the UI
         (<HTMLElement>document.getElementById("addElement")).style.display = "none";
         (<HTMLElement>document.getElementById("ideaList")).style.display = "block";
+    }
+    
+    selectedFile: File | undefined;
+    fileData: string | undefined;
+  
+    onFileSelected(event: any): void {
+      const file: File = event.target.files[0];
+      if (file) {
+        this.selectedFile = file;
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+          const base64 = reader.result as string;
+          const fileData = {
+            fileName: file.name,
+            fileType: file.type,
+            base64File: base64.split(',')[1]
+          };
+          this.fileData = JSON.stringify(fileData, null, 2);
+          console.log(this.fileData); // console json
+        };
+        reader.onerror = (error) => {
+          console.error('Error reading file:', error);
+        };
+      }
     }
 
     /**
@@ -90,7 +117,9 @@ export class IdeaSubmission {
             }).then((response) => {
                 // If we get an "ok" message, return the json
                 if (response.ok) {
+                    this.router.navigate(['/home-page']);
                     return Promise.resolve(response.json());
+                    
                 }
                 // Otherwise, handle server errors with a detailed popup message
                 else {

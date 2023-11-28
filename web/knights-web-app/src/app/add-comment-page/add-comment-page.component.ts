@@ -26,6 +26,31 @@ export class AddCommentPageComponent implements OnInit{
     this.data = this.detailedPostInfoService.getData();
     console.log("here is data in comment submission component:", this.data);
   }
+  
+  selectedFile: File | undefined;
+  fileData: string | undefined;
+
+  onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        const fileData = {
+          fileName: file.name,
+          fileType: file.type,
+          base64File: base64.split(',')[1]
+        };
+        this.fileData = JSON.stringify(fileData, null, 2);
+        console.log(this.fileData); // console json
+      };
+      reader.onerror = (error) => {
+        console.error('Error reading file:', error);
+      };
+    }
+  }
 
   // /ideas/:id/comments POST '{"mContent": "Hello This is comment written by Sehyoun", "sessionKey": "String", "mIdeaId": 10}'
   onSubmit(){
@@ -84,7 +109,7 @@ export class AddCommentPageComponent implements OnInit{
               return Promise.reject(response);
           }).then((data) => {
             console.log('this is data: ', data);
-            this.router.navigate(["/home-page"])
+
 
              // newEntryForm.onSubmitResponse(data);
           }).catch((error) => {
