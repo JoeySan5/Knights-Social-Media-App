@@ -7,7 +7,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import edu.lehigh.cse216.knights.backend.Comment.ExtendedComment;
@@ -504,6 +505,13 @@ public class Database {
                 }
                 rsComments.close();
 
+                // resposne from database will have the fileID, not a file object.
+                // With this fileID, we will go to the cache or google storage and retrieve the
+                // object
+                // Once the object is retrieved we decode data and send back proper FileObject
+                // ID
+                // FileObject file = function(fileId);
+
                 res = new ExtendedIdea(
                         rs.getInt("ideaid"),
                         rs.getString("content"),
@@ -512,6 +520,7 @@ public class Database {
                         posterUsername,
                         comments,
                         (FileObject) rs.getObject("fileid"),
+                        // file,
                         rs.getString("link"));
             }
             rs.close();
@@ -868,8 +877,15 @@ public class Database {
 
     String parseFileid(FileObject file) {
         String fileId = "";
+        // Get the current timestamp
+        LocalDateTime timestamp = LocalDateTime.now();
+
+        // Format the timestamp using a DateTimeFormatter
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
+        String formattedTimestamp = timestamp.format(formatter);
         try {
             fileId = file.getmFileName();
+            fileId = fileId + formattedTimestamp;
         } catch (Exception e) {
             e.printStackTrace();
         }

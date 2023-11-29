@@ -193,7 +193,7 @@ public class App {
 
             FileObject file = req.mFile;
 
-            String fileid = db.parseFileid(file); // error line
+            String fileid = db.parseFileid(file);
             System.out.println("fileid: " + fileid);
 
             // conncecting to cache
