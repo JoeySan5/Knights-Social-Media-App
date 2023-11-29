@@ -163,6 +163,7 @@ public class App {
                 return gson.toJson(new StructuredResponse("error", "Invalid session key",
                         null));
             }
+
             response.status(200);
             response.type("application/json");
             Idea.ExtendedIdea idea = db.selectOneIdea(idx);
@@ -187,9 +188,14 @@ public class App {
             // ensure status 200 OK, with a MIME type of JSON
             // NB: even on error, we return 200, but with a JSON object that
             // describes the error.
-
             String key = req.sessionKey;
             String userID = null;
+
+            FileObject file = req.mFile;
+
+            String fileid = db.parseFileid(file); // error line
+            System.out.println("fileid: " + fileid);
+
             // conncecting to cache
             MemcachedClient mc = null;
             try {
@@ -217,7 +223,7 @@ public class App {
 
             response.status(200);
             response.type("application/json");
-            int rowsInserted = db.insertIdea(req.mContent, userID);
+            int rowsInserted = db.insertIdea(req.mContent, userID, fileid, req.mLink);
             if (rowsInserted <= 0) {
                 return gson.toJson(new StructuredResponse("error", "error creating idea",
                         null));
@@ -415,7 +421,7 @@ public class App {
 
             // generate a new session key-a random string.
             String sessionKey = SessionKeyGenerator.generateRandomString(12);
-            mc.set(sessionKey, 500, userId);
+            mc.set(sessionKey, 0, userId);
             // show up the sessionKey and sessionKeyTable
             System.out.println("session Key is " + sessionKey);
             System.out.println("sessionKey value in cache: " + mc.get(sessionKey));

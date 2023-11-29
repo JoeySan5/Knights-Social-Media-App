@@ -200,7 +200,8 @@ public class Database {
             // implemented in
             // Phase 1?
             this.mInsertOneIdea = this.mConnection
-                    .prepareStatement("INSERT INTO ideas (content, userid, likeCount, valid) VALUES (?, ?, 0, true)");
+                    .prepareStatement(
+                            "INSERT INTO ideas (content, userid, likeCount, valid, fileid ,link) VALUES (?, ?, 0, true, ?, ?)");
 
             this.mSelectAllIdeas = this.mConnection
                     .prepareStatement("SELECT ideaid, content, likeCount, userid FROM ideas " +
@@ -234,24 +235,7 @@ public class Database {
             // Standard CRUD operations
             // tjp: these SQL prepared statement are essential for understanding exactly
             // what the backend is asking the database
-            this.mInsertOneIdea = this.mConnection
-                    .prepareStatement("INSERT INTO ideas (content, userID, likeCount, valid) VALUES (?, ?, 0, true)");
 
-            // Get all ideas in the database
-            this.mSelectAllIdeas = this.mConnection
-                    .prepareStatement("SELECT ideaID, content, likeCount, userID FROM ideas " +
-                            "WHERE valid IS TRUE " +
-                            "ORDER BY ideaID DESC");
-
-            // Get one idea information from the database
-            this.mSelectOneIdea = this.mConnection
-                    .prepareStatement("SELECT * from ideas WHERE ideaID=? AND valid IS TRUE");
-
-            // Update the likeCount of a single idea in the database
-            this.mUpdateIdeaLikeCount = this.mConnection
-                    .prepareStatement("UPDATE ideas SET likeCount = likeCount + ? WHERE ideaID = ?");
-
-            // Register user's default profile
             this.mInsertNewUser = this.mConnection.prepareStatement(
                     "INSERT INTO users (email, valid, username, GI, SO, note, userID) " +
                             "VALUES ('unknown', true, 'unknown', 'unknown', 'unknown', 'unknown', ?)");
@@ -420,11 +404,13 @@ public class Database {
      * 
      * @return The number of ideas that were inserted
      */
-    int insertIdea(String content, String userId) {
+    int insertIdea(String content, String userId, String file, String link) {
         int count = 0;
         try {
             mInsertOneIdea.setString(1, content);
             mInsertOneIdea.setString(2, userId);
+            mInsertOneIdea.setString(3, file);
+            mInsertOneIdea.setString(4, link);
             // likeCount will automatically be set to 0; it is written into the
             // preparedStatement
             count += mInsertOneIdea.executeUpdate();
@@ -442,8 +428,16 @@ public class Database {
      */
     ArrayList<ExtendedIdea> selectAllIdeas() {
         ArrayList<ExtendedIdea> res = new ArrayList<ExtendedIdea>();
+
         try {
             ResultSet rs = mSelectAllIdeas.executeQuery();
+
+            // Here we will have to retrieve the file ID from the database. Once we have the
+            // file, we want to retrieve it from google cloud.
+            // Once we have the file we want to encode it into base64. Once in base64 we
+            // will be adding it to the extended idea
+
+            // Also must get link from database, and return that as well.
 
             while (rs.next()) {
                 int ideaId = rs.getInt("ideaid");
@@ -516,7 +510,9 @@ public class Database {
                         rs.getInt("likeCount"),
                         rs.getString("userid"),
                         posterUsername,
-                        comments);
+                        comments,
+                        (FileObject) rs.getObject("fileid"),
+                        rs.getString("link"));
             }
             rs.close();
         } catch (SQLException e) {
@@ -870,4 +866,13 @@ public class Database {
     }
     // ******************************************************************************
 
+    String parseFileid(FileObject file) {
+        String fileId = "";
+        try {
+            fileId = file.getmFileName();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return fileId;
+    }
 }
