@@ -28,4 +28,11 @@ public class FileObject {
         return this.mFileName;
     }
 
+    public String getmFileType() {
+        return this.mFileType;
+    }
+
+    public String getmBase64() {
+        return this.mBase64;
+    }
 }
