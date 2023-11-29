@@ -17,6 +17,9 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 
@@ -39,6 +42,15 @@ import java.util.concurrent.TimeoutException;
  * App creates an HTTP server capable of interacting with the Database.
  */
 public class App {
+    // {
+    // "client_id":
+    // "764086051850-6qr4p6gpi6hn506pt8ejuq83di341hur.apps.googleusercontent.com",
+    // "client_secret": "d-FL95Q19q7MQmFpd7hHD0Ty",
+    // "quota_project_id": "the-knights",
+    // "refresh_token":
+    // "1//05eOano31QLEbCgYIARAAGAUSNwF-L9Ira1eY3hsy6T7SsfODfkodsVYHZlQqZhDJLRZTa17KTe13vfwXmLYoQeajGZypJlS7m6E",
+    // "type": "authorized_user"
+    // }
 
     /**
      * Sets up the database and server ports.
@@ -53,6 +65,21 @@ public class App {
         Database db = getDatabaseConnection();
         if (db == null)
             return;
+
+        // The name of google cloud storage bucket
+        String bucketName = "knights-bucket-2";
+        // Initialize the Google Cloud Storage client
+        Storage storage = StorageOptions.getDefaultInstance().getService();
+        Bucket bucket = storage.get(bucketName);
+
+        System.out.println("\nhere is bucket" + bucket);
+
+        try {
+            storage.close();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         // gson provides us with a way to turn JSON into objects, and objects
         // into JSON.
