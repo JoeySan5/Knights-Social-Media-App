@@ -10,6 +10,14 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
+
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 
 import edu.lehigh.cse216.knights.backend.Comment.ExtendedComment;
 import edu.lehigh.cse216.knights.backend.Idea.ExtendedIdea;
@@ -511,6 +519,8 @@ public class Database {
                 // Once the object is retrieved we decode data and send back proper FileObject
                 // ID
                 // FileObject file = function(fileId);
+                String fileId = rs.getString("fileid");
+                FileObject file = convertToFileObject(fileId);
 
                 res = new ExtendedIdea(
                         rs.getInt("ideaid"),
@@ -519,8 +529,7 @@ public class Database {
                         rs.getString("userid"),
                         posterUsername,
                         comments,
-                        (FileObject) rs.getObject("fileid"),
-                        // file,
+                        file,
                         rs.getString("link"));
             }
             rs.close();
@@ -890,5 +899,42 @@ public class Database {
             e.printStackTrace();
         }
         return fileId;
+    }
+
+    FileObject convertToFileObject(String fileId) {
+        String fileType = "";
+        String base64String = "";
+        // Initialize the Google Cloud Storage client
+        // Gets information from env var GOOGLE_APPLICATION_CREDENTIALS
+        Storage storage = StorageOptions.getDefaultInstance().getService();
+        // The name of google cloud storage bucket
+        String bucketName = "knights-bucket-2";
+        String blobName = fileId;
+        BlobId blobId = BlobId.of(bucketName, blobName);
+        Blob blob = storage.get(blobId);
+
+        System.out.println("\nhere is blob: " + blobId);
+
+        if (blob != null) {
+            // Retrieving data
+            fileType = blob.getContentType();
+            base64String = Base64.getEncoder().encodeToString(blob.getContent());
+            // Output the results
+            System.out.println("File Type: " + fileType);
+            System.out.println("Base64 Data: " + base64String);
+            System.out.println("File Name: " + fileId);
+        } else {
+            System.out.println("Blob does not exist");
+            return null;
+        }
+
+        try {
+            storage.close();
+        } catch (Exception e) {
+            System.err.println("Error closing storage in selectOneIdea function");
+            e.printStackTrace();
+        }
+
+        return new FileObject(fileId, fileType, base64String);
     }
 }
