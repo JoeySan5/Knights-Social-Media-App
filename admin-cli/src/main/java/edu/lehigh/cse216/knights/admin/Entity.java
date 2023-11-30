@@ -77,6 +77,12 @@ public class Entity {
         /** Validity of the user */
         public boolean valid;
 
+        /** file ID of file posted */
+        public String fileId;
+
+        /** link of link posted */
+        public String link;
+
         /**
          * Idea constructor with all parameters specified
          * @param ideaId idea id
@@ -84,13 +90,17 @@ public class Entity {
          * @param content content of idea
          * @param likeCount number of likes
          * @param valid validity
+         * @param fileId fileId
+         * @param link link
          */
-        public Idea(int ideaId, String userId, String content, int likeCount, boolean valid) {
+        public Idea(int ideaId, String userId, String content, int likeCount, boolean valid, String fileId, String link) {
             this.ideaId = ideaId;
             this.userId = userId;
             this.content = content;
             this.likeCount = likeCount;
             this.valid = valid;
+            this.fileId = fileId;
+            this.link = link;
         }
     }
 
@@ -139,18 +149,28 @@ public class Entity {
         /** The like count for this idea entry */
         public int ideaId;
 
+        /** file ID of file posted */
+        public String fileId;
+
+        /** link of link posted */
+        public String link;
+
         /**
          * Comment constructor with all parameters specified 
          * @param commentId comment ID
          * @param content content of comment
          * @param userId user ID
          * @param ideaId idea ID
+         * @param fileId fileId
+         * @param link link
          */
-        public Comment(int commentId, String content, String userId, int ideaId) {
+        public Comment(int commentId, String content, String userId, int ideaId, String fileId, String link) {
             this.commentId = commentId;
             this.content = content;
             this.userId = userId;
             this.ideaId = ideaId;
+            this.fileId = fileId;
+            this.link = link;
         }
     }
 
