@@ -9,7 +9,7 @@ class Idea {
   final int mLikeCount;
   final String mPosterUsername;
   final String mUserId;
-  // final String? mFilePath; // New field for file path
+  final String? mFilePath; // New field for file path
 
   const Idea(
       {required this.mId,
@@ -17,8 +17,8 @@ class Idea {
       this.mLink,
       required this.mLikeCount,
       required this.mPosterUsername,
-      required this.mUserId
-      // this.mFilePath, // Initialize the new field
+      required this.mUserId,
+      this.mFilePath, // Initialize the new field
       });
 
   ///This is a factory constructor that creates an idea instance from json objects.
@@ -30,7 +30,7 @@ class Idea {
         mLikeCount: json['mLikeCount'],
         mPosterUsername: json['mPosterUsername'],
         mUserId: json['mUserId'],
-        // mFilePath: json['mFilePath'], // Extract from JSON
+        mFilePath: json['mFilePath'], // Extract from JSON
     );
   }
 
@@ -41,7 +41,10 @@ class Idea {
         'mLikeCount': mLikeCount,
         'mPosterUsername': mPosterUsername,
         'mUserId': mUserId,
-        'mLink': mLink
-        // 'mFilePath': mFilePath, // Convert to JSON
+        'mLink': mLink,
+        // "mFile":{mFile,
+        // "mFileType": mFileType,
+        // "mBase64": mBase64}
+        'mFilePath': mFilePath, // Convert to JSON
       };
 }

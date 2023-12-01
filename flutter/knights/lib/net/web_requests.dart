@@ -60,7 +60,7 @@ Future<Poster> fetchPoster(String id, String sessionKey) async {
   var url = Uri.parse(
       'https://team-knights.dokku.cse.lehigh.edu/users/$id?sessionKey=$sessionKey');
   var headers = {"Accept": "application/json"};
-  // garbage user that gets returned if sopmething goes wrong
+  // garbage user that gets returned if something goes wrong
   Poster garb = Poster(
       mId: "", mUsername: 'garbage', mEmail: 'nonExistent', mNote: 'garbage');
 
@@ -135,7 +135,7 @@ Future<DetailedPost> fetchDetailedPost(int mId, String sessionKey) async {
   var response = await http.get(url, headers: headers);
   print(response.body);
 
-  /// upon sucess, returnData gets populated withproper data
+  /// upon sucess, returnData gets populated with proper data
   if (response.statusCode == 200) {
     DetailedPost returnData;
     var res = jsonDecode(response.body);

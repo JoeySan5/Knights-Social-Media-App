@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import 'package:knights/net/web_requests.dart';
@@ -26,6 +29,23 @@ class _IdeasForm extends State<IdeasForm> {
     myController.dispose();
     super.dispose();
   }
+  
+  File? _selectedFile;
+
+  Future<void> pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      setState(() {
+        _selectedFile = File(result.files.single.path!);
+      });
+    } else {
+      // User canceled the picker
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No file selected')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,14 +56,13 @@ class _IdeasForm extends State<IdeasForm> {
       child: Column(
         children: [
           Padding(
-              padding: const EdgeInsets.only(top: 30),
-              child: SizedBox(
-                  width: 300,
-                  height: 300,
+              padding: const EdgeInsets.all(8.0),
+              // child: SizedBox(
+              //     width: 300,
+              //     height: 300,
                   child: TextFormField(
-                    maxLines: null,
-                    expands: true,
-
+                    maxLines: 5, // reduced max lines
+                    //expands: true,
                     //controller: myController,
                     decoration: const InputDecoration(
                         border: OutlineInputBorder(),
@@ -66,16 +85,18 @@ class _IdeasForm extends State<IdeasForm> {
                       print('content: $value');
                     },
                     style: const TextStyle(color: Colors.white),
-                  ))),
+                  )
+                  //)
+                  ),
           Padding(
-              padding: const EdgeInsets.only(top: 30),
+              padding: const EdgeInsets.all(8.0),
               // SECOND BOX FOR LINKS
-              child: SizedBox(
-                  width: 300,
-                  height: 300,
+              // child: SizedBox(
+              //     width: 300,
+              //     height: 300,
                   child: TextFormField(
-                    maxLines: null,
-                    expands: true,
+                    maxLines: 2, // reduced max lines
+                    //expands: true,
 
                     //controller: myController,
                     decoration: const InputDecoration(
@@ -99,7 +120,25 @@ class _IdeasForm extends State<IdeasForm> {
                       print('content: $value');
                     },
                     style: const TextStyle(color: Colors.white),
-                  ))),
+                  )
+                  //)
+                  ),
+          
+          // Attach file button
+          ElevatedButton(
+            onPressed: pickFile,
+            child: const Text('Attach File'),
+          ),
+
+          // Optional: Display the selected file name
+          if (_selectedFile != null)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child:
+                  Text("Selected File: ${_selectedFile!.path.split('/').last}"),
+            ),        
+          
+          // Submit button  
           ElevatedButton(
               style: const ButtonStyle(
                 backgroundColor: MaterialStatePropertyAll(Colors.green),
@@ -121,44 +160,5 @@ class _IdeasForm extends State<IdeasForm> {
         ],
       ),
     );
-    // return Column(
-    //   children: [
-
-    //         Padding(
-    //           padding: const EdgeInsets.only(top: 30),
-    //           child: SizedBox(
-    //           width: 300,
-    //           height: 300,
-    //           child: TextField(
-    //             maxLines: null,
-    //             expands: true,
-
-    //           controller: myController,
-    //           decoration: const InputDecoration(
-    //           border: OutlineInputBorder(),
-    //           hintText: 'Please write your idea here...',
-    //           hintStyle: TextStyle(color: Colors.white),
-    //           contentPadding: EdgeInsets.all(10)
-    //         ),
-    //         style: const TextStyle(color: Colors.white),
-    //         )
-    //         )
-    //         ),
-
-    //     ElevatedButton(
-    //           style: const ButtonStyle(
-    //               backgroundColor: MaterialStatePropertyAll(Colors.green),
-    //             ),
-    //             //the arrow function ()=> allows for postIdeas to return a future
-    //             //this is done because onPressed accepts only voids, not future
-    //           onPressed:() => {
-    //             postIdeas(myController.text, widget.sessionKey),
-    //             Navigator.pop(context)
-    //           },
-    //           child: const Text('Submit')
-
-    //           ),
-    //   ],
-    // );
   }
 }
