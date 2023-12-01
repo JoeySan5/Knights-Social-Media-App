@@ -58,7 +58,7 @@
 
 #### Locally
 1. From the backend maven project root, run mvn exec:java with the `PORT` and `DATABASE_URL` environment variables specified
-    * `PORT=8998 CLIENT_ID=1019349198762-463i1tt2naq9ipll3f9ade5u7nli7gju.apps.googleusercontent.com DATABASE_URL=postgres://pfdcoetq:VMXXrjrJtMXqzP6JwpjnapwpOVpk6e9o@peanut.db.elephantsql.com/pfdcoetq mvn exec:java`
+    * `PORT=8998 CLIENT_ID=1019349198762-463i1tt2naq9ipll3f9ade5u7nli7gju.apps.googleusercontent.com DATABASE_URL=postgres://pfdcoetq:VMXXrjrJtMXqzP6JwpjnapwpOVpk6e9o@peanut.db.elephantsql.com/pfdcoetq MEMCACHIER_USERNAME=B24B55 MEMCACHIER_PASSWORD=FDCD8702A87D0542C2EC23142008D739 MEMCACHIER_SERVERS=mc4.dev.ec2.memcachier.com:11211 CORS_ENABLED=TRUE GOOGLE_APPLICATION_CREDENTIALS="src\main\java\edu\lehigh\cse216\knights\backend\credentials\the-knights-d575548961a0.json" mvn exec:java`
     * The address is `http://localhost:PORT/`
 
 #### On Dokku
