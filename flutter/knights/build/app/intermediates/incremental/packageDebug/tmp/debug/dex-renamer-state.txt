@@ -1,4 +1,0 @@
-#Fri Dec 01 16:56:32 EST 2023
-base.0=/Users/adivikarawat/Desktop/CSE216/cse216-2023fa-team-25/flutter/knights/build/app/intermediates/dex/debug/mergeDexDebug/classes.dex
-path.0=classes.dex
-renamed.0=classes.dex
