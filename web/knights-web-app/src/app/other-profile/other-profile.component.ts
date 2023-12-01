@@ -11,13 +11,13 @@ export class OtherProfileComponent {
   data: any;
 
   //this constructor id's and injection site for the service. setting detailedPost... as an instance of DetailedPost...
-  constructor(private detailedPostInfoService: DetailedPostInfoService){
+  constructor(private detailedPostInfoService: DetailedPostInfoService) {
   }
 
   ngOnInit(): void {
-      this.getData();
+    this.getData();
   }
-  getData(): any{
+  getData(): any {
     this.data = this.detailedPostInfoService.getData();
     console.log("here is data in other profile component:", this.data);
   }

@@ -1,5 +1,7 @@
 <div class="tr"> 
-    <div class="usern">{{data.mPosterUsername}}</div>
+    
+    <!--Profile-page should be the profile which has been clicked by user-->
+    <div class="usern" routerLink="/profile-page">{{data.mPosterUsername}}</div>
     <div >{{data.mContent}}</div>
 </div>
 
@@ -9,6 +11,8 @@
 <!-- This is the angular way of creating divs based off of an array
 Additionally, I am initializing each element of mComments array to be set to variable mComment -->
 <div *ngFor="let mComment of data.mComments"  class="comments">
+
+    <!--Profile-page should be the profile which has been clicked by user-->
     <div class="usern" routerLink="/profile-page">{{mComment.mCommenterUsername}}</div>
     <div >{{mComment.mContent}}</div>
 </div>
