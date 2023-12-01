@@ -12,6 +12,7 @@ import junit.framework.TestSuite;
 public class CommentTest extends TestCase {
     /**
      * Create the test case
+     * 
      * @param testName name of the test case
      */
     public CommentTest(String testName) {
@@ -34,8 +35,10 @@ public class CommentTest extends TestCase {
         String userID = "testUser";
         int ideaID = 2;
         String content = "Test Comment";
+        String link = null;
+        FileObject file = null;
 
-        Comment comment = new Comment(id, userID, ideaID, content);
+        Comment comment = new Comment(id, userID, ideaID, content, link, file);
 
         assertEquals(id, comment.mId);
         assertEquals(userID, comment.mUserId);
