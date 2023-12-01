@@ -533,7 +533,10 @@ public class Database {
                 // ID
                 // FileObject file = function(fileId);
                 String fileId = rs.getString("fileid");
-                FileObject file = retrieveFileObject(fileId);
+                FileObject file = null;
+                if (fileId != null) {
+                    file = retrieveFileObject(fileId);
+                }
 
                 res = new ExtendedIdea(
                         rs.getInt("ideaid"),
