@@ -1,0 +1,103 @@
+{
+    "sampleUsers" : [
+        {
+          "userId": "11223344556677889900a",
+          "username": "userAlpha",
+          "email": "useralpha@example.com",
+          "GI": "AB1234",
+          "SO": "SO5678",
+          "note": "First test user",
+          "valid": true
+        },
+        {            
+          "userId": "1234567890abcdef12345",
+          "username": "userBravo",
+          "email": "userbravo@example.com",
+          "GI": "BC2345",
+          "SO": "SO6789",
+          "note": "Second test user",
+          "valid": true
+        },
+        {
+          "userId": "abcdef1234567890abcde",
+          "username": "userCharlie",
+          "email": "usercharlie@example.com",
+          "GI": "CD3456",
+          "SO": "SO7890",
+          "note": "Third test user",
+          "valId": true
+        }
+    ],
+    "sampleIdeas" : [
+        {
+            "userId": "11223344556677889900a",
+            "content": "This is a great idea to start with!",
+            "valid": true
+        },
+        {
+            "userId": "1234567890abcdef12345",
+            "content": "This is another brilliant idea for our project!",
+            "valid": true
+        },
+        {
+            "userId": "abcdef1234567890abcde",
+            "content": "How about this innovative concept?",
+            "valid": true
+        },
+        {
+            "userId": "11223344556677889900a",
+            "content": "An idea to revolutionize our approach!",
+            "valid": true
+        },
+        {
+            "userId": "1234567890abcdef12345",
+            "content": "A sustainable idea for long-term growth.",
+            "valid": true
+        }
+        
+    ],
+    "sampleComments" : [
+        {
+            "ideaId": 1,
+            "userId": "1234567890abcdef12345",
+            "content": "I think this idea has a lot of potentials. Let's discuss it further."
+        },
+        {
+            "ideaId": 2,
+            "userId": "11223344556677889900a",
+            "content": "I love where this idea is headed, but have we considered the environmental impact?"
+        },
+        {
+            "ideaId": 3,
+            "userId": "abcdef1234567890abcde",
+            "content": "This innovative concept could be a game-changer for us!"
+        },
+        {
+            "ideaId": 1,
+            "userId": "11223344556677889900a",
+            "content": "I'm a bit skeptical about this. Could you provide more details on the execution plan?"
+        },
+        {
+            "ideaId": 2,
+            "userId": "abcdef1234567890abcde",
+            "content": "Fantastic idea! Have we thought about potential partnerships to make this happen?"
+        }
+    ],
+    "sampleLikes" : [
+        {
+            "ideaId" : 1,
+            "userId" : "1234567890abcdef12345",
+            "value" : 1
+        },
+        {
+            "ideaId" : 2,
+            "userId" : "1234567890abcdef12345",
+            "value" : -1
+        },
+        {
+            "ideaId" : 2,
+            "userId" : "abcdef1234567890abcde",
+            "value" : -1
+        }
+    ]
+}

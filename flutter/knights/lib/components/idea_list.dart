@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
-
-
-import 'package:knights/models/idea.dart';
+import 'package:knights/models/Idea.dart';
 import 'package:knights/components/idea_format.dart';
 import 'package:knights/net/web_requests.dart';
 
@@ -11,8 +9,8 @@ import 'package:knights/net/web_requests.dart';
 ///Fetches Ideas from dokku and converts those ideas into Idea Format objects.
 ///This then is added into a list view which is formatted within the home_page view.
 class IdeaList extends StatefulWidget{
-    
-    const IdeaList({super.key});
+    final String sessionKey;
+    const IdeaList({super.key, required this.sessionKey});
 
       @override
       State<IdeaList> createState() => _IdeaList();
@@ -32,12 +30,12 @@ class IdeaList extends StatefulWidget{
     @override
     void initState(){
       super.initState();
-      _futureListIdeas = fetchIdeas();
+      _futureListIdeas = fetchIdeas(widget.sessionKey);
     }
 
     void retry(){
       setState(() {
-        _futureListIdeas = fetchIdeas();
+        _futureListIdeas = fetchIdeas(widget.sessionKey);
       });
     }
 
@@ -63,7 +61,7 @@ class IdeaList extends StatefulWidget{
             itemBuilder: (context, index) {
               developer.log('building with context & $index');
 
-              return IdeaFormat(mId: snapshot.data![index].mId, mContent:snapshot.data![index].mContent, mLikeCount: snapshot.data![index].mLikeCount);
+              return IdeaFormat(sessionKey: widget.sessionKey,mId: snapshot.data![index].mId, mContent:snapshot.data![index].mContent, mLikeCount: snapshot.data![index].mLikeCount, mPosterUsername: snapshot.data![index].mPosterUsername, mUserId: snapshot.data![index].mUserId);
             },
             );
             

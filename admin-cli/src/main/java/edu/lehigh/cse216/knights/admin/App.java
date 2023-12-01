@@ -20,6 +20,15 @@ public class App {
     /** Database object to communicate with the PostgreSQL database. */
     static Database db;
 
+    /** Defaut port to access PostgreSQL database with. Can be specified by using
+     * detailed environment variables for database setup. */
+    private static final String DEFAULT_PORT_DB = "5432";
+
+    private static String filepath;
+
+    /** File path for directory containing sample data. Can be specified with an environment variable. */
+    private static final String DEFAULT_FILE_PATH = "src/main/java/edu/lehigh/cse216/knights/admin/resources/";
+
     /** The actions prompted to the admin from the App menu. */
     static final String MENU_ACTIONS = "TDS*Vq?";
 
@@ -128,9 +137,19 @@ public class App {
         db = getDatabaseConnection();
         if (db == null)
             return;
+        // Set up the file path to use for populating with sample data
+        filepath = getFilePath();
 
         // Start our basic command-line interpreter:
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+
+        /**
+         * Add two functions that alter comments, likes to have two new fields
+         * also add these fields to create tables bc if tables do not exist then they need to be added
+         */
+        db.alterIdeaTable();
+        db.alterCommentsTable();
+
         while (true) {
             // Get the user's request, and do it
             //
@@ -151,7 +170,7 @@ public class App {
             }
             else if (action == 'S') {
                 // Add a set of sample data to the database
-                addSampleData();
+                addSampleData(in);
             } else if (action == 'V') {
                 // update the validation for user or idea
                 setValidity(in);
@@ -226,17 +245,18 @@ public class App {
      */
     /**
      * Read sample data from a JSON file and insert data to the database.
+     * @param in BufferedReader created by main()
      */
-    public static void addSampleData(){
-        // BACKLOG - allow admin to specify filename to use as sample data
-        String filename = "SampleData1.json";
-        // Data files must be in the resources folder
-        final String path = "src/main/java/edu/lehigh/cse216/knights/admin/resources/";
+    public static void addSampleData(BufferedReader in){
+        // Data files must be in the resources folder, unless path is specified with environment variable
         String jsonString = "";
         try {
-            jsonString = new String(Files.readAllBytes(Paths.get(path + filename)));
+            System.out.println("Input file name (with extension) containing sample data:");
+            String filename = in.readLine();
+            jsonString = new String(Files.readAllBytes(Paths.get(App.filepath + filename)));
         } catch (IOException e) {
             System.out.println("Error reading file: " + e.getMessage());
+            return;
         }
 
         // Read the sample data from the file
@@ -251,19 +271,23 @@ public class App {
             db.insertUser(user);
         }
         for(Entity.Idea idea : ideas){
+            // ideaID is set automatically in database
+            // The sample data should have likeCount = 0 on all ideas, unless admin is doing specific testing
             db.insertIdea(idea);
         }
         for(Entity.Comment comment : comments){
+            // commentID is set automatically in database
             db.insertComment(comment);
         }
         for(Entity.Like like : likes){
+            // Inserting likes includes incrementing the like count
             db.insertLike(like);
         }
     }
 
     /**
      * Get some data from the database according to Admin inputs
-     * @param in
+     * @param in BufferedReader created by main()
      */
     private static void getData(BufferedReader in) {
         System.out.println("Get data from which table?");
@@ -299,15 +323,62 @@ public class App {
             // Print each Idea
             for (Entity.Idea idea : res) {
                 String validity = idea.valid? "Valid" : "INVALID";
-                System.out.println(" [" + idea.ideaId + "] " + idea.likeCount + " likes | " + validity);
+                System.out.println(" [" + idea.ideaId + "] " + idea.likeCount + " likes | " + " fileId: " + idea.fileId +", link: " + idea.link + " " + validity);
                 System.out.println("\t'"+idea.content+"'");
             }
         } else if (action == 'C'){
-            System.out.println("Comment viewing is a phase 2 backlog item");
+            ArrayList<Entity.Comment> res = db.selectAllComments();
+            if(res == null){
+                System.out.println("Error querying comments");
+                return;
+            }
+            System.out.println(" Current Comments");
+            System.out.println(" -------------");
+            // Print each comment
+            for (Entity.Comment comment : res){
+                System.out.println("CommentId: ["+comment.commentId+"]  ideaId:" + comment.ideaId + " | " + " userId: "+ comment.userId + " | fileId: " + comment.fileId + ", link: " + comment.link);
+                System.out.println("\t'"+comment.content+"'");
+            }
         } else if (action == 'L'){
-            System.out.println("Like viewing is a phase 2 backlog item");
+            ArrayList<Entity.Like> res = db.selectAllLikes();
+            if(res == null){
+                System.out.println("Error querying likes");
+                return;
+            }
+            System.out.println(" Current Likes");
+            System.out.println(" -------------");
+            // Print each comment
+            for (Entity.Like like : res){
+                System.out.println("LikeId: ["+like.ideaId+"]  UserId:" + like.userId + " |");
+                System.out.println("\t'"+like.value+"'");
+            }
         } else if (action == '*'){
-            System.out.println("Detailed Idea view is a backlog item");
+            System.out.print("Please enter the postId: ");
+            try{
+                String input = in.readLine();
+                boolean check = isInteger(input);
+                if(check == true){
+                    int ideaId = Integer.parseInt(input);
+                    ArrayList<Entity.Comment> res = db.selectCommentsDetailedPost(ideaId);
+                    if(res == null){
+                        return;
+                    }
+                    System.out.println(" Current Comments for idea: "+ideaId);
+                    System.out.println(" -------------");
+                    // print each comment
+                    for(Entity.Comment comment : res){
+                        System.out.println("CommentId: ["+comment.commentId+"]  ideaId:" + comment.ideaId + " | " + " userId: "+ comment.userId + " | fileId: " + comment.fileId + ", link: " + comment.link);
+                        System.out.println("\t'"+comment.content+"'");
+                    }
+                } else {
+                    System.out.println("Please input a valid ideaId. Try again.");
+                    return;
+                }
+            } catch (Exception e){
+                System.out.println("Error reading input: \n");
+                e.printStackTrace();
+                return;
+            }
         }
     }
 
@@ -320,14 +391,19 @@ public class App {
         String SET_INVALID = "Invalidate";
         String SET_VALID = "Restore";
         String entityId = "", validityInput;
-        // updatedValidity is specified in the CLI. Only reason to the value here is for avoiding compiler warning.
+        // updatedValidity is specified in the CLI. Only reason to initialize the value here is for avoiding a compiler warning.
         boolean updatedValidity = true;
         int entitiesChanged = 0;
-        // Tech debt - make cli cleaner by first specify if the entity exists
+        String entityName = "entity";
+        if(action == 'U'){
+            entityName = "user";
+        } else if(action == 'I') {
+            entityName = "idea";
+        }
 
         // Getting inputs
         try {
-            System.out.println("Input ID:");
+            System.out.println("Input "+entityName+" ID:");
             entityId = in.readLine();
             System.out.println("Type '"+SET_INVALID+"' to set to invalid or '"+SET_VALID+"' to set to valid.");
             validityInput = in.readLine();
@@ -336,13 +412,14 @@ public class App {
             } else if(validityInput.equalsIgnoreCase(SET_VALID)) {
                 updatedValidity = true;
             } else {
-            System.out.println("Invalid command. Cancelling action without making changes.");
+                System.out.println("Invalid command. Cancelling action without making changes.");
+                return;
             }
         } catch (IOException e) {
             e.printStackTrace();
+            return;
         }
 
-        // Backlog: clean up logic in this function
         if(action == 'U'){
             entitiesChanged = db.setUserValidity(entityId, updatedValidity);
         } else if(action == 'I') {
@@ -353,11 +430,8 @@ public class App {
                 System.out.println("Invalid ID, not a number.");
             }
         }
-        System.out.println("Updated "+entitiesChanged+" entity in database");
-
+        System.out.println("Updated "+entitiesChanged+" "+entityName+"(s) in database");
     }
-
-    private static final String DEFAULT_PORT_DB = "5432";
 
     /**
     * Get a fully-configured connection to the database, or exit immediately
@@ -395,4 +469,30 @@ public class App {
         }
         return defaultVal;
     }
+
+    /**
+     * Get a file path from an environment variable, or return the default file path.
+     * @return the file path to use for locating sample data
+     */
+    private static String getFilePath() {
+        if(System.getenv("FILEPATH") != null ){
+            return System.getenv("FILEPATH");
+        }
+        return DEFAULT_FILE_PATH;
+    }
+
+    /**
+     * Helper method to check if input is valid integer
+     * @param input String from BufferedReader
+     * @return boolean if String can be an Integer or not
+     */
+    public static boolean isInteger (String input){
+        try{
+            Integer.parseInt(input);
+            return true;
+        } catch (NumberFormatException e){
+            return false;
+        }
+    }
+
 }

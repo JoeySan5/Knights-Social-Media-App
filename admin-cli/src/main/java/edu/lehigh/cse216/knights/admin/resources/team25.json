@@ -1,7 +1,7 @@
 {
     "sampleUsers" : [
         {
-          "userId": "101136375578726959533",
+          "userId": "115632613034941022740",
           "username": "Joseph",
           "email": "jrs225@lehigh.edu",
           "GI": "gi1",
@@ -10,7 +10,7 @@
           "valid": true
         },
         {
-          "userId": "115632613034941022740",
+          "userId": "101136375578726959533",
           "username": "Eric",
           "email": "ejo223@lehigh.edu",
           "GI": "gi2",

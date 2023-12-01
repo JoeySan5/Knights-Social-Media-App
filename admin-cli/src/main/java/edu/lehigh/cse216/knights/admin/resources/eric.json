@@ -1,0 +1,20 @@
+{   "sampleUsers" : [  ],
+    "sampleIdeas" : [
+    {
+        "userId": "1234567890abcdef12345",
+        "content": "woah!",
+        "fileId": "A_sample_img.png2023-12-01_05:49:38",
+        "link": "www.elephantsql.com",
+        "valid": true
+    },
+    {
+        "userId": "1234567890abcdef12345",
+        "content": "Another sample idea.",
+        "fileId": "sample_img.jpg2023-12-01_05:49:38",
+        "link": "www.elephantsql.com",
+        "valid": true
+    }
+],
+"sampleComments" : [  ],
+"sampleLikes" : [  ]
+}
