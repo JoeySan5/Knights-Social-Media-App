@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'dart:io';
 import 'package:knights/pages/login_page.dart';
 
-
 ///The main functions starts the app by calling MyHomePage
 ///
 ///Also holds the process to get app certification to communicate with other sites.

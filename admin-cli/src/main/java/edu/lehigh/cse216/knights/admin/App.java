@@ -142,6 +142,14 @@ public class App {
 
         // Start our basic command-line interpreter:
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+
+        /**
+         * Add two functions that alter comments, likes to have two new fields
+         * also add these fields to create tables bc if tables do not exist then they need to be added
+         */
+        db.alterIdeaTable();
+        db.alterCommentsTable();
+
         while (true) {
             // Get the user's request, and do it
             //
@@ -315,15 +323,62 @@ public class App {
             // Print each Idea
             for (Entity.Idea idea : res) {
                 String validity = idea.valid? "Valid" : "INVALID";
-                System.out.println(" [" + idea.ideaId + "] " + idea.likeCount + " likes | " + validity);
+                System.out.println(" [" + idea.ideaId + "] " + idea.likeCount + " likes | " + " fileId: " + idea.fileId +", link: " + idea.link + " " + validity);
                 System.out.println("\t'"+idea.content+"'");
             }
         } else if (action == 'C'){
-            System.out.println("Comment viewing is a phase 2 backlog item");
+            ArrayList<Entity.Comment> res = db.selectAllComments();
+            if(res == null){
+                System.out.println("Error querying comments");
+                return;
+            }
+            System.out.println(" Current Comments");
+            System.out.println(" -------------");
+            // Print each comment
+            for (Entity.Comment comment : res){
+                System.out.println("CommentId: ["+comment.commentId+"]  ideaId:" + comment.ideaId + " | " + " userId: "+ comment.userId + " | fileId: " + comment.fileId + ", link: " + comment.link);
+                System.out.println("\t'"+comment.content+"'");
+            }
         } else if (action == 'L'){
-            System.out.println("Like viewing is a phase 2 backlog item");
+            ArrayList<Entity.Like> res = db.selectAllLikes();
+            if(res == null){
+                System.out.println("Error querying likes");
+                return;
+            }
+            System.out.println(" Current Likes");
+            System.out.println(" -------------");
+            // Print each comment
+            for (Entity.Like like : res){
+                System.out.println("LikeId: ["+like.ideaId+"]  UserId:" + like.userId + " |");
+                System.out.println("\t'"+like.value+"'");
+            }
         } else if (action == '*'){
-            System.out.println("Detailed Idea view is a backlog item");
+            System.out.print("Please enter the postId: ");
+            try{
+                String input = in.readLine();
+                boolean check = isInteger(input);
+                if(check == true){
+                    int ideaId = Integer.parseInt(input);
+                    ArrayList<Entity.Comment> res = db.selectCommentsDetailedPost(ideaId);
+                    if(res == null){
+                        return;
+                    }
+                    System.out.println(" Current Comments for idea: "+ideaId);
+                    System.out.println(" -------------");
+                    // print each comment
+                    for(Entity.Comment comment : res){
+                        System.out.println("CommentId: ["+comment.commentId+"]  ideaId:" + comment.ideaId + " | " + " userId: "+ comment.userId + " | fileId: " + comment.fileId + ", link: " + comment.link);
+                        System.out.println("\t'"+comment.content+"'");
+                    }
+                } else {
+                    System.out.println("Please input a valid ideaId. Try again.");
+                    return;
+                }
+            } catch (Exception e){
+                System.out.println("Error reading input: \n");
+                e.printStackTrace();
+                return;
+            }
         }
     }
 
@@ -424,6 +479,20 @@ public class App {
             return System.getenv("FILEPATH");
         }
         return DEFAULT_FILE_PATH;
+    }
+
+    /**
+     * Helper method to check if input is valid integer
+     * @param input String from BufferedReader
+     * @return boolean if String can be an Integer or not
+     */
+    public static boolean isInteger (String input){
+        try{
+            Integer.parseInt(input);
+            return true;
+        } catch (NumberFormatException e){
+            return false;
+        }
     }
 
 }

@@ -60,7 +60,7 @@ Future<Poster> fetchPoster(String id, String sessionKey) async {
   var url = Uri.parse(
       'https://team-knights.dokku.cse.lehigh.edu/users/$id?sessionKey=$sessionKey');
   var headers = {"Accept": "application/json"};
-  // garbage user that gets returned if sopmething goes wrong
+  // garbage user that gets returned if something goes wrong
   Poster garb = Poster(
       mId: "", mUsername: 'garbage', mEmail: 'nonExistent', mNote: 'garbage');
 
@@ -263,13 +263,16 @@ Future<bool> onLikeButtonTapped(int id, String sessionKey) async {
 ///Web Function to send post request to dokku backend. Creates idea with userText
 ///POST
 ///takes in userText and sessionKey to determine which user is making post
-Future<String> postIdeas(String userText, String sessionKey) async {
+Future<String> postIdeas(
+    String userText, String link, String sessionKey, String fileName, String base64) async {
   developer.log('Making web request...');
   var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas');
   var headers = {"Accept": "application/json"};
-  var body = {'mContent': userText, 'sessionKey': sessionKey};
+  var mFile = {'mFileName': fileName, 'mFileType': fileName.split(".").last, 'mBase64': base64};
+  var body = {'mContent': userText, 'mLink': link, 'sessionKey': sessionKey, 'mFile': mFile};
   print(sessionKey);
   print(userText);
+  print(link);
   var response = await http.post(url, headers: headers, body: jsonEncode(body));
   print(response.body);
   if (response.statusCode == 200) {

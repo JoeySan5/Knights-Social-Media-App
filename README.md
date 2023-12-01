@@ -29,6 +29,9 @@
     * The app currently does not allow the user to effectively see their like/dislike be updated on a certain post without having to refresh. 
     The app does not allow the user to refresh without doing hot reload or closing the app.
 
+1. web (sprint 12)
+    * The web app allows for viewing and posting Ideas and comments on Ideas, which include text content, an optional link, and an optional file attachment. Profile pages can be viewed, and self profile content edited.
+
 ## Build & Run Instructions
 
 ### Mobile
@@ -46,23 +49,18 @@
 ### Web
 #### to deploy UI
     * ensure that CORS is enabled through dokku
-    * once this is checked, navigate to Web/ directory
-    * run the command: sh deploy.sh
-        * this compiles, runs, and creates the necessary folders to run
-    * once loaded, navigate to the correct https location, there should be 3 different ones
+    * once this is checked, navigate to knights-web-app/
+    * then in the terminal type: ng serve --open
 
 #### to run unit tests
-    * navigate to Web/ directory
-    * run command: sh deploy.sh
-    * once this compiles, select one of the three http locations provided
-    * navigate to that url but add '/spec_runner.html' to the end of the url
-    * verify that tests work
+    * navigate to knights-web-app
+    * run command: ng test
 
 ### Backend
 
 #### Locally
 1. From the backend maven project root, run mvn exec:java with the `PORT` and `DATABASE_URL` environment variables specified
-    * `PORT=8998 CLIENT_ID=1019349198762-463i1tt2naq9ipll3f9ade5u7nli7gju.apps.googleusercontent.com DATABASE_URL=postgres://pfdcoetq:VMXXrjrJtMXqzP6JwpjnapwpOVpk6e9o@peanut.db.elephantsql.com/pfdcoetq mvn exec:java`
+    * `PORT=8998 CLIENT_ID=1019349198762-463i1tt2naq9ipll3f9ade5u7nli7gju.apps.googleusercontent.com DATABASE_URL=postgres://pfdcoetq:VMXXrjrJtMXqzP6JwpjnapwpOVpk6e9o@peanut.db.elephantsql.com/pfdcoetq MEMCACHIER_USERNAME=B24B55 MEMCACHIER_PASSWORD=FDCD8702A87D0542C2EC23142008D739 MEMCACHIER_SERVERS=mc4.dev.ec2.memcachier.com:11211 CORS_ENABLED=TRUE GOOGLE_APPLICATION_CREDENTIALS="src\main\java\edu\lehigh\cse216\knights\backend\credentials\the-knights-d575548961a0.json" mvn exec:java`
     * The address is `http://localhost:PORT/`
 
 #### On Dokku
