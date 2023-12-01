@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 
 import 'package:knights/net/web_requests.dart';
 
+import 'dart:convert';
+import 'dart:typed_data';
+
 ///Component for Ideas Form (Submission).
 ///
 ///Contains the a text field for the user to write into. Creates a controller to
@@ -32,18 +35,40 @@ class _IdeasForm extends State<IdeasForm> {
   
   File? _selectedFile;
 
+  // Future<void> pickFile() async {
+  //   FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+  //   if (result != null) {
+  //     setState(() {
+  //       var logoBase64 = result!.files.first.bytes;
+  //       //_selectedFile = File(result.files.single.path!);
+  //     });
+  //   } else {
+  //     // User canceled the picker
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('No file selected')),
+  //     );
+  //   }
+  // }
+
   Future<void> pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result != null) {
       setState(() {
         _selectedFile = File(result.files.single.path!);
+        String fileName = result.files.first.name;
+        print('selected fileName: $fileName');
+        Uint8List? fileBytes = result.files.first.bytes;
+        String base64 = base64Encode(fileBytes!);
+        print('base64 file bytes: $base64');
       });
     } else {
       // User canceled the picker
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No file selected')),
       );
+  
     }
   }
 

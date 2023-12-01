@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:knights/net/web_requests.dart';
 import 'package:knights/models/Poster.dart';
 
-/// this class is format to  display current userinformation
+/// this class is format to display current user information
 ///
 /// component includers user id, username, email, note
 class PosterFormat extends StatefulWidget {
@@ -37,7 +37,7 @@ class _PosterFormat extends State<PosterFormat> {
     });
   }
 
-/// similar to user compnent except that it is not editable
+/// similar to user component except that it is not editable
   @override
   Widget build(BuildContext context) {
     return Center(

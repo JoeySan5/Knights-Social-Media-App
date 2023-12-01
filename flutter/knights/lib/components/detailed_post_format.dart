@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:knights/models/DetailedPost.dart';
-
 import 'package:knights/net/web_requests.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+
 import 'package:knights/models/User.dart';
 import 'package:knights/net/web_requests.dart';
 import 'package:knights/pages/home_page.dart';
 import 'package:knights/components/idea_format.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 /// this class is to format detailed post view
 ///
@@ -25,6 +28,17 @@ class DetailedPostFormat extends StatefulWidget {
 class _DetailedPostFormat extends State<DetailedPostFormat> {
   late Future<DetailedPost> _futureDetailedPostFormat;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  Future<void> _launchUrl(String url) async {
+    if (await canLaunchUrlString(url)) {
+      await launchUrlString(url);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot open the link')),
+      );
+    }
+  }
+
 
   @override
   void initState() {
@@ -78,13 +92,26 @@ class _DetailedPostFormat extends State<DetailedPostFormat> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              'Poster Username: ${snapshot.data!.mPosterUsername}',
-                              style: const TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.white,
-                                  fontFamily: 'roboto'),
-                            ),
+                            child: snapshot.data!.mLink != null && snapshot.data!.mLink!.isNotEmpty
+                  ? InkWell(
+                      child: Text(
+                        'Open Link: ${snapshot.data!.mLink}',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                      onTap: () =>_launchUrl(snapshot.data!.mLink!),
+                      //onTap: () => launchUrlString(snapshot.data!.mLink!),
+                    )
+                  : Container(), // Empty container when there's no link
+                            // Text(
+                            //   'Poster Username: ${snapshot.data!.mPosterUsername}',
+                            //   style: const TextStyle(
+                            //       fontSize: 20,
+                            //       color: Colors.white,
+                            //       fontFamily: 'roboto'),
+                            // ),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),

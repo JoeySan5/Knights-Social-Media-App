@@ -10,6 +10,8 @@ class DetailedPost{
   final String mUserId;
   final String mPosterUsername;
   List<Comments> mComments;
+
+  var mLink;
   DetailedPost({required this.mId, required this.mContent, required this.mLikeCount, required this.mUserId, required this.mPosterUsername, required this.mComments});
 
 /// determines what is assigned to variables upon sucessful JSOn request

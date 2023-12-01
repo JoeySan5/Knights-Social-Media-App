@@ -15,8 +15,8 @@ import 'package:knights/models/Poster.dart';
 // View a User’s Profile Page using sessionKey
 Future<User> fetchUsers(String sessionKey) async {
   developer.log('Making web request for user data...');
-  var url = Uri.parse(
-      'https://team-knights.dokku.cse.lehigh.edu/users?sessionKey=$sessionKey');
+  var url = Uri.parse('http://localhost:8998');
+  //'https://team-knights.dokku.cse.lehigh.edu/users?sessionKey=$sessionKey'
   var headers = {"Accept": "application/json"};
   // garbage user that gets returned if sopmething goes wrong
   User garb = User(
@@ -57,8 +57,8 @@ Future<User> fetchUsers(String sessionKey) async {
 /// very similar to fetchUser above
 Future<Poster> fetchPoster(String id, String sessionKey) async {
   developer.log('Making web request for user data...');
-  var url = Uri.parse(
-      'https://team-knights.dokku.cse.lehigh.edu/users/$id?sessionKey=$sessionKey');
+  var url = Uri.parse('http://localhost:8998');
+  //'https://team-knights.dokku.cse.lehigh.edu/users/$id?sessionKey=$sessionKey');
   var headers = {"Accept": "application/json"};
   // garbage user that gets returned if something goes wrong
   Poster garb = Poster(
@@ -95,7 +95,8 @@ Future<Poster> fetchPoster(String id, String sessionKey) async {
 Future updateUserProfile(String sessionKey, String mUsername, String mEmail,
     String mSO, String mGI, String mNote) async {
   developer.log('Making web request...');
-  var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/users');
+  var url = Uri.parse('http://localhost:8998/users');
+  //'https://team-knights.dokku.cse.lehigh.edu/users');
   var headers = {"Accept": "application/json"};
   var body = {
     'sessionKey': sessionKey,
@@ -126,8 +127,8 @@ Future updateUserProfile(String sessionKey, String mUsername, String mEmail,
 ///
 Future<DetailedPost> fetchDetailedPost(int mId, String sessionKey) async {
   developer.log('Making web request for detailed post data...');
-  var url = Uri.parse(
-      'https://team-knights.dokku.cse.lehigh.edu/ideas/$mId?sessionKey=$sessionKey');
+  var url = Uri.parse('http://localhost:8998');
+  //'https://team-knights.dokku.cse.lehigh.edu/ideas/$mId?sessionKey=$sessionKey');
   var headers = {"Accept": "application/json"};
   // garbage DetailedPost that gets returned if something goes wrong
   List<Comments> garb = [];
@@ -205,7 +206,8 @@ Future<DetailedPost> fetchDetailedPost(int mId, String sessionKey) async {
 /// uses the content, sessionKey, and ideaId
 Future postComment(String mContent, String sessionKey, int mIdeaId) async {
   developer.log('making web request...');
-  var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/comments');
+  var url = Uri.parse('http://localhost:8998/comments');
+  //'https://team-knights.dokku.cse.lehigh.edu/comments');
   var headers = {"Accept": "application/json"};
   var body = {
     'sessionKey': sessionKey,
@@ -229,8 +231,8 @@ Future<bool> onDislikeButtonTapped(int id, String sessionKey) async {
   bool isLiked = true;
 
   developer.log('Making web request...');
-  var url =
-      Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/$id/likes');
+  var url = Uri.parse('http://localhost:8998');
+  //'https://team-knights.dokku.cse.lehigh.edu/ideas/$id/likes');
   var headers = {"Accept": "application/json"};
   var body = {'sessionKey': sessionKey, 'value': -1};
 
@@ -248,8 +250,8 @@ Future<bool> onLikeButtonTapped(int id, String sessionKey) async {
   bool isLiked = true;
 
   developer.log('Making web request...');
-  var url =
-      Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas/$id/likes');
+  var url = Uri.parse('http://localhost:8998');
+  //'https://team-knights.dokku.cse.lehigh.edu/ideas/$id/likes');
   var headers = {"Accept": "application/json"};
   var body = {'sessionKey': sessionKey, 'value': 1};
 
@@ -266,7 +268,8 @@ Future<bool> onLikeButtonTapped(int id, String sessionKey) async {
 Future<String> postIdeas(
     String userText, String link, String sessionKey) async {
   developer.log('Making web request...');
-  var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas');
+  var url = Uri.parse('http://localhost:8998');
+  //'https://team-knights.dokku.cse.lehigh.edu/ideas');
   var headers = {"Accept": "application/json"};
   var body = {'mContent': userText, 'mLink': link, 'sessionKey': sessionKey};
   print(sessionKey);
@@ -292,8 +295,8 @@ Future<String> postIdeas(
 /// returns all ideas assuming sessionKey is valid
 Future<List<Idea>> fetchIdeas(String sessionKey) async {
   developer.log('Making web request...');
-  var url = Uri.parse(
-      'https://team-knights.dokku.cse.lehigh.edu/ideas?sessionKey=$sessionKey');
+  var url = Uri.parse('http://localhost:8998');
+  //'https://team-knights.dokku.cse.lehigh.edu/ideas?sessionKey=$sessionKey');
   var headers = {"Accept": "application/json"};
 
   var response = await http.get(url, headers: headers);
@@ -330,7 +333,8 @@ Future<List<Idea>> fetchIdeas(String sessionKey) async {
 ///GET
 Future<List<Idea>> fetchIdeasTest(http.Client client) async {
   developer.log('Making web request...');
-  var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas');
+  var url = Uri.parse('http://localhost:8998');
+  //'https://team-knights.dokku.cse.lehigh.edu/ideas');
   var headers = {"Accept": "application/json"};
 
   var response = await client.get(url, headers: headers);
