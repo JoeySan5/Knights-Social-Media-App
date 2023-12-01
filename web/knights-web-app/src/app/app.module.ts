@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
+import { Base64DecodePipe } from './pipes/base64Decode.pipe';
 import { AppRoutingModule } from './app-routing.module';
 import { Router, RouterModule, Routes } from '@angular/router';
 
@@ -45,7 +45,8 @@ const routes: Routes = [
     DetailedPostComponent,
     AddCommentPageComponent,
     OtherProfileComponent,
-    TestComponent
+    TestComponent,
+    Base64DecodePipe
   ],
   imports: [
     BrowserModule,

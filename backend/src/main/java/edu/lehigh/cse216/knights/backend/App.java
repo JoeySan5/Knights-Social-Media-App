@@ -197,9 +197,13 @@ public class App {
             String userID = null;
 
             FileObject file = req.mFile;
+            String fileid = "";
+            if (file != null) {
+                fileid = db.parseFileid(file);
+            }
 
-            String fileid = db.parseFileid(file);
             System.out.println("fileid: " + fileid);
+            System.out.println("json body: " + request.body());
 
             // conncecting to cache
             MemcachedClient mc = null;
@@ -228,35 +232,40 @@ public class App {
 
             response.status(200);
             response.type("application/json");
+
             int rowsInserted = db.insertIdea(req.mContent, userID, fileid, req.mLink);
             if (rowsInserted <= 0) {
                 return gson.toJson(new StructuredResponse("error", "error creating idea",
                         null));
             } else {
-                // Initialize the Google Cloud Storage client
-                // Gets information from env var GOOGLE_APPLICATION_CREDENTIALS
-                Storage storage = StorageOptions.getDefaultInstance().getService();
-                // The name of google cloud storage bucket
-                String bucketName = "knights-bucket-2";
-                Bucket bucket = storage.get(bucketName);
-                String blobName = fileid;
-                BlobId blobId = BlobId.of(bucketName, blobName);
-                BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(file.getmFileType()).build();
 
-                // Decode base64 data
-                byte[] decodedData = Base64.getDecoder().decode(file.getmBase64());
+                if (fileid != "") {
+                    // Initialize the Google Cloud Storage client
+                    // Gets information from env var GOOGLE_APPLICATION_CREDENTIALS
+                    Storage storage = StorageOptions.getDefaultInstance().getService();
+                    // The name of google cloud storage bucket
+                    String bucketName = "knights-bucket-2";
+                    Bucket bucket = storage.get(bucketName);
+                    String blobName = fileid;
+                    BlobId blobId = BlobId.of(bucketName, blobName);
+                    BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(file.getmFileType()).build();
 
-                storage.create(blobInfo, decodedData);
+                    // Decode base64 data
+                    System.out.println("\nhere is file content: " + file.getmBase64());
+                    byte[] decodedData = Base64.getDecoder().decode(file.getmBase64());
 
-                System.out.println("\nhere is bucket" + bucket);
+                    storage.create(blobInfo, decodedData);
 
-                storage.close();
+                    System.out.println("\nhere is bucket" + bucket);
 
-                try {
                     storage.close();
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+
+                    try {
+                        storage.close();
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
                 return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + "idea(s)", null));
             }

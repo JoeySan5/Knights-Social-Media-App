@@ -1,24 +1,54 @@
-<div class="tr"> 
-    
+<div class="tr">
+
     <!--Profile-page should be the profile which has been clicked by user-->
     <div class="usern" routerLink="/profile-page">{{data.mPosterUsername}}</div>
-    <div >{{data.mContent}}</div>
+    <div>{{data.mContent}}</div>
+    <div *ngIf="data.mLink">
+        <a [href]="data.mLink" target="_blank">{{ data.mLink }}</a>
+    </div>
+    <!-- Image file display -->
+    <img *ngIf="data.mFile && (data.mFile.mFileType === 'image/jpeg' || data.mFile.mFileType === 'image/png')"
+        [src]="'data:' + data.mFile.mFileType + ';base64,' + data.mFile.mBase64" alt="Posted Image" />
+
+    <!-- Audio file display -->
+    <audio *ngIf="data.mFile && data.mFile.mFileType === 'audio/mpeg'" controls>
+        <source [src]="'data:' + data.mFile.mFileType + ';base64,' + data.mFile.mBase64"
+            type="{{data.mFile.mFileType}}">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Video file display -->
+    <video *ngIf="data.mFile && data.mFile.mFileType === 'video/mp4'" controls>
+        <source [src]="'data:' + data.mFile.mFileType + ';base64,' + data.mFile.mBase64"
+            type="{{data.mFile.mFileType}}">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- Text file display -->
+    <div *ngIf="data.mFile && data.mFile.mFileType === 'text/plain'">
+        <pre>{{ data.mFile.mBase64 | base64Decode }}</pre>
+    </div>
+
+    <!-- PDF file display -->
+    <object *ngIf="data.mFile && data.mFile.mFileType === 'application/pdf'"
+        [data]="'data:' + data.mFile.mFileType + ';base64,' + data.mFile.mBase64" type="application/pdf" width="100%"
+        height="600px">
+        PDF viewer is not available.
+    </object>
 </div>
 
-<h2 *ngIf="data.mComments.length >0" class="tagline" > Comments people have left:</h2>
-<h2 *ngIf="data.mComments.length == 0" class="tagline" > No comments left :(</h2>
+<h2 *ngIf="data.mComments.length >0" class="tagline"> Comments people have left:</h2>
+<h2 *ngIf="data.mComments.length == 0" class="tagline"> No comments left :(</h2>
 
 <!-- This is the angular way of creating divs based off of an array
 Additionally, I am initializing each element of mComments array to be set to variable mComment -->
-<div *ngFor="let mComment of data.mComments"  class="comments">
+<div *ngFor="let mComment of data.mComments" class="comments">
 
     <!--Profile-page should be the profile which has been clicked by user-->
     <div class="usern" routerLink="/profile-page">{{mComment.mCommenterUsername}}</div>
-    <div >{{mComment.mContent}}</div>
+    <div>{{mComment.mContent}}</div>
 </div>
 
 
 <button id="showAdd" routerLink="/add-comment-page" style="cursor: pointer;">Add a comment</button>
 <button id="showHome" routerLink="/home-page" style="cursor: pointer;">Home</button>
-    
-

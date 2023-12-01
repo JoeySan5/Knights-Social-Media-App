@@ -4,7 +4,8 @@ import { Router } from '@angular/router';
 
 var newEntryForm: IdeaSubmission;
 var mainList: IdeaListComponent;
-const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
+// const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
+const backendUrl = "http://localhost:8998";
 const sessionKey = localStorage.getItem('sessionKey');
 
 
@@ -63,12 +64,12 @@ export class IdeaSubmission {
 
             // This function is called once the FileReader finishes reading the file
             reader.onload = () => {
-                const base64 = reader.result as string;
+                const mBase64 = reader.result as string;
                 // Creating an object with the file's name, type, and the Base64 encoded content
                 const fileData = {
-                    fileName: file.name,
-                    fileType: file.type,
-                    base64File: base64.split(',')[1] // Splitting the result to get only the Base64 part
+                    mFileName: file.name,
+                    mFileType: file.type,
+                    mBase64: mBase64.split(',')[1] // Splitting the result to get only the Base64 part
                 };
                 // Converting the file data object to a JSON string for further processing
                 this.fileData = JSON.stringify(fileData, null, 2);
@@ -102,15 +103,15 @@ export class IdeaSubmission {
 
         // Defining an interface for the structure of file data to be sent to the server.
         interface ServerFileData {
-            mfileType: string;  // Type of the file, e.g., 'image/jpeg'
-            base64: string;     // Base64 encoded string of the file content
-            mfileName: string;  // Name of the file
+            mFileType: string;  // Type of the file, e.g., 'image/jpeg'
+            mBase64: string;     // Base64 encoded string of the file content
+            mFileName: string;  // Name of the file
         }
 
         // Declaring a variable to store the file data for the server.
         // Initially, it's set to null to handle cases where no file is selected.
         let serverFileData: ServerFileData | null = null;
-
+        
         // Check if there is any file data present (this.fileData is not undefined)
         if (this.fileData) {
             // Parsing the JSON string to an object to easily access its properties
@@ -118,11 +119,19 @@ export class IdeaSubmission {
 
             // Assigning the parsed data to the serverFileData with the correct structure
             serverFileData = {
-                mfileType: fileDataObject.fileType, // Assigning file type
-                base64: fileDataObject.base64File,  // Assigning base64 encoded content
-                mfileName: fileDataObject.fileName  // Assigning file name
+                mFileType: fileDataObject.mFileType, // Assigning file type
+                mBase64: fileDataObject.mBase64,  // Assigning base64 encoded content
+                mFileName: fileDataObject.mFileName  // Assigning file name
             };
-        }
+        } 
+        // else{
+        //     serverFileData = {
+        //         mFileType: "nullType", // Assigning file type
+        //         mBase64: "nullBase64",  // Assigning base64 encoded content
+        //         mFileName: "nullName"  // Assigning file name
+        //     };
+        // }
+
         console.log(idea);
 
         // set up an AJAX POST. 
@@ -133,13 +142,14 @@ export class IdeaSubmission {
                 body: JSON.stringify({
                     mContent: idea,
                     sessionKey: sessionKey,
-                    link: link,
-                    file: serverFileData
+                    mLink: link,
+                    mFile: serverFileData
                 }),
                 headers: {
                     'Content-type': 'application/json; charset=UTF-8'
                 }
             }).then((response) => {
+                console.log('this is response: ', response); 
                 // If we get an "ok" message, return the json
                 if (response.ok) {
                     this.router.navigate(['/home-page']);

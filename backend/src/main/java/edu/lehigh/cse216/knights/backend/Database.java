@@ -534,7 +534,10 @@ public class Database {
                 // FileObject file = function(fileId);
                 String fileId = rs.getString("fileid");
                 FileObject file = null;
-                if (fileId != null) {
+                System.out.println("this is rs" + rs);
+                System.out.println("this is get fileid" + rs.getString("fileid"));
+
+                if (fileId != null && !fileId.isEmpty()) {
                     file = retrieveFileObject(fileId);
                 }
 
@@ -935,21 +938,22 @@ public class Database {
     }
 
     private FileObject getFileFromCache(String fileId) {
+
+        System.out.println("\nTHSI IS FILE ID IN GETFILEFROMCACHE:" + fileId);
         // conncecting to cache
         MemcachedClient mc = null;
+        if (fileId == "") {
+            System.out.println("not null, 1");
+            return null;
+        }
+        if (fileId == null) {
+            System.out.println("not null, 2");
+            return null;
+        }
         try {
+            System.out.println("In try catch ");
+
             mc = createMemcachedClient();
-        } catch (IOException e) {
-            System.err.println("Couldn't create a connection to MemCachier: " +
-                    e.getMessage());
-        }
-
-        if (mc == null) {
-            System.err.println("mc is null. Exiting.");
-            System.exit(1);
-        }
-
-        try {
             String response = mc.get(fileId);
             if (response == null) {
                 return null;
@@ -958,9 +962,15 @@ public class Database {
                 System.out.println(gson.fromJson(response, FileObject.class));
                 return gson.fromJson(response, FileObject.class);
             }
-        } catch (TimeoutException | InterruptedException | MemcachedException e) {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
+
+        } catch (IOException | TimeoutException | InterruptedException | MemcachedException e) {
+            System.err.println("Couldn't create a connection to MemCachier: " +
+                    e.getMessage());
+        }
+
+        if (mc == null) {
+            System.err.println("mc is null. Exiting.");
+            System.exit(1);
         }
 
         return null;
