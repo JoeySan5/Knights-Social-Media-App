@@ -6,6 +6,7 @@ var newEntryForm: IdeaSubmission;
 var mainList: IdeaListComponent;
 
 const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
+// const backendUrl = "http://localhost:8998";
 const sessionKey = localStorage.getItem('sessionKey');
 
 

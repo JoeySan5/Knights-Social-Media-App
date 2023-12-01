@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 
 
 const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
+// const backendUrl = "http://localhost:8998";
+
 const sessionKey = localStorage.getItem('sessionKey');
 
 @Component({
