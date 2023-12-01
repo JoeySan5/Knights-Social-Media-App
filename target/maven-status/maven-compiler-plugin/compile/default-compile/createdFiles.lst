@@ -1,4 +1,5 @@
 edu\lehigh\cse216\knights\backend\SessionKeyGenerator.class
+edu\lehigh\cse216\knights\backend\FileObject.class
 edu\lehigh\cse216\knights\backend\Request$UserRequest.class
 edu\lehigh\cse216\knights\backend\App.class
 edu\lehigh\cse216\knights\backend\Request$CommentRequest.class

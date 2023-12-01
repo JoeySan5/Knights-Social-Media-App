@@ -1,1 +1,7 @@
 edu\lehigh\cse216\knights\backend\AppTest.class
+edu\lehigh\cse216\knights\backend\DatabaseTest.class
+edu\lehigh\cse216\knights\backend\IdeaTest.class
+edu\lehigh\cse216\knights\backend\MockDatabase.class
+edu\lehigh\cse216\knights\backend\CommentTest.class
+edu\lehigh\cse216\knights\backend\cloudTest.class
+edu\lehigh\cse216\knights\backend\UserTest.class
