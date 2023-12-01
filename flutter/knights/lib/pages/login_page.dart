@@ -52,9 +52,6 @@ class MyLoginPage extends StatelessWidget {
                 style: const ButtonStyle(
                   backgroundColor: MaterialStatePropertyAll(Colors.green),
                 ),
-<<<<<<< HEAD
-                onPressed: signIn,
-=======
                 onPressed: () => {
                       if (signIn != null)
                         {
@@ -64,18 +61,12 @@ class MyLoginPage extends StatelessWidget {
                                   builder: (context) => const MyHomePage()))
                         }
                     },
->>>>>>> web
                 child: const Text('Sign Up with Google')))
       ],
     ))));
   }
 
   Future signIn() async {
-<<<<<<< HEAD
-    final user = await GoogleSignInApi.login();
-  }
-
-=======
     final GoogleSignInAccount? user = await GoogleSignInApi.login();
     //final GoogleSignInAccount? account = await _googleSignIn.signIn();
     if (user != null) {
@@ -112,5 +103,4 @@ class MyLoginPage extends StatelessWidget {
       print('Sending token to server failed: $error');
     }
   }
->>>>>>> web
 }
