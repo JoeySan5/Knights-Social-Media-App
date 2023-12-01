@@ -77,7 +77,9 @@ export class ProfilepageComponent implements OnInit {
                 method: 'GET',
                 headers: {
                     'Content-type': 'application/json; charset=UTF-8'
-                }
+                },
+                cache: 'force-cache'
+
             }).then((response) => {
                 // If we get an "ok" idea, clear the form
                 if (response.ok) {

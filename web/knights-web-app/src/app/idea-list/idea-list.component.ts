@@ -38,7 +38,8 @@ export class IdeaListComponent implements OnInit{
             method: 'GET',
             headers: {
                 'Content-type': 'application/json; charset=UTF-8'
-            }
+            },
+            cache: 'no-cache'
         }).then( (response) => {
             // If we get an "ok" idea, clear the form
             if (response.ok) {
@@ -147,7 +148,8 @@ private userNClick(userId: String){
         method: 'GET',
         headers: {
             'Content-type': 'application/json; charset=UTF-8'
-        }
+        },
+        cache: 'force-cache'
     }).then( (response) => {
         // If we get an "ok" idea, clear the form
         if (response.ok) {
@@ -188,7 +190,9 @@ private trClicK(Id: String){
             method: 'GET',
             headers: {
                 'Content-type': 'application/json; charset=UTF-8'
-            }
+            },
+            cache: 'force-cache'
+
         }).then( (response) => {
             // If we get an "ok" idea, clear the form
             if (response.ok) {

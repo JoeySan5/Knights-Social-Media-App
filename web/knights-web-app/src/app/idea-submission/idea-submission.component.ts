@@ -5,8 +5,7 @@ import { Router } from '@angular/router';
 var newEntryForm: IdeaSubmission;
 var mainList: IdeaListComponent;
 
-// const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
-const backendUrl = "http://localhost:8998";
+const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
 const sessionKey = localStorage.getItem('sessionKey');
 
 
