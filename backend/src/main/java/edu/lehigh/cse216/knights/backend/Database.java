@@ -175,6 +175,16 @@ public class Database {
     private PreparedStatement mGetCommenterUserID;
 
     /**
+     * Prepared statement to delete all likes from an idea
+     */
+    private PreparedStatement mDeleteLikesFromIdea;
+
+    /**
+     * Prepared statement to delete all comments from an idea
+     */
+    private PreparedStatement mDeleteCommentsFromIdea;
+
+    /**
      * The Database constructor is private: we only create Database objects
      * through the getDatabase() method.
      */
@@ -320,6 +330,12 @@ public class Database {
             // Update a like in the table
             this.mUpdateOneLike = this.mConnection.prepareStatement(
                     "UPDATE likes SET value = ? WHERE ideaID = ? AND userID = ?");
+
+            this.mDeleteLikesFromIdea = this.mConnection.prepareStatement(
+                    "DELETE FROM likes WHERE ideaID = ?");
+
+            this.mDeleteCommentsFromIdea = this.mConnection.prepareStatement(
+                    "DELETE FROM comments WHERE ideaID = ?");
 
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
@@ -622,6 +638,10 @@ public class Database {
     int deleteIdea(int ideaId) {
         int res = -1;
         try {
+            mDeleteLikesFromIdea.setInt(1, ideaId);
+            mDeleteLikesFromIdea.executeUpdate();
+            mDeleteCommentsFromIdea.setInt(1, ideaId);
+            mDeleteCommentsFromIdea.executeUpdate();
             mDeleteOneIdea.setInt(1, ideaId);
             res = mDeleteOneIdea.executeUpdate();
         } catch (SQLException e) {
