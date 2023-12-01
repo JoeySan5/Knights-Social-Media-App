@@ -3,7 +3,8 @@ import { DetailedPostInfoService } from '../detailed-post-info.service';
 import { Router } from '@angular/router';
 
 
-const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
+// const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
+const backendUrl = "http://localhost:8998";
 const sessionKey = localStorage.getItem('sessionKey');
 
 @Component({
@@ -53,12 +54,12 @@ export class AddCommentPageComponent implements OnInit {
 
       // This function is called once the FileReader finishes reading the file
       reader.onload = () => {
-        const base64 = reader.result as string;
+        const mBase64 = reader.result as string;
         // Creating an object with the file's name, type, and the Base64 encoded content
         const fileData = {
-          fileName: file.name,
-          fileType: file.type,
-          base64File: base64.split(',')[1] // Splitting the result to get only the Base64 part
+          mFileName: file.name,
+          mFileType: file.type,
+          mBase64: mBase64.split(',')[1] // Splitting the result to get only the Base64 part
         };
         // Converting the file data object to a JSON string for further processing
         this.fileData = JSON.stringify(fileData, null, 2);
@@ -71,6 +72,7 @@ export class AddCommentPageComponent implements OnInit {
       };
     }
   }
+
   // /ideas/:id/comments POST '{"mContent": "Hello This is comment written by Sehyoun", "sessionKey": "String", "mIdeaId": 10}'
   onSubmit() {
     // get the values of the idea field, force them to be strings, and check 
@@ -88,9 +90,9 @@ export class AddCommentPageComponent implements OnInit {
 
     // Defining an interface for the structure of file data to be sent to the server.
     interface ServerFileData {
-      mfileType: string;  // Type of the file, e.g., 'image/jpeg'
-      base64: string;     // Base64 encoded string of the file content
-      mfileName: string;  // Name of the file
+      mFileType: string;  // Type of the file, e.g., 'image/jpeg'
+      mBase64: string;     // Base64 encoded string of the file content
+      mFileName: string;  // Name of the file
     }
 
     // Declaring a variable to store the file data for the server.
@@ -104,9 +106,9 @@ export class AddCommentPageComponent implements OnInit {
 
       // Assigning the parsed data to the serverFileData with the correct structure
       serverFileData = {
-        mfileType: fileDataObject.fileType, // Assigning file type
-        base64: fileDataObject.base64File,  // Assigning base64 encoded content
-        mfileName: fileDataObject.fileName  // Assigning file name
+        mFileType: fileDataObject.mFileType, // Assigning file type
+        mBase64: fileDataObject.mBase64,  // Assigning base64 encoded content
+        mFileName: fileDataObject.mFileName  // Assigning file name
       };
     }
     console.log(comment);
@@ -120,8 +122,8 @@ export class AddCommentPageComponent implements OnInit {
           mContent: comment,
           sessionKey: sessionKey,
           mIdeaId: this.data.mId,
-          link: link,
-          file: serverFileData
+          mLink: link,
+          mFile: serverFileData
         }),
         headers: {
           'Content-type': 'application/json; charset=UTF-8'
