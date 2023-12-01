@@ -4,11 +4,11 @@
 - **Team Number**: 25
 - **Team Name**: Knights
 - **Members**:
-  - Tommy Parisi - Admin Developer - Contact Email: tjp225@lehigh.edu
-  - Joseph Sanchez - Web Developer - Contact Email: jrs225@lehigh.edu
-  - Adivi Karawat - Project Manager - Contact Email: adk225@lehigh.edu
-  - Eric Osterman - Mobile Developer - Contact Email: ejo223@lehigh.edu
-  - Sehyoun Jang - Backend Manager - Contact Email: sej324@lehigh.edu
+  - Tommy Parisi - Project Manager (Phase 3)  - Contact Email: tjp225@lehigh.edu
+  - Joseph Sanchez - Backend Developer (Phase 3) - Contact Email: jrs225@lehigh.edu
+  - Adivi Karawat - Mobile Developer (Phase 3) - Contact Email: adk225@lehigh.edu
+  - Eric Osterman - Admin Developer (Phase 3) - Contact Email: ejo223@lehigh.edu
+  - Sehyoun Jang - Web Developer (Phase 3)  - Contact Email: sej324@lehigh.edu
 
 ## URLs
 - **Git Repository**: <https://bitbucket.org/cse216-2023fa-team-25/cse216-2023fa-team-25/src/master/>
@@ -21,7 +21,6 @@
 ### Initial Setup (Version 0.1.0)
 - Repository has been set up with the essential directories and branches.
 - README file has been created and updated with team information, key URLs, and initial project description.
-<<<<<<< HEAD
 
 
 ### Tagged Release
@@ -63,7 +62,7 @@
 
 #### Locally
 1. From the backend maven project root, run mvn exec:java with the `PORT` and `DATABASE_URL` environment variables specified
-    * `PORT=8998 DATABASE_URL=postgres://pfdcoetq:VMXXrjrJtMXqzP6JwpjnapwpOVpk6e9o@peanut.db.elephantsql.com/pfdcoetq mvn exec:java`
+    * `PORT=8998 CLIENT_ID=1019349198762-463i1tt2naq9ipll3f9ade5u7nli7gju.apps.googleusercontent.com DATABASE_URL=postgres://pfdcoetq:VMXXrjrJtMXqzP6JwpjnapwpOVpk6e9o@peanut.db.elephantsql.com/pfdcoetq mvn exec:java`
     * The address is `http://localhost:PORT/`
 
 #### On Dokku
@@ -87,7 +86,7 @@
 ## Developer Documentation
 
 ### Artifacts
-[Artifacts](docs/README-phase1.md)
+[Artifacts List](docs/README-phase3.md)
 
 ### Mobile
 [Mobile Dartdocs](docs/mobile_artifacts/api/index.html)
@@ -99,5 +98,5 @@
 [Backend Javadoc](docs/backend-apidocs/site/apidocs/index.html)
 
 ### Admin
-[Admin Javadoc](docs/admin-apidocs/index.html)
+[Admin Javadoc](docs/admin-apidocs/site/apidocs/index.html)
 

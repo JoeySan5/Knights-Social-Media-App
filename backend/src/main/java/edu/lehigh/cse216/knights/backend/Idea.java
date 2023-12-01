@@ -33,6 +33,9 @@ public class Idea {
      */
     public int mLikeCount;
 
+    /**
+     * The userid associated with this idea entry
+     */
     public String mUserId;
 
     /**
@@ -79,6 +82,7 @@ public class Idea {
     /**
      * Copy constructor to create one Idea from another.
      * Currently not used in production code, just in the MockDatabase.
+     * @param idea The idea to copy
      */
     Idea(Idea idea) {
         mId = idea.mId;
@@ -88,11 +92,29 @@ public class Idea {
         mUserId = idea.mUserId;
     }
 
-
+    /**
+     * ExtendedIdea is a subclass of Idea that includes the username
+     * of the poster and the comments associated with the idea
+     */
     public static class ExtendedIdea extends Idea {
+        /**
+         * The username of the poster
+         */
         public String mPosterUsername;
+        /**
+         * The comments associated with this idea
+         */
         public ArrayList<ExtendedComment> mComments;
 
+        /**
+         * Constructor with the id, content, likeCount, userid, posterUsername, and comments specified.
+         * @param id The id to associate with the Idea in this row.  Assumed to be unique 
+         * @param content The content string for this Idea
+         * @param likeCount The number of likes this Idea has
+         * @param userid The userid associated with this Idea
+         * @param posterUsername The username of the poster
+         * @param comments The comments associated with this idea
+         */
         public ExtendedIdea(int id, String content, int likeCount, String userid,
                             String posterUsername, ArrayList<ExtendedComment> comments) {
             super(id, content, likeCount, userid);
@@ -100,7 +122,14 @@ public class Idea {
             this.mComments = comments;
         }
         
-        //No comment
+        /**
+         * Constructor with the id, content, likeCount, userid, and posterUsername specified.
+         * @param id The id to associate with the Idea in this row.  Assumed to be unique
+         * @param content The content string for this Idea
+         * @param likeCount The number of likes this Idea has
+         * @param userid The userid associated with this Idea
+         * @param posterUsername The username of the poster
+         */
         public ExtendedIdea(int id, String content, int likeCount, String userid,
                             String posterUsername) {
             super(id, content, likeCount, userid);
