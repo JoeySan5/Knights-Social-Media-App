@@ -175,6 +175,16 @@ public class Database {
     private PreparedStatement mGetCommenterUserID;
 
     /**
+     * Prepared statement to delete all likes from an idea
+     */
+    private PreparedStatement mDeleteLikesFromIdea;
+
+    /**
+     * Prepared statement to delete all comments from an idea
+     */
+    private PreparedStatement mDeleteCommentsFromIdea;
+
+    /**
      * The Database constructor is private: we only create Database objects
      * through the getDatabase() method.
      */
@@ -271,7 +281,7 @@ public class Database {
 
             // Post a comment to an specific idea with specific user
             this.mInsertOneComment = this.mConnection.prepareStatement(
-                    "INSERT INTO comments (content, userID, ideaID) VALUES (?, ?, ?)");
+                    "INSERT INTO comments (content, userID, ideaID, fileid ,link) VALUES (?, ?, ?,?,?)");
 
             // Edit a comment to an specific idea with specific user
             this.mUpdateOneComment = this.mConnection.prepareStatement(
@@ -320,6 +330,12 @@ public class Database {
             // Update a like in the table
             this.mUpdateOneLike = this.mConnection.prepareStatement(
                     "UPDATE likes SET value = ? WHERE ideaID = ? AND userID = ?");
+
+            this.mDeleteLikesFromIdea = this.mConnection.prepareStatement(
+                    "DELETE FROM likes WHERE ideaID = ?");
+
+            this.mDeleteCommentsFromIdea = this.mConnection.prepareStatement(
+                    "DELETE FROM comments WHERE ideaID = ?");
 
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
@@ -513,6 +529,15 @@ public class Database {
                     int commentId = rsComments.getInt("commentid");
                     String content = rsComments.getString("content");
                     String userId = rsComments.getString("userid");
+                    String link = rsComments.getString("link");
+                    String fileId = rs.getString("fileid");
+                    FileObject file = null;
+                    System.out.println("this is rs" + rs);
+                    System.out.println("this is get fileid" + rs.getString("fileid"));
+
+                    if (fileId != null && !fileId.isEmpty()) {
+                        file = retrieveFileObject(fileId);
+                    }
 
                     mGetCommenterName.setInt(1, commentId);
                     ResultSet rsCommenter = mGetCommenterName.executeQuery();
@@ -522,7 +547,8 @@ public class Database {
                     }
                     rsCommenter.close();
 
-                    comments.add(new ExtendedComment(commentId, userId, ideaId, content, commenterUsername));
+                    comments.add(
+                            new ExtendedComment(commentId, userId, ideaId, content, commenterUsername, link, file));
                 }
                 rsComments.close();
 
@@ -548,8 +574,8 @@ public class Database {
                         rs.getString("userid"),
                         posterUsername,
                         comments,
-                        file,
-                        rs.getString("link"));
+                        rs.getString("link"),
+                        file);
             }
             rs.close();
         } catch (SQLException e) {
@@ -612,6 +638,10 @@ public class Database {
     int deleteIdea(int ideaId) {
         int res = -1;
         try {
+            mDeleteLikesFromIdea.setInt(1, ideaId);
+            mDeleteLikesFromIdea.executeUpdate();
+            mDeleteCommentsFromIdea.setInt(1, ideaId);
+            mDeleteCommentsFromIdea.executeUpdate();
             mDeleteOneIdea.setInt(1, ideaId);
             res = mDeleteOneIdea.executeUpdate();
         } catch (SQLException e) {
@@ -769,12 +799,14 @@ public class Database {
      * 
      * @return The number of comments that were inserted. 0 indicates an error.
      */
-    int insertNewComment(String content, String userId, int ideaId) {
+    int insertNewComment(String content, String userId, int ideaId, String file, String link) {
         int count = 0;
         try {
             mInsertOneComment.setString(1, content);
             mInsertOneComment.setString(2, userId);
             mInsertOneComment.setInt(3, ideaId);
+            mInsertOneComment.setString(4, file);
+            mInsertOneComment.setString(5, link);
             count += mInsertOneComment.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -814,11 +846,22 @@ public class Database {
             mSelectAllComments.setInt(1, ideaId);
             ResultSet rs = mSelectAllComments.executeQuery();
             while (rs.next()) {
+                String fileId = rs.getString("fileid");
+                FileObject file = null;
+                System.out.println("this is rs" + rs);
+                System.out.println("this is get fileid" + rs.getString("fileid"));
+
+                if (fileId != null && !fileId.isEmpty()) {
+                    file = retrieveFileObject(fileId);
+                }
+
                 res.add(new Comment(
                         rs.getInt("id"),
                         rs.getString("userid"),
                         rs.getInt("ideaid"),
-                        rs.getString("content")));
+                        rs.getString("content"),
+                        rs.getString("link"),
+                        file));
             }
             rs.close();
             return res;

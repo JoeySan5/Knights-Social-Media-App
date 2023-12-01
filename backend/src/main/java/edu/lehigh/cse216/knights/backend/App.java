@@ -658,6 +658,15 @@ public class App {
 
             String key = req.sessionKey;
             String userID = null;
+            FileObject file = req.mFile;
+            String fileid = "";
+            if (file != null) {
+                fileid = db.parseFileid(file);
+            }
+
+            System.out.println("fileid: " + fileid);
+            System.out.println("json body: " + request.body());
+
             // conncecting to cache
             MemcachedClient mc = null;
             try {
@@ -687,11 +696,39 @@ public class App {
                 }
             }
 
-            int rowsInserted = db.insertNewComment(req.mContent, userID, req.mIdeaId);
+            int rowsInserted = db.insertNewComment(req.mContent, userID, req.mIdeaId, fileid, req.mLink);
             if (rowsInserted <= 0) {
                 return gson.toJson(new StructuredResponse("error", "error creating comment",
                         null));
             } else {
+                if (fileid != "") {
+                    // Initialize the Google Cloud Storage client
+                    // Gets information from env var GOOGLE_APPLICATION_CREDENTIALS
+                    Storage storage = StorageOptions.getDefaultInstance().getService();
+                    // The name of google cloud storage bucket
+                    String bucketName = "knights-bucket-2";
+                    Bucket bucket = storage.get(bucketName);
+                    String blobName = fileid;
+                    BlobId blobId = BlobId.of(bucketName, blobName);
+                    BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(file.getmFileType()).build();
+
+                    // Decode base64 data
+                    System.out.println("\nhere is file content: " + file.getmBase64());
+                    byte[] decodedData = Base64.getDecoder().decode(file.getmBase64());
+
+                    storage.create(blobInfo, decodedData);
+
+                    System.out.println("\nhere is bucket" + bucket);
+
+                    storage.close();
+
+                    try {
+                        storage.close();
+                    } catch (Exception e) {
+                        System.err.println("error closing storage: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
                 return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + "comment(s)", null));
             }
         });
