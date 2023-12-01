@@ -128,6 +128,7 @@ public abstract class Request {
      */
     public String mLink;
 
+    // File associated with idea
     public FileObject mFile;
 
   }
@@ -168,5 +169,13 @@ public abstract class Request {
      * The idea id associated with this comment
      */
     public String mContent;
+
+    /**
+     * The link associated with the idea.
+     */
+    public String mLink;
+
+    // File associated with comment
+    public FileObject mFile;
   }
 }

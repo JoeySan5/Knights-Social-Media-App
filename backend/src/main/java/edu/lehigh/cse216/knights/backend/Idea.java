@@ -2,6 +2,8 @@ package edu.lehigh.cse216.knights.backend;
 
 import java.util.ArrayList;
 
+import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse.File;
+
 import edu.lehigh.cse216.knights.backend.Comment.ExtendedComment;
 
 // import java.util.Date; // should use something like java.sql.Date instead
@@ -107,10 +109,10 @@ public class Idea {
          */
         public ArrayList<ExtendedComment> mComments;
 
-        // This is the link stri
+        // This is the link string
         public String mLink;
 
-        // TODO: String format should be fileid
+        // File object
         public FileObject mFile;
 
         /**
@@ -126,7 +128,7 @@ public class Idea {
          * @param comments       The comments associated with this idea
          */
         public ExtendedIdea(int id, String content, int likeCount, String userid,
-                String posterUsername, ArrayList<ExtendedComment> comments, FileObject file, String link) {
+                String posterUsername, ArrayList<ExtendedComment> comments, String link, FileObject file) {
             super(id, content, likeCount, userid);
             this.mPosterUsername = posterUsername;
             this.mComments = comments;
