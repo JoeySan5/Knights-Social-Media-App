@@ -1,0 +1,35 @@
+#addElement {
+    background: black;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: fit-content;
+}
+
+#addElement h3 {
+    color: green;
+    margin-bottom: 10px;
+}
+
+#addElement label {
+    display: block;
+    margin-top: 10px;
+}
+
+#addElement textarea {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.comment-buttons {
+    text-align: right;
+
+}
+
+.comment-buttons button {
+    margin-left: 10px;
+}
+
+.fileButton {
+    margin-top: 10px;
+}   

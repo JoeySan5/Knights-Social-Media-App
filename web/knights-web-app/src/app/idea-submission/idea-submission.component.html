@@ -1,0 +1,20 @@
+<div id="addElement">
+  <div id="addElement">
+    <h3>Add a New Entry</h3>
+    <label for="newIdea">Message</label>
+    <textarea id="newIdea" placeholder="Enter your idea here"></textarea>
+
+    <label for="newLink">Link </label>
+    <textarea id="newLink" placeholder="Enter link here"></textarea>
+
+    <div class="buttons">
+      <button id="addCancel" routerLink="/home-page" style="cursor: pointer;">Cancel</button>
+      <button id="addButton" (click)="submitForm()" style="cursor: pointer;">Add</button>
+    </div>
+
+    <div class="fileButton">
+      <input type="file" (change)="onFileSelected($event)" accept=".jpg, .jpeg, .png, .mp3, .mp4, .txt, .pdf" style="cursor: pointer;" />
+      <!--jpg, jpeg, png, mp4 display / pdf txt can download / mp3 run the file(sound)-->
+    </div>
+  </div>
+</div>
