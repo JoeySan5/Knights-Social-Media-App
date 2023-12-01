@@ -264,11 +264,12 @@ Future<bool> onLikeButtonTapped(int id, String sessionKey) async {
 ///POST
 ///takes in userText and sessionKey to determine which user is making post
 Future<String> postIdeas(
-    String userText, String link, String sessionKey) async {
+    String userText, String link, String sessionKey, String fileName, String base64) async {
   developer.log('Making web request...');
   var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas');
   var headers = {"Accept": "application/json"};
-  var body = {'mContent': userText, 'mLink': link, 'sessionKey': sessionKey};
+  var mFile = {'mFileName': fileName, 'mFileType': fileName.split(".").last, 'mBase64': base64};
+  var body = {'mContent': userText, 'mLink': link, 'sessionKey': sessionKey, 'mFile': mFile};
   print(sessionKey);
   print(userText);
   print(link);

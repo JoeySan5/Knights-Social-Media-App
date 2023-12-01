@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-
+import 'dart:developer' as developer;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:knights/models/DetailedPost.dart';
@@ -58,17 +58,19 @@ class _DetailedPostFormat extends State<DetailedPostFormat> {
   }
 
   File? _selectedFile;
+  String? fileName;
+  String? base64;
   Future<void> pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result != null) {
       setState(() {
         _selectedFile = File(result.files.single.path!);
-        String fileName = result.files.first.name;
-        print('selected fileName: $fileName');
+        fileName = result.files.first.name;
+        developer.log('selected fileName: $fileName');
         Uint8List? fileBytes = result.files.first.bytes;
-        String base64 = base64Encode(fileBytes!);
-        print('base64 file bytes: $base64');
+        base64 = base64Encode(fileBytes!);
+        developer.log('base64 file bytes: $base64');
       });
     } else {
       // User canceled the picker
