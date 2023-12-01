@@ -66,6 +66,8 @@ class IdeaList extends StatefulWidget{
               return IdeaFormat(mId: snapshot.data![index].mId, mContent:snapshot.data![index].mContent, mLikeCount: snapshot.data![index].mLikeCount);
             },
             );
+            
+
           }
           else if(snapshot.hasError){
             child = Text('${snapshot.error}');

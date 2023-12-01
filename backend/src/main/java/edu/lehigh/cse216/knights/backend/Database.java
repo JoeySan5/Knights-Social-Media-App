@@ -1,5 +1,7 @@
 package edu.lehigh.cse216.knights.backend;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -7,11 +9,30 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.concurrent.TimeoutException;
+
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
+import com.google.gson.Gson;
 
 import edu.lehigh.cse216.knights.backend.Comment.ExtendedComment;
 import edu.lehigh.cse216.knights.backend.Idea.ExtendedIdea;
+import net.rubyeye.xmemcached.MemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClientBuilder;
+import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.auth.AuthInfo;
+import net.rubyeye.xmemcached.command.BinaryCommandFactory;
+import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.utils.AddrUtil;
 
 /**
  * Database interacts with the ElephantSQL database through a set of
@@ -19,11 +40,39 @@ import edu.lehigh.cse216.knights.backend.Idea.ExtendedIdea;
  * and returns the appropriate result to the HTTP server App
  */
 public class Database {
+    final Gson gson = new Gson();
     /**
      * The connection to the database. When there is no connection, it should
      * be null. Otherwise, there is a valid open connection
      */
     private Connection mConnection;
+
+    // ******************************************************************************
+
+    // The functionality to create and drop tables is the responsibility of the
+    // admin,
+    // and these prepared statements are not typically used in ordinary cases
+    /**
+     * A prepared statement for creating the table in our database
+     */
+    private PreparedStatement mCreateIdeaTable;
+
+    /**
+     * A prepared statement for dropping the table in our database
+     */
+    private PreparedStatement mDropIdeaTable;
+
+    /**
+     * A prepared statement for creating the user table in our database
+     */
+    private PreparedStatement mCreateUserTable;
+
+    /**
+     * A prepared statement for dropping the user table in our database
+     */
+    private PreparedStatement mDropUserTable;
+
+    // ******************************************************************************
 
     /**
      * A prepared statement for getting all ideas in the database
@@ -37,6 +86,8 @@ public class Database {
 
     /**
      * A prepared statement for deleting an idea from the database
+     * But, this functionality is unlikely to be used in practice. Phase 2
+     * guidelines do not provide instructions for implementing this feature
      */
     private PreparedStatement mDeleteOneIdea;
 
@@ -52,50 +103,76 @@ public class Database {
     private PreparedStatement mUpdateIdeaLikeCount;
 
     /**
-     * A prepared statement for creating the table in our database
+     * A prepared statement for checking if a like exists
+     * This statement is related to the like functionality
      */
-    private PreparedStatement mCreateIdeaTable;
-
-    /**
-     * A prepared statement for dropping the table in our database
-     */
-    private PreparedStatement mDropIdeaTable;
-
-    private PreparedStatement mCreateUserTable;
-
-    private PreparedStatement mDropUserTable;
-
-    // Register user's default profile with specific userid
-    private PreparedStatement mInsertNewUser;
-
-    // Edit user's profile with specific userid
-    private PreparedStatement mUpdateOneUser;
-
-    // Get the PosterName
-    private PreparedStatement mGetPosterName;
-
-    // Get all information of specific user
-    private PreparedStatement mSelectOneUser;
-
-    // Post a comment to an specific idea with specific user
-    private PreparedStatement mInsertOneComment;
-
-    // Edit a comment to an specific idea with specific user
-    private PreparedStatement mUpdateOneComment;
-
-    // Get all comments of specific idea
-    private PreparedStatement mSelectAllComments;
-
-    // Get the commenter username of specific comment
-    private PreparedStatement mGetCommenterName;
-
     private PreparedStatement mCheckIfLikeExists;
 
+    /**
+     * A prepared statement for inserting a new like into the database
+     * This statement is related to the like functionality
+     */
     private PreparedStatement mInsertNewLike;
 
+    /**
+     * A prepared statement for deleting a like from the database
+     * This statement is related to the like functionality
+     */
     private PreparedStatement mDeleteOneLike;
 
+    /**
+     * A prepared statement for updating a like in the database
+     * This statement is related to the like functionality
+     */
     private PreparedStatement mUpdateOneLike;
+
+    /**
+     * A prepared statement for inserting a new user into the database with default
+     * profile
+     */
+    private PreparedStatement mInsertNewUser;
+
+    /**
+     * A prepared statement for updating a user's profile in the database
+     */
+    private PreparedStatement mUpdateOneUser;
+
+    /**
+     * A prepared statement for getting the poster name of an idea
+     */
+    private PreparedStatement mGetPosterName;
+
+    /**
+     * A prepared statement for getting information of a specific user
+     * Based on the user's session key request, limited information can be provided,
+     * or all information can be provided.
+     */
+    private PreparedStatement mSelectOneUser;
+
+    /**
+     * A prepared statement for inserting a new comment into the database
+     */
+    private PreparedStatement mInsertOneComment;
+
+    /**
+     * A prepared statement for updating a comment in the database
+     */
+    private PreparedStatement mUpdateOneComment;
+
+    /**
+     * A prepared statement for getting all comments of a specific idea
+     */
+    private PreparedStatement mSelectAllComments;
+
+    /**
+     * A prepared statement for getting the commenter username of a specific comment
+     */
+    private PreparedStatement mGetCommenterName;
+
+    /**
+     * A prepared statement for getting the commenter ID of a specific comment
+     */
+    private PreparedStatement mGetCommenterUserID;
 
     /**
      * The Database constructor is private: we only create Database objects
@@ -120,11 +197,22 @@ public class Database {
             // We have "ideas" as the table name for example - this must be consistent
             // across the Admin and Backend components
 
+            // ******************************************************************************
+
+            // tjp Question: should we use 'id' or 'ID'? Really a choice for admin to make
+            // sej Answer:n PostgreSQL, identifiers (table names, column names, etc.) are
+            // case-insensitive by default.
+            // If you don't enclose identifiers in double quotes (""), PostgreSQL will
+            // convert them to lowercase.
+            // We will still use 'ID' for the sake of team convention.
+
+            // ******************************************************************************
+            // These four prepared statements are not actually used in the backend.
             // Note: no "IF NOT EXISTS" or "IF EXISTS" checks on table
             // creation/deletion, so multiple executions will cause an exception
             this.mCreateIdeaTable = this.mConnection.prepareStatement(
-                    "CREATE TABLE ideas (id SERIAL PRIMARY KEY, content VARCHAR(2048) NOT NULL, likeCount INT)");
-            // tjp Question: should we use 'id' or 'ID'? Really a choice for admin to make
+                    "CREATE TABLE ideas (ID SERIAL PRIMARY KEY, content VARCHAR(2048) NOT NULL, likeCount INT)");
+
             this.mDropIdeaTable = this.mConnection.prepareStatement("DROP TABLE ideas");
 
             // Standard CRUD operations
@@ -134,7 +222,8 @@ public class Database {
             // implemented in
             // Phase 1?
             this.mInsertOneIdea = this.mConnection
-                    .prepareStatement("INSERT INTO ideas (content, userid, likeCount) VALUES (?, ?, 0)");
+                    .prepareStatement(
+                            "INSERT INTO ideas (content, userid, likeCount, valid, fileid ,link) VALUES (?, ?, 0, true, ?, ?)");
 
             this.mSelectAllIdeas = this.mConnection
                     .prepareStatement("SELECT ideaid, content, likeCount, userid FROM ideas " +
@@ -160,57 +249,77 @@ public class Database {
 
             this.mDropUserTable = this.mConnection.prepareStatement("DROP TABLE users");
 
-            // Register user's default profile
+            this.mDeleteOneIdea = this.mConnection.prepareStatement("DELETE FROM ideas WHERE ideaID = ?"); // Not
+            // implemented in
+            // Phase 1? - Yes, also in phase 2.
+            // ******************************************************************************
+
+            // Standard CRUD operations
+            // tjp: these SQL prepared statement are essential for understanding exactly
+            // what the backend is asking the database
+
             this.mInsertNewUser = this.mConnection.prepareStatement(
-                    "INSERT INTO users (email, valid, username, GI, SO, note, userid) " +
+                    "INSERT INTO users (email, valid, username, GI, SO, note, userID) " +
                             "VALUES ('unknown', true, 'unknown', 'unknown', 'unknown', 'unknown', ?)");
             // Edit user's profile
             this.mUpdateOneUser = this.mConnection.prepareStatement(
-                    "UPDATE users SET username = ?, email = ?, GI = ?, SO = ?, note = ? WHERE userId = ?");
+                    "UPDATE users SET username = ?, email = ?, GI = ?, SO = ?, note = ? WHERE userID = ?");
 
             // Get all information of specific user
             this.mSelectOneUser = this.mConnection.prepareStatement(
-                    "SELECT * from users WHERE userid=?");
+                    "SELECT * from users WHERE userID=?");
 
             // Post a comment to an specific idea with specific user
             this.mInsertOneComment = this.mConnection.prepareStatement(
-                    "INSERT INTO comments (content, userid, ideaid) VALUES (?, ?, ?)");
+                    "INSERT INTO comments (content, userID, ideaID) VALUES (?, ?, ?)");
 
             // Edit a comment to an specific idea with specific user
             this.mUpdateOneComment = this.mConnection.prepareStatement(
-                    "UPDATE comments SET content = ? WHERE commentid = ?");
+                    "UPDATE comments SET content = ? WHERE commentID = ?");
 
             // Get all comments of specific idea
             this.mSelectAllComments = this.mConnection.prepareStatement(
-                    "SELECT * from comments WHERE ideaid=?");
+                    "SELECT * from comments WHERE ideaID=?");
 
             // Get the commenter username of specific comment
             this.mGetCommenterName = this.mConnection.prepareStatement(
                     "SELECT u.username " +
                             "FROM comments c " +
-                            "JOIN users u ON c.userid = u.userid " +
-                            "WHERE c.commentid = ?");
+                            "JOIN users u ON c.userID = u.userID " +
+                            "WHERE c.commentID = ?");
 
             // Get the PosterName
             this.mGetPosterName = this.mConnection.prepareStatement(
                     "SELECT u.username " +
                             "FROM ideas i " +
-                            "JOIN users u ON i.userid = u.userid " +
-                            "WHERE i.ideaid = ?");
+                            "JOIN users u ON i.userID = u.userID " +
+                            "WHERE i.ideaID = ?");
 
+            // Get the commenter userID
+            this.mGetCommenterUserID = this.mConnection.prepareStatement(
+                    "SELECT userID " +
+                            "FROM comments " +
+                            "WHERE commentID = ?");
+
+            // Get the value for checking if a like exists
+            // in the likes table. The query will return the 'like' value if it exists.
+            // If no 'like' is found, the result set will be empty.
             this.mCheckIfLikeExists = this.mConnection.prepareStatement(
                     "SELECT value " +
                             "FROM likes " +
-                            "WHERE userid = ? AND ideaid = ?");
+                            "WHERE userID = ? AND ideaID = ?");
 
+            // Insert a new like into the table
             this.mInsertNewLike = this.mConnection.prepareStatement(
-                    "INSERT INTO likes (ideaid, userid, value) VALUES (?, ?, ?)");
+                    "INSERT INTO likes (ideaID, userID, value) VALUES (?, ?, ?)");
 
+            // Delete a like from the table
             this.mDeleteOneLike = this.mConnection.prepareStatement(
-                    "DELETE FROM likes WHERE ideaid = ? AND userid = ?");
+                    "DELETE FROM likes WHERE ideaID = ? AND userID = ?");
 
+            // Update a like in the table
             this.mUpdateOneLike = this.mConnection.prepareStatement(
-                    "UPDATE likes SET value = ? WHERE ideaid = ? AND userid = ?");
+                    "UPDATE likes SET value = ? WHERE ideaID = ? AND userID = ?");
 
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
@@ -317,11 +426,13 @@ public class Database {
      * 
      * @return The number of ideas that were inserted
      */
-    int insertIdea(String content, String userId) {
+    int insertIdea(String content, String userId, String file, String link) {
         int count = 0;
         try {
             mInsertOneIdea.setString(1, content);
             mInsertOneIdea.setString(2, userId);
+            mInsertOneIdea.setString(3, file);
+            mInsertOneIdea.setString(4, link);
             // likeCount will automatically be set to 0; it is written into the
             // preparedStatement
             count += mInsertOneIdea.executeUpdate();
@@ -339,8 +450,16 @@ public class Database {
      */
     ArrayList<ExtendedIdea> selectAllIdeas() {
         ArrayList<ExtendedIdea> res = new ArrayList<ExtendedIdea>();
+
         try {
             ResultSet rs = mSelectAllIdeas.executeQuery();
+
+            // Here we will have to retrieve the file ID from the database. Once we have the
+            // file, we want to retrieve it from google cloud.
+            // Once we have the file we want to encode it into base64. Once in base64 we
+            // will be adding it to the extended idea
+
+            // Also must get link from database, and return that as well.
 
             while (rs.next()) {
                 int ideaId = rs.getInt("ideaid");
@@ -407,13 +526,27 @@ public class Database {
                 }
                 rsComments.close();
 
+                // resposne from database will have the fileID, not a file object.
+                // With this fileID, we will go to the cache or google storage and retrieve the
+                // object
+                // Once the object is retrieved we decode data and send back proper FileObject
+                // ID
+                // FileObject file = function(fileId);
+                String fileId = rs.getString("fileid");
+                FileObject file = null;
+                if (fileId != null) {
+                    file = retrieveFileObject(fileId);
+                }
+
                 res = new ExtendedIdea(
                         rs.getInt("ideaid"),
                         rs.getString("content"),
                         rs.getInt("likeCount"),
                         rs.getString("userid"),
                         posterUsername,
-                        comments);
+                        comments,
+                        file,
+                        rs.getString("link"));
             }
             rs.close();
         } catch (SQLException e) {
@@ -464,6 +597,8 @@ public class Database {
         return res;
     }
 
+    // ******************************************************************************
+    // unused in phase 1, 2
     /**
      * Delete an idea by ID
      * 
@@ -481,7 +616,17 @@ public class Database {
         }
         return res;
     }
+    // ******************************************************************************
 
+    /**
+     * Get the previous like value of a user for an idea
+     * 
+     * @param userID The id of the user
+     * @param ideaID The id of the idea
+     * 
+     * @return The previous like value of the user for the idea. 0 indicates that
+     *         the user has netural position about this idea
+     */
     int previousLikeValue(String userID, int ideaID) {
         try {
             mCheckIfLikeExists.setString(1, userID);
@@ -490,7 +635,7 @@ public class Database {
             // Return true if the user has (dis)liked the post before
             ResultSet res = mCheckIfLikeExists.executeQuery();
             if (res.next()) {
-                return res.getInt("value");
+                return res.getInt("value"); // The value will be 1 or -1.
             } else {
                 return 0;
             }
@@ -507,7 +652,7 @@ public class Database {
      * @param likeDelta the requested amount to change likes by; must be 1 or -1 to
      *                  be successful
      * 
-     * @return The amount of posts affected by the given likeCountged. -1 indicates
+     * @return The amount of posts affected by the given likeCountged. 0 indicates
      *         an error.
      */
     int updateIdeaLikeCount(String userID, int ideaId, int likeValue) {
@@ -551,6 +696,13 @@ public class Database {
         return res;
     }
 
+    /**
+     * Insert a new user into the database
+     * 
+     * @param userId The id of the user
+     * 
+     * @return The number of users that were inserted. 0 indicates an error.
+     */
     int insertNewUser(String userId) {
         int count = 0;
         try {
@@ -562,6 +714,13 @@ public class Database {
         return count;
     }
 
+    /**
+     * Update a user's profile in the database
+     * 
+     * @param req The request object containing the user's information
+     * 
+     * @return The number of users that were updated = 1. 0 indicates an error.
+     */
     int updateOneUser(Request.UserRequest req) {
         try {
             mUpdateOneUser.setString(1, req.mUsername);
@@ -577,6 +736,13 @@ public class Database {
         }
     }
 
+    /**
+     * Get the poster name of an idea
+     * 
+     * @param ideaid The id of the idea
+     * 
+     * @return The poster name of the idea. null indicates an error.
+     */
     String getPosterName(int ideaid) {
         String posterName = null;
         try {
@@ -591,7 +757,15 @@ public class Database {
         return posterName;
     }
 
-    // (content, userid, ideaid)
+    /**
+     * Insert a new comment into the database
+     * 
+     * @param content The content of the comment
+     * @param userId  The id of the user
+     * @param ideaId  The id of the idea
+     * 
+     * @return The number of comments that were inserted. 0 indicates an error.
+     */
     int insertNewComment(String content, String userId, int ideaId) {
         int count = 0;
         try {
@@ -605,6 +779,14 @@ public class Database {
         return count;
     }
 
+    /**
+     * Update a comment in the database
+     * 
+     * @param content   The content of the comment
+     * @param commentId The id of the comment
+     * 
+     * @return The number of comments that were updated. 0 indicates an error.
+     */
     int updateOneComment(String content, int commentId) {
         try {
             mUpdateOneComment.setString(1, content);
@@ -616,6 +798,13 @@ public class Database {
         }
     }
 
+    /**
+     * Get the Comment information of a specific comment
+     * 
+     * @param commentId The id of the comment
+     * 
+     * @return The comment information. null indicates an error.
+     */
     ArrayList<Comment> selectAllComments(int ideaId) {
         ArrayList<Comment> res = new ArrayList<Comment>();
         try {
@@ -636,6 +825,33 @@ public class Database {
         }
     }
 
+    /**
+     * Get the commenter username of a specific comment
+     * 
+     * @param commentID The id of the comment
+     * 
+     * @return The commenter username. null indicates an error.
+     */
+
+    String getCommenterUserID(int commentID) {
+        String CommenterUserID = "default";
+        try {
+            mGetCommenterUserID.setInt(1, commentID);
+            ResultSet rs = mGetCommenterUserID.executeQuery();
+            if (rs.next()) {
+                System.out.println(rs.getString("userID"));
+                CommenterUserID = rs.getString("userID");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return CommenterUserID;
+
+    }
+
+    // ******************************************************************************
+    // unused functions in Backend. in phase 1, 2
     /**
      * Create idea tblData. If it already exists, this will print an error
      */
@@ -682,4 +898,162 @@ public class Database {
             e.printStackTrace();
         }
     }
+    // ******************************************************************************
+
+    String parseFileid(FileObject file) {
+        String fileId = "";
+        // Get the current timestamp
+        LocalDateTime timestamp = LocalDateTime.now();
+
+        // Format the timestamp using a DateTimeFormatter
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
+        String formattedTimestamp = timestamp.format(formatter);
+        try {
+            fileId = file.getmFileName();
+            fileId = fileId + formattedTimestamp;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return fileId;
+    }
+
+    FileObject retrieveFileObject(String fileId) {
+
+        // first we want to check if memecache has the object
+        FileObject file = getFileFromCache(fileId);
+        if (file != null) {
+            System.out.println("\nFile found in cache\n");
+            return file;
+        } else {
+            // if memecache does not have the object then retrieve it from google storage
+            // and add it into memecache
+            System.out
+                    .println("\nFile not found in cache. Retrieved from storage, and put in cache for 1000 seconds\n ");
+            return getFileFromStorage(fileId);
+        }
+
+    }
+
+    private FileObject getFileFromCache(String fileId) {
+        // conncecting to cache
+        MemcachedClient mc = null;
+        try {
+            mc = createMemcachedClient();
+        } catch (IOException e) {
+            System.err.println("Couldn't create a connection to MemCachier: " +
+                    e.getMessage());
+        }
+
+        if (mc == null) {
+            System.err.println("mc is null. Exiting.");
+            System.exit(1);
+        }
+
+        try {
+            String response = mc.get(fileId);
+            if (response == null) {
+                return null;
+            } else {
+                System.out.println("\nhere is response from cache:" + response);
+                System.out.println(gson.fromJson(response, FileObject.class));
+                return gson.fromJson(response, FileObject.class);
+            }
+        } catch (TimeoutException | InterruptedException | MemcachedException e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    FileObject getFileFromStorage(String fileId) {
+        String fileType = "";
+        String base64String = "";
+        // Initialize the Google Cloud Storage client
+        // Gets information from env var GOOGLE_APPLICATION_CREDENTIALS
+        Storage storage = StorageOptions.getDefaultInstance().getService();
+        // The name of google cloud storage bucket
+        String bucketName = "knights-bucket-2";
+        String blobName = fileId;
+        BlobId blobId = BlobId.of(bucketName, blobName);
+        Blob blob = storage.get(blobId);
+
+        System.out.println("\nhere is blob: " + blobId);
+
+        if (blob != null) {
+            // Retrieving data
+            fileType = blob.getContentType();
+            base64String = Base64.getEncoder().encodeToString(blob.getContent());
+            // Output the results
+            System.out.println("File Type: " + fileType);
+            System.out.println("Base64 Data: " + base64String);
+            System.out.println("File Name: " + fileId);
+        } else {
+            System.out.println("Blob does not exist in cloud storage");
+            return null;
+        }
+
+        try {
+            storage.close();
+        } catch (Exception e) {
+            System.err.println("Error closing storage in selectOneIdea function");
+            e.printStackTrace();
+        }
+
+        insertFileToCache(new FileObject(fileId, fileType, base64String));
+        return new FileObject(fileId, fileType, base64String);
+    }
+
+    private void insertFileToCache(FileObject fileObject) {
+        String fileAsString = gson.toJson(fileObject);
+        String fileName = fileObject.getmFileName();
+
+        // conncecting to cache
+        MemcachedClient mc = null;
+        try {
+            mc = createMemcachedClient();
+        } catch (IOException e) {
+            System.err.println("Couldn't create a connection to MemCachier: " +
+                    e.getMessage());
+        }
+
+        if (mc == null) {
+            System.err.println("mc is null. Exiting.");
+            System.exit(1);
+        }
+
+        try {
+            System.out.println("\nfileName (key):" + fileName + " fileAsString: " + fileAsString);
+            mc.set(fileName, 1000, fileAsString);
+        } catch (TimeoutException | InterruptedException | MemcachedException e) {
+            System.err.println("error inserting file to cache:" + e.getMessage());
+            e.printStackTrace();
+        }
+
+    }
+
+    private static MemcachedClient createMemcachedClient() throws IOException {
+        List<InetSocketAddress> servers = AddrUtil.getAddresses(System.getenv("MEMCACHIER_SERVERS").replace(",", " "));
+        AuthInfo authInfo = AuthInfo.plain(System.getenv("MEMCACHIER_USERNAME"), System.getenv("MEMCACHIER_PASSWORD"));
+
+        // this builds the memcache client
+        MemcachedClientBuilder builder = new XMemcachedClientBuilder(servers);
+
+        // Configure SASL auth for each server
+        for (InetSocketAddress server : servers) {
+            builder.addAuthInfo(server, authInfo);
+        }
+
+        // Use binary protocol
+        builder.setCommandFactory(new BinaryCommandFactory());
+        // Connection timeout in milliseconds (default: )
+        builder.setConnectTimeout(1000);
+        // Reconnect to servers (default: true)
+        builder.setEnableHealSession(true);
+        // Delay until reconnect attempt in milliseconds (default: 2000)
+        builder.setHealSessionInterval(2000);
+        MemcachedClient mc = builder.build();
+        return mc;
+    }
+
 }

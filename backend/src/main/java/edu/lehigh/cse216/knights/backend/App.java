@@ -4,59 +4,71 @@ package edu.lehigh.cse216.knights.backend;
 // create an HTTP GET route
 import spark.Spark;
 
+import java.util.Base64;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
-
 import static spark.Spark.*;
 
 // Import Google's JSON library
 import com.google.gson.*;
-
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.json.Json;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
+
+//For memeCachier
+import net.rubyeye.xmemcached.MemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClientBuilder;
+import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.auth.AuthInfo;
+import net.rubyeye.xmemcached.command.BinaryCommandFactory;
+import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.utils.AddrUtil;
+
+import java.lang.InterruptedException;
+import java.net.InetSocketAddress;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 /**
  * App creates an HTTP server capable of interacting with the Database.
  */
 public class App {
+
     /**
      * Sets up the database and server ports.
      * 
      * @param args The command line arguments, (unused)
      */
     public static void main(String[] args) {
+
         staticFiles.location("/public");
 
         // Get a fully-configured connection to the database, or exit immediately
         Database db = getDatabaseConnection();
         if (db == null)
             return;
-
         // gson provides us with a way to turn JSON into objects, and objects
         // into JSON.
         //
         // NB: it must be final, so that it can be accessed from our lambdas
         //
         // NB: Gson is thread-safe. See
+        //
         // https://stackoverflow.com/questions/10380835/is-it-ok-to-use-gson-instance-as-a-static-field-in-a-model-bean-reuse
         final Gson gson = new Gson();
 
-        /**
-         * Key = sessionKey
-         * String = userId
-         */
-        Hashtable<String, String> sessionKeyTable = new Hashtable<>();
-        sessionKeyTable.put("lGaJjDO8kdNq", "112569610817039937158");
-        sessionKeyTable.put("k0kyOGwPlod5", "107106171889739877350");
         // Set the port on which to listen for requests from the environment
         Spark.port(getIntFromEnv("PORT", DEFAULT_PORT_SPARK));
 
@@ -75,12 +87,13 @@ public class App {
             final String acceptCrossOriginRequestsFrom = "*";
             final String acceptedCrossOriginRoutes = "GET,PUT,POST,DELETE,OPTIONS";
             final String supportedRequestHeaders = "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin,Access-Control-Allow-Origin";
-            enableCORS(acceptCrossOriginRequestsFrom, acceptedCrossOriginRoutes, supportedRequestHeaders);
+            enableCORS(acceptCrossOriginRequestsFrom, acceptedCrossOriginRoutes,
+                    supportedRequestHeaders);
         }
 
         // Set up a route for serving the main page
         // tjp: this 'main page' of 'index.html' is just a placeholder. It also leads
-        // to a 404 error since the page doesn't exist. Maybe in future phases we should
+        // to a 404 error since the page doesn't exist. Maybe in future phases weshould
         // go to some specific page.
         Spark.get("/", (req, res) -> {
             res.redirect("/index.html");
@@ -88,12 +101,39 @@ public class App {
         });
 
         // GET route that returns all ideas with their id, content, and likeCount.
+        // The session key should be vaild to get the ideas
         // All we do is get the data, embed it in a StructuredResponse, turn it into
         // JSON, and
         // return it. If there's no data, we return "[]", so there's no need
         // for error handling.
         Spark.get("/ideas", (request, response) -> {
+
+            String key = request.queryParams("sessionKey");
+            System.out.println("here is sess key:" + key);
+
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+
             // ensure status 200 OK, with a MIME type of JSON
+
+            // check if stored in cache
+            String sesskey = mc.get(key);
+            System.out.println("here is mc getting key" + "\n" + mc.get(key) + "\n");
+            if (sesskey == null) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            }
             response.status(200);
             response.type("application/json");
             return gson.toJson(new StructuredResponse("ok", null, db.selectAllIdeas()));
@@ -106,47 +146,119 @@ public class App {
         // Server Error. Otherwise, we have an integer, and the only possible
         // error is that it doesn't correspond to a row with data.
         Spark.get("/ideas/:id", (request, response) -> {
+
             int idx = Integer.parseInt(request.params("id"));
             // ensure status 200 OK, with a MIME type of JSON
+            String key = request.queryParams("sessionKey");
+
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+            if (mc.get(key) == null) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            }
+
             response.status(200);
             response.type("application/json");
             Idea.ExtendedIdea idea = db.selectOneIdea(idx);
             if (idea == null) {
-                return gson.toJson(new StructuredResponse("error", idx + " not found", null));
+                return gson.toJson(new StructuredResponse("error", idx + " not found",
+                        null));
             } else {
                 return gson.toJson(new StructuredResponse("ok", null, idea));
             }
         });
-
-        // TODO - we might need to implement this route specifically for newly-created
-        // users to be re-reouted to
-        // already logged in users should be routed to /ideas
-        // /users route should act like /users/:id but with self's own id only.
-        // This is a backlog item and possibly is completely unnecessary.
-        //
-        // Spark.get("/users", (request, response) -> {
-        // //verify session key
-        // // function the same as GET /users/:id
-        // }
 
         // POST route for adding a new idea to the Database. This will read
         // JSON from the body of the request, turn it into a IdeaRequest
         // object, extract the title and content, insert them, and return the
         // ID of the newly created row.
         Spark.post("/ideas", (request, response) -> {
+
             // NB: if gson.Json fails, Spark will reply with status 500 Internal
             // Server Error
-            Request.IdeaRequest req = gson.fromJson(request.body(), Request.IdeaRequest.class);
+            Request.IdeaRequest req = gson.fromJson(request.body(),
+                    Request.IdeaRequest.class);
             // ensure status 200 OK, with a MIME type of JSON
             // NB: even on error, we return 200, but with a JSON object that
             // describes the error.
+            String key = req.sessionKey;
+            String userID = null;
+
+            FileObject file = req.mFile;
+
+            String fileid = db.parseFileid(file);
+            System.out.println("fileid: " + fileid);
+
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+
+            if (mc.get(key) == null) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            } else {
+                userID = mc.get(key);
+                if (userID == null) {
+                    return gson.toJson(new StructuredResponse("error", "authentication failed",
+                            null));
+                }
+            }
+
             response.status(200);
             response.type("application/json");
-            int rowsInserted = db.insertIdea(req.mContent, req.mUserId);
+            int rowsInserted = db.insertIdea(req.mContent, userID, fileid, req.mLink);
             if (rowsInserted <= 0) {
-                return gson.toJson(new StructuredResponse("error", "error creating idea", null));
+                return gson.toJson(new StructuredResponse("error", "error creating idea",
+                        null));
             } else {
-                return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + " idea(s)", null));
+                // Initialize the Google Cloud Storage client
+                // Gets information from env var GOOGLE_APPLICATION_CREDENTIALS
+                Storage storage = StorageOptions.getDefaultInstance().getService();
+                // The name of google cloud storage bucket
+                String bucketName = "knights-bucket-2";
+                Bucket bucket = storage.get(bucketName);
+                String blobName = fileid;
+                BlobId blobId = BlobId.of(bucketName, blobName);
+                BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(file.getmFileType()).build();
+
+                // Decode base64 data
+                byte[] decodedData = Base64.getDecoder().decode(file.getmBase64());
+
+                storage.create(blobInfo, decodedData);
+
+                System.out.println("\nhere is bucket" + bucket);
+
+                storage.close();
+
+                try {
+                    storage.close();
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + "idea(s)", null));
             }
         });
 
@@ -156,15 +268,31 @@ public class App {
             // If we can't get an ID or can't parse the JSON, Spark will send
             // a status 500
             int idx = Integer.parseInt(request.params("id"));
-            Request.LikeRequest req = gson.fromJson(request.body(), Request.LikeRequest.class);
+            Request.LikeRequest req = gson.fromJson(request.body(),
+                    Request.LikeRequest.class);
 
             String key = req.sessionKey;
             System.out.println("sessionKey: " + key);
 
-            if (!sessionKeyTable.containsKey(key)) {
-                return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
             }
-            String userID = sessionKeyTable.get(key);
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+
+            if (mc.get(key) == null) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            }
+            String userID = mc.get(key);
             System.out.println("userID: " + userID);
 
             int likeIncrement = req.value;
@@ -178,7 +306,8 @@ public class App {
             response.status(200);
             response.type("application/json");
 
-            System.out.println("sessionKey: " + key + "userID: " + userID + "likeIncrement: " + likeIncrement);
+            System.out.println("sessionKey: " + key + "userID: " + userID +
+                    "likeIncrement: " + likeIncrement);
 
             int rowsUpdated = db.updateIdeaLikeCount(userID, idx, likeIncrement);
 
@@ -191,6 +320,8 @@ public class App {
         });
 
         // DELETE route for removing an idea from the Database.
+        // This is actually an unused feature. There are no implementation instructions
+        // for this feature in phase 2
         Spark.delete("/ideas/:id", (request, response) -> {
             // If we can't get an ID, Spark will send a status 500
             int idx = Integer.parseInt(request.params("id"));
@@ -202,24 +333,36 @@ public class App {
             // message sent on a successful delete
             int rowsDeleted = db.deleteIdea(idx);
             if (rowsDeleted <= 0) {
-                return gson.toJson(new StructuredResponse("error", "unable to delete idea #" + idx, null));
+                return gson.toJson(new StructuredResponse("error", "unable to delete idea #"
+                        + idx, null));
             } else {
                 return gson.toJson(new StructuredResponse("ok", null, null));
             }
         });
 
+        // Post route for login authentication with Google OAuth
+        // If the authentication is successful, return a session key
+        // Also, add the session key and userId to the sessionKeyTable
+        // If the authentication is failed, return an error message
+        // If the user is not in the database, add the user to the database
+        // Client ID is stored in the environment variable CLIENT_ID
         Spark.post("/login", (request, response) -> {
 
-            // tjp: TODO maybe set this as environment variable. Hard-coding the client_id
-            // goes against 12-factor app guidelines
-            String CLIENT_ID = "1019349198762-463i1tt2naq9ipll3f9ade5u7nli7gju.apps.googleusercontent.com";
+            String CLIENT_ID = System.getenv("CLIENT_ID");
+
+            if (CLIENT_ID == null) {
+                System.out.println("CLIENT_ID is not set, please check your mvn exec command");
+                return gson.toJson(new StructuredResponse("error",
+                        "CLIENT_ID is not set, please check your mvn exec command", null));
+            }
 
             // Need to verify that types are correct
             // Originally NetHttpTransport was type HttpTransport
             NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
-            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport,
+                    jsonFactory)
                     // Specify the CLIENT_ID of the app that accesses the backend:
                     .setAudience(Collections.singletonList(CLIENT_ID))
                     // Or, if multiple clients access the backend:
@@ -228,9 +371,11 @@ public class App {
 
             // (Receive idTokenString by HTTPS POST)
             // System.out.println("heres req" + request.headers());
+
             System.out.println(request);
-            System.out.println(request.body());
-            Request.LoginRequest req = gson.fromJson(request.body(), Request.LoginRequest.class);
+            // System.out.println(request.body());
+            Request.LoginRequest req = gson.fromJson(request.body(),
+                    Request.LoginRequest.class);
 
             // String idTokenString = request.params();
             Set<String> paramSet = request.queryParams();
@@ -266,14 +411,16 @@ public class App {
 
             } else {
                 // Case for authentication failed
-                System.out.println("For testing backend - Invalid ID token.");
-                return gson.toJson(new StructuredResponse("error", "authentication failed", null));
+                System.out.println("Invalid ID token. please check the Client_ID or process of getting token");
+                return gson.toJson(new StructuredResponse("error", "authentication failed",
+                        null));
             }
             // This case should never occur, but it might if authentication is successful
             // but provides no subjectID
             if (userId == null) {
                 System.out.println("For testing backend - UserId is null on 'successful' authentication");
-                return gson.toJson(new StructuredResponse("error", "authentication failed", null));
+                return gson.toJson(new StructuredResponse("error", "authentication failed",
+                        null));
             }
 
             // If no user exists, add a new user to the users table in the database
@@ -281,67 +428,157 @@ public class App {
             if (res == null) {
                 int rowsInserted = db.insertNewUser(userId);
                 if (rowsInserted <= 0) {
-                    return gson.toJson(new StructuredResponse("error", "error creating user", null));
+                    return gson.toJson(new StructuredResponse("error", "error creating user",
+                            null));
                 }
             } else if (res.mValid == false) {
-                return gson.toJson(new StructuredResponse("error", "user has been invalidated", null));
+                return gson.toJson(new StructuredResponse("error", "user has been invalidated to login", null));
+            }
+
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
             }
 
             // generate a new session key-a random string.
             String sessionKey = SessionKeyGenerator.generateRandomString(12);
-            sessionKeyTable.put(sessionKey, userId);
-            // show up the sessionKeyTable
-            System.out.println("sessionKeyTable: " + sessionKeyTable);
-            return gson.toJson(new StructuredResponse("ok", "authentication success", sessionKey));
+            mc.set(sessionKey, 0, userId);
+            // show up the sessionKey and sessionKeyTable
+            System.out.println("session Key is " + sessionKey);
+            System.out.println("sessionKey value in cache: " + mc.get(sessionKey));
+            return gson.toJson(new StructuredResponse("ok", "authentication success",
+                    sessionKey));
         });
 
-        // Register users profile with default value
+        // Post route for adding a new user to the database
+        // The new user only has a userId and a valid status
+        // The other information will be 'unknown'
         Spark.post("/users", (request, response) -> {
-            Request.UserRequest req = gson.fromJson(request.body(), Request.UserRequest.class);
+            Request.UserRequest req = gson.fromJson(request.body(),
+                    Request.UserRequest.class);
 
             response.status(200);
             response.type("application/json");
 
             int rowsInserted = db.insertNewUser(req.mId);
             if (rowsInserted <= 0) {
-                return gson.toJson(new StructuredResponse("error", "error creating user", null));
+                return gson.toJson(new StructuredResponse("error", "error creating user",
+                        null));
             } else {
                 return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + " user(s)", null));
             }
         });
 
-        // Edit user's profile
+        // Put route for updating a user's information
+        // The user can only update his/her own information
         Spark.put("/users", (request, response) -> {
-            Request.UserRequest req = gson.fromJson(request.body(), Request.UserRequest.class);
+            Request.UserRequest req = gson.fromJson(request.body(),
+                    Request.UserRequest.class);
             response.status(200);
             response.type("application/json");
 
+            // Check the session key
+            String key = req.sessionKey;
+            String userId;
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+            if (mc.get(key) == null) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            } else {
+                userId = mc.get(key);
+                if (userId == null) {
+                    return gson.toJson(new StructuredResponse("error", "authentication failed",
+                            null));
+                }
+            }
+
+            req.mId = userId;
+
             int rowsUpdated = db.updateOneUser(req);
             if (rowsUpdated <= 0) {
-                return gson.toJson(new StructuredResponse("error", "error updating user", null));
+                return gson.toJson(new StructuredResponse("error", "error updating user",
+                        null));
             } else {
                 return gson.toJson(new StructuredResponse("ok", "updated " + rowsUpdated + " user(s)", null));
             }
         });
 
-        // get user's information
+        // Get route for getting a user's information
+        // The user can only get his/her own information (GI and SO)
+        // If the user request to get other user's information, the server will return
+        // information with restricted information (without GI and SO)
         Spark.get("/users/:id", (request, response) -> {
             String requestedUserId = request.params("id");
             // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
 
-            // Explain, why we can't use this way to get sessionKey
+            // Question: why we can't use this way to get sessionKey
             // Request.UserRequest req = gson.fromJson(request.body(),
             // Request.UserRequest.class);
             // String key = req.sessionKey;
 
-            String key = request.queryParams("sessionKey");
+            // Answer:
+            // -d sends the data as the request body. GET requests typically do not have a
+            // request body, and the route handler in your server code is not set up to
+            // parse a JSON body for a GET request. It is expecting a query parameter
+            // instead.
 
-            if (!sessionKeyTable.containsKey(key)) {
-                return gson.toJson(new StructuredResponse("error", "Invalid session key", null));
+            // For the server code to accept the sessionKey from the request body, you would
+            // need to parse the JSON from the request body with
+            // gson.fromJson(request.body(), ...) within the route handler. But this is not
+            // standard practice for GET requests, which is why the -d option with a GET
+            // request is not working.
+
+            // In RESTful API design, it's more common to use query parameters or path
+            // variables for GET requests and reserve the request body for POST or PUT
+            // requests where a resource is being created or updated.
+            // So we are using query parameter to get sessionKey
+
+            String key = request.queryParams("sessionKey");
+            System.out.println("Requested sessionKey: " + key);
+            System.out.println("Reqeusted userId: " + requestedUserId);
+
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
             }
-            String userId = sessionKeyTable.get(key);
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+
+            if (mc.get(key) == null) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            }
+            String userId = mc.get(key);
             boolean restrictInfo = !(userId.equals(requestedUserId));
 
             User user = db.selectOneUser(requestedUserId, restrictInfo);
@@ -352,33 +589,181 @@ public class App {
             }
         });
 
-        // post a comment
-        Spark.post("/comments", (request, response) -> {
-            Request.CommentRequest req = gson.fromJson(request.body(), Request.CommentRequest.class);
+        // Same function as above, but without the userId parameter
+        // Only use the session key, and get the user's information
+        // This function is used for getting the user's own information
+        Spark.get("/users", (request, response) -> {
+            // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
-            int rowsInserted = db.insertNewComment(req.mContent, req.mUserId, req.mIdeaId);
-            if (rowsInserted <= 0) {
-                return gson.toJson(new StructuredResponse("error", "error creating comment", null));
+
+            // See other get Users function for more detailed comments
+
+            String key = request.queryParams("sessionKey");
+            System.out.println("Requested sessionKey: " + key);
+
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+
+            if (mc.get(key) == null) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            }
+
+            if (mc.get(key) == null) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            }
+            String userId = mc.get(key);
+            boolean restrictInfo = false;
+
+            User user = db.selectOneUser(userId, restrictInfo);
+            if (user == null) {
+                return gson.toJson(new StructuredResponse("error", userId + " not found",
+                        null));
             } else {
-                return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + " comment(s)", null));
+                return gson.toJson(new StructuredResponse("ok", null, user));
             }
         });
 
-        // Edit a comment
-        Spark.put("/comments", (request, response) -> {
-            Request.CommentRequest req = gson.fromJson(request.body(), Request.CommentRequest.class);
+        // POST route for adding a new comment to the Database. This will read
+        // JSON from the body of the request, turn it into a CommentRequest
+        // object, extract the (content, UserID, IdeaID) insert them, and return the
+        // ID of the newly created row.
+        Spark.post("/comments", (request, response) -> {
+            Request.CommentRequest req = gson.fromJson(request.body(),
+                    Request.CommentRequest.class);
             response.status(200);
             response.type("application/json");
+
+            String key = req.sessionKey;
+            String userID = null;
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+
+            if (mc.get(key) == null) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            }
+            if (mc.get(key) == null) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            } else {
+                userID = mc.get(key);
+                if (userID == null) {
+                    return gson.toJson(new StructuredResponse("error", "authentication failed",
+                            null));
+                }
+            }
+
+            int rowsInserted = db.insertNewComment(req.mContent, userID, req.mIdeaId);
+            if (rowsInserted <= 0) {
+                return gson.toJson(new StructuredResponse("error", "error creating comment",
+                        null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", "created " + rowsInserted + "comment(s)", null));
+            }
+        });
+
+        // Put route for updating a comment's content
+        // The user can only update his/her own comment
+        Spark.put("/comments", (request, response) -> {
+            Request.CommentRequest req = gson.fromJson(request.body(),
+                    Request.CommentRequest.class);
+            response.status(200);
+            response.type("application/json");
+
+            String key = req.sessionKey;
+            String userID = null;
+            // conncecting to cache
+            MemcachedClient mc = null;
+            try {
+                mc = createMemcachedClient();
+            } catch (IOException e) {
+                System.err.println("Couldn't create a connection to MemCachier: " +
+                        e.getMessage());
+            }
+
+            if (mc == null) {
+                System.err.println("mc is null. Exiting.");
+                System.exit(1);
+            }
+
+            if (mc.get(key) == null) {
+                return gson.toJson(new StructuredResponse("error", "Invalid session key",
+                        null));
+            } else {
+                userID = mc.get(key);
+                if (userID == null) {
+                    return gson.toJson(new StructuredResponse("error", "authentication failed",
+                            null));
+                }
+            }
+            System.out.println("mid: " + req.mId);
+
+            String CommenterID = db.getCommenterUserID(req.mId);
+            System.out.println("CommenterID: " + CommenterID);
+            System.out.println("userID: " + userID);
+
+            if (!userID.equals(CommenterID)) {
+                return gson.toJson(new StructuredResponse("error", "You can only edit your own comment", null));
+            }
 
             int rowsUpdated = db.updateOneComment(req.mContent, req.mId);
             if (rowsUpdated <= 0) {
-                return gson.toJson(new StructuredResponse("error", "error updating comment", null));
+                return gson.toJson(new StructuredResponse("error", "error updating comment",
+                        null));
             } else {
-                return gson.toJson(new StructuredResponse("ok", "updated " + rowsUpdated + " comment(s)", null));
+                return gson.toJson(new StructuredResponse("ok", "updated " + rowsUpdated + "comment(s)", null));
             }
         });
 
+    }
+
+    private static MemcachedClient createMemcachedClient() throws IOException {
+        List<InetSocketAddress> servers = AddrUtil.getAddresses(System.getenv("MEMCACHIER_SERVERS").replace(",", " "));
+        AuthInfo authInfo = AuthInfo.plain(System.getenv("MEMCACHIER_USERNAME"), System.getenv("MEMCACHIER_PASSWORD"));
+
+        // this builds the memcache client
+        MemcachedClientBuilder builder = new XMemcachedClientBuilder(servers);
+
+        // Configure SASL auth for each server
+        for (InetSocketAddress server : servers) {
+            builder.addAuthInfo(server, authInfo);
+        }
+
+        // Use binary protocol
+        builder.setCommandFactory(new BinaryCommandFactory());
+        // Connection timeout in milliseconds (default: )
+        builder.setConnectTimeout(1000);
+        // Reconnect to servers (default: true)
+        builder.setEnableHealSession(true);
+        // Delay until reconnect attempt in milliseconds (default: 2000)
+        builder.setHealSessionInterval(2000);
+        MemcachedClient mc = builder.build();
+        return mc;
     }
 
     private static final String DEFAULT_PORT_DB = "5432";

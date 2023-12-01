@@ -1,0 +1,34 @@
+{
+    "sampleUsers" : [
+        {
+          "userId": "101136375578726959533",
+          "username": "Joseph",
+          "email": "jrs225@lehigh.edu",
+          "GI": "gi1",
+          "SO": "so1",
+          "note": "Joseph added by admin",
+          "valid": true
+        },
+        {
+          "userId": "115632613034941022740",
+          "username": "Eric",
+          "email": "ejo223@lehigh.edu",
+          "GI": "gi2",
+          "SO": "so2",
+          "note": "Eric added by admin",
+          "valid": true
+        },
+        {
+          "userId": "112569610817039937158",
+          "username": "Tommy",
+          "email": "tjp225@lehigh.edu",
+          "GI": "gi3",
+          "SO": "so3",
+          "note": "Tommy the admin",
+          "valid": true
+        }
+    ],
+    "sampleIdeas" : [ ],
+    "sampleComments" : [  ],
+    "sampleLikes" : [  ]
+}
