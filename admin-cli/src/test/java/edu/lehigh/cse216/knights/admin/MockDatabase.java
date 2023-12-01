@@ -24,6 +24,7 @@ public class MockDatabase{
         likes = new ArrayList<Entity.Like>();
     }
 
+    /** methods for inserting entities into mock db */
     public void insertUser(Entity.User user){
         users.add(user);
     }
@@ -38,6 +39,23 @@ public class MockDatabase{
 
     public void insertLike(Entity.Like like){
         likes.add(like);
+    }
+
+    /** methods for getting entities from mock db */
+    public Entity.User getUser(int index){
+        return users.get(index);
+    }
+
+    public Entity.Idea getIdea(int index){
+        return ideas.get(index);
+    }
+
+    public Entity.Comment getComment(int index){
+        return comments.get(index);
+    }
+
+    public Entity.Like getLike(int index){
+        return likes.get(index);
     }
 
     
