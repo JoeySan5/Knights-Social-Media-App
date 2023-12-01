@@ -1,5 +1,7 @@
 package edu.lehigh.cse216.knights.backend;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -11,6 +13,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
@@ -18,9 +22,17 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
+import com.google.gson.Gson;
 
 import edu.lehigh.cse216.knights.backend.Comment.ExtendedComment;
 import edu.lehigh.cse216.knights.backend.Idea.ExtendedIdea;
+import net.rubyeye.xmemcached.MemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClientBuilder;
+import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.auth.AuthInfo;
+import net.rubyeye.xmemcached.command.BinaryCommandFactory;
+import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.utils.AddrUtil;
 
 /**
  * Database interacts with the ElephantSQL database through a set of
@@ -28,6 +40,7 @@ import edu.lehigh.cse216.knights.backend.Idea.ExtendedIdea;
  * and returns the appropriate result to the HTTP server App
  */
 public class Database {
+    final Gson gson = new Gson();
     /**
      * The connection to the database. When there is no connection, it should
      * be null. Otherwise, there is a valid open connection
@@ -520,7 +533,7 @@ public class Database {
                 // ID
                 // FileObject file = function(fileId);
                 String fileId = rs.getString("fileid");
-                FileObject file = convertToFileObject(fileId);
+                FileObject file = retrieveFileObject(fileId);
 
                 res = new ExtendedIdea(
                         rs.getInt("ideaid"),
@@ -901,7 +914,56 @@ public class Database {
         return fileId;
     }
 
-    FileObject convertToFileObject(String fileId) {
+    FileObject retrieveFileObject(String fileId) {
+
+        // first we want to check if memecache has the object
+        FileObject file = getFileFromCache(fileId);
+        if (file != null) {
+            System.out.println("\nFile found in cache\n");
+            return file;
+        } else {
+            // if memecache does not have the object then retrieve it from google storage
+            // and add it into memecache
+            System.out
+                    .println("\nFile not found in cache. Retrieved from storage, and put in cache for 1000 seconds\n ");
+            return getFileFromStorage(fileId);
+        }
+
+    }
+
+    private FileObject getFileFromCache(String fileId) {
+        // conncecting to cache
+        MemcachedClient mc = null;
+        try {
+            mc = createMemcachedClient();
+        } catch (IOException e) {
+            System.err.println("Couldn't create a connection to MemCachier: " +
+                    e.getMessage());
+        }
+
+        if (mc == null) {
+            System.err.println("mc is null. Exiting.");
+            System.exit(1);
+        }
+
+        try {
+            String response = mc.get(fileId);
+            if (response == null) {
+                return null;
+            } else {
+                System.out.println("\nhere is response from cache:" + response);
+                System.out.println(gson.fromJson(response, FileObject.class));
+                return gson.fromJson(response, FileObject.class);
+            }
+        } catch (TimeoutException | InterruptedException | MemcachedException e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    FileObject getFileFromStorage(String fileId) {
         String fileType = "";
         String base64String = "";
         // Initialize the Google Cloud Storage client
@@ -924,7 +986,7 @@ public class Database {
             System.out.println("Base64 Data: " + base64String);
             System.out.println("File Name: " + fileId);
         } else {
-            System.out.println("Blob does not exist");
+            System.out.println("Blob does not exist in cloud storage");
             return null;
         }
 
@@ -935,6 +997,60 @@ public class Database {
             e.printStackTrace();
         }
 
+        insertFileToCache(new FileObject(fileId, fileType, base64String));
         return new FileObject(fileId, fileType, base64String);
     }
+
+    private void insertFileToCache(FileObject fileObject) {
+        String fileAsString = gson.toJson(fileObject);
+        String fileName = fileObject.getmFileName();
+
+        // conncecting to cache
+        MemcachedClient mc = null;
+        try {
+            mc = createMemcachedClient();
+        } catch (IOException e) {
+            System.err.println("Couldn't create a connection to MemCachier: " +
+                    e.getMessage());
+        }
+
+        if (mc == null) {
+            System.err.println("mc is null. Exiting.");
+            System.exit(1);
+        }
+
+        try {
+            System.out.println("\nfileName (key):" + fileName + " fileAsString: " + fileAsString);
+            mc.set(fileName, 1000, fileAsString);
+        } catch (TimeoutException | InterruptedException | MemcachedException e) {
+            System.err.println("error inserting file to cache:" + e.getMessage());
+            e.printStackTrace();
+        }
+
+    }
+
+    private static MemcachedClient createMemcachedClient() throws IOException {
+        List<InetSocketAddress> servers = AddrUtil.getAddresses(System.getenv("MEMCACHIER_SERVERS").replace(",", " "));
+        AuthInfo authInfo = AuthInfo.plain(System.getenv("MEMCACHIER_USERNAME"), System.getenv("MEMCACHIER_PASSWORD"));
+
+        // this builds the memcache client
+        MemcachedClientBuilder builder = new XMemcachedClientBuilder(servers);
+
+        // Configure SASL auth for each server
+        for (InetSocketAddress server : servers) {
+            builder.addAuthInfo(server, authInfo);
+        }
+
+        // Use binary protocol
+        builder.setCommandFactory(new BinaryCommandFactory());
+        // Connection timeout in milliseconds (default: )
+        builder.setConnectTimeout(1000);
+        // Reconnect to servers (default: true)
+        builder.setEnableHealSession(true);
+        // Delay until reconnect attempt in milliseconds (default: 2000)
+        builder.setHealSessionInterval(2000);
+        MemcachedClient mc = builder.build();
+        return mc;
+    }
+
 }

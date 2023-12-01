@@ -714,10 +714,6 @@ public class App {
             if (mc.get(key) == null) {
                 return gson.toJson(new StructuredResponse("error", "Invalid session key",
                         null));
-            }
-            if (mc.get(key) == null) {
-                return gson.toJson(new StructuredResponse("error", "Invalid session key",
-                        null));
             } else {
                 userID = mc.get(key);
                 if (userID == null) {
