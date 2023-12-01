@@ -263,13 +263,15 @@ Future<bool> onLikeButtonTapped(int id, String sessionKey) async {
 ///Web Function to send post request to dokku backend. Creates idea with userText
 ///POST
 ///takes in userText and sessionKey to determine which user is making post
-Future<String> postIdeas(String userText, String sessionKey) async {
+Future<String> postIdeas(
+    String userText, String link, String sessionKey) async {
   developer.log('Making web request...');
   var url = Uri.parse('https://team-knights.dokku.cse.lehigh.edu/ideas');
   var headers = {"Accept": "application/json"};
-  var body = {'mContent': userText, 'sessionKey': sessionKey};
+  var body = {'mContent': userText, 'mLink': link, 'sessionKey': sessionKey};
   print(sessionKey);
   print(userText);
+  print(link);
   var response = await http.post(url, headers: headers, body: jsonEncode(body));
   print(response.body);
   if (response.statusCode == 200) {
