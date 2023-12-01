@@ -6,8 +6,7 @@ import { Router } from '@angular/router';
 
 var mainList: IdeaListComponent;
 var $: any;
-// const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
-const backendUrl = "http://localhost:8998";
+const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
 const sessionKey = localStorage.getItem('sessionKey');
 
 
