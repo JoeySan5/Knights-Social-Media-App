@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:io';
-
-import 'package:knights/pages/home_page.dart';
 import 'package:knights/pages/login_page.dart';
 
 
@@ -29,8 +27,10 @@ class MyApp extends StatelessWidget{
       ),
       home:  const Directionality(
         textDirection: TextDirection.ltr, 
+        /// calls login pag which makes user login in properly before seeing rest of app
         child: MyLoginPage(),
         ),
+
 
     );
   }

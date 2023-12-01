@@ -8,7 +8,8 @@ import 'package:knights/net/web_requests.dart';
 ///keep track of what is being written inside of the text field. Lastly, contains a 
 ///submit button to post onto backend-dokku.
 class IdeasForm extends StatefulWidget{
-  const IdeasForm({super.key});
+  final String sessionKey;
+  const IdeasForm({super.key, required this.sessionKey});
 
   @override
   State<IdeasForm> createState() => _IdeasForm();
@@ -56,8 +57,12 @@ class _IdeasForm extends State<IdeasForm>{
                 ),
                 //the arrow function ()=> allows for postIdeas to return a future
                 //this is done because onPressed accepts only voids, not future
-              onPressed:() => postIdeas(myController.text),
+              onPressed:() => {
+                postIdeas(myController.text, widget.sessionKey),
+                Navigator.pop(context)
+              },
               child: const Text('Submit')
+
               ),
       ],
     );
