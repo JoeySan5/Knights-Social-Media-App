@@ -4,11 +4,11 @@
 - **Team Number**: 25
 - **Team Name**: Knights
 - **Members**:
-  - Tommy Parisi - Backend Developer - Contact Email: tjp225@lehigh.edu
-  - Joseph Sanchez - Mobile Developer - Contact Email: jrs225@lehigh.edu
-  - Adivi Karawat - Admin Developer - Contact Email: adk225@lehigh.edu
-  - Eric Osterman - Web Developer - Contact Email: ejo223@lehigh.edu
-  - Sehyoun Jang - Project Manager - Contact Email: sej324@lehigh.edu
+  - Tommy Parisi - Project Manager (Phase 3)  - Contact Email: tjp225@lehigh.edu
+  - Joseph Sanchez - Backend Developer (Phase 3) - Contact Email: jrs225@lehigh.edu
+  - Adivi Karawat - Mobile Developer (Phase 3) - Contact Email: adk225@lehigh.edu
+  - Eric Osterman - Admin Developer (Phase 3) - Contact Email: ejo223@lehigh.edu
+  - Sehyoun Jang - Web Developer (Phase 3)  - Contact Email: sej324@lehigh.edu
 
 ## URLs
 - **Git Repository**: <https://bitbucket.org/cse216-2023fa-team-25/cse216-2023fa-team-25/src/master/>
@@ -21,7 +21,6 @@
 ### Initial Setup (Version 0.1.0)
 - Repository has been set up with the essential directories and branches.
 - README file has been created and updated with team information, key URLs, and initial project description.
-<<<<<<< HEAD
 
 
 ### Tagged Release
@@ -47,23 +46,18 @@
 ### Web
 #### to deploy UI
     * ensure that CORS is enabled through dokku
-    * once this is checked, navigate to Web/ directory
-    * run the command: sh deploy.sh
-        * this compiles, runs, and creates the necessary folders to run
-    * once loaded, navigate to the correct https location, there should be 3 different ones
+    * once this is checked, navigate to knights-web-app/
+    * then in the terminal type: ng serve --open
 
 #### to run unit tests
-    * navigate to Web/ directory
-    * run command: sh deploy.sh
-    * once this compiles, select one of the three http locations provided
-    * navigate to that url but add '/spec_runner.html' to the end of the url
-    * verify that tests work
+    * navigate to knights-web-app
+    * run command: ng test
 
 ### Backend
 
 #### Locally
 1. From the backend maven project root, run mvn exec:java with the `PORT` and `DATABASE_URL` environment variables specified
-    * `PORT=8998 CLIENT_ID=1019349198762-463i1tt2naq9ipll3f9ade5u7nli7gju.apps.googleusercontent.com DATABASE_URL=postgres://pfdcoetq:VMXXrjrJtMXqzP6JwpjnapwpOVpk6e9o@peanut.db.elephantsql.com/pfdcoetq mvn exec:java`
+    * `PORT=8998 CLIENT_ID=1019349198762-463i1tt2naq9ipll3f9ade5u7nli7gju.apps.googleusercontent.com DATABASE_URL=postgres://pfdcoetq:VMXXrjrJtMXqzP6JwpjnapwpOVpk6e9o@peanut.db.elephantsql.com/pfdcoetq MEMCACHIER_USERNAME=B24B55 MEMCACHIER_PASSWORD=FDCD8702A87D0542C2EC23142008D739 MEMCACHIER_SERVERS=mc4.dev.ec2.memcachier.com:11211 CORS_ENABLED=TRUE GOOGLE_APPLICATION_CREDENTIALS="src\main\java\edu\lehigh\cse216\knights\backend\credentials\the-knights-d575548961a0.json" mvn exec:java`
     * The address is `http://localhost:PORT/`
 
 #### On Dokku
@@ -87,7 +81,7 @@
 ## Developer Documentation
 
 ### Artifacts
-[Artifacts](docs/backend-apidocs/apidocs)
+[Artifacts List](docs/README-phase3.md)
 
 ### Mobile
 [Mobile Dartdocs](docs/mobile_artifacts/api/index.html)
@@ -99,5 +93,5 @@
 [Backend Javadoc](docs/backend-apidocs/site/apidocs/index.html)
 
 ### Admin
-[Admin Javadoc](docs/admin-apidocs/index.html)
+[Admin Javadoc](docs/admin-apidocs/site/apidocs/index.html)
 

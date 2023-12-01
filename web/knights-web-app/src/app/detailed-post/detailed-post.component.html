@@ -1,0 +1,74 @@
+<div class="tr">
+    <!-- Profile-page should be the profile which has been clicked by user -->
+    <div class="usern" routerLink="/profile-page">{{data.mPosterUsername}}</div>
+    <div>{{data.mContent}}</div>
+    <div *ngIf="data.mLink">
+        <a [href]="data.mLink.startsWith('http') ? data.mLink : 'http://' + data.mLink" target="_blank">Attached Link: {{ data.mLink }}</a>
+    </div>
+
+    <!-- Image file display -->
+    <img *ngIf="data.mFile && (data.mFile.mFileType === 'image/jpeg' || data.mFile.mFileType === 'image/png')"
+        [src]="'data:' + data.mFile.mFileType + ';base64,' + data.mFile.mBase64" alt="Posted Image" />
+
+    <!-- Audio file display -->
+    <audio *ngIf="data.mFile && data.mFile.mFileType === 'audio/mpeg'" controls>
+        <source [src]="'data:' + data.mFile.mFileType + ';base64,' + data.mFile.mBase64" type="{{data.mFile.mFileType}}">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Video file display -->
+    <video *ngIf="data.mFile && data.mFile.mFileType === 'video/mp4'" controls>
+        <source [src]="'data:' + data.mFile.mFileType + ';base64,' + data.mFile.mBase64" type="{{data.mFile.mFileType}}">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- PDF file download -->
+    <div *ngIf="data.mFile && data.mFile.mFileType === 'application/pdf'">
+        <a [href]="'data:' + data.mFile.mFileType + ';base64,' + data.mFile.mBase64" [download]="data.mFile.mFileName">Download {{ data.mFile.mFileName }}</a>
+    </div>
+
+    <!-- Text file download -->
+    <div *ngIf="data.mFile && data.mFile.mFileType === 'text/plain'">
+        <a [href]="'data:' + data.mFile.mFileType + ';base64,' + data.mFile.mBase64" [download]="data.mFile.mFileName">Download {{ data.mFile.mFileName }}</a>
+    </div>
+</div>
+
+<h2 *ngIf="data.mComments.length > 0" class="tagline">Comments people have left:</h2>
+<h2 *ngIf="data.mComments.length == 0" class="tagline">No comments left :(</h2>
+
+<div *ngFor="let mComment of data.mComments" class="comments">
+    <div class="usern" routerLink="/profile-page">{{mComment.mCommenterUsername}}</div>
+    <div>{{mComment.mContent}}</div>
+    <div *ngIf="mComment.mLink">
+        <a [href]="mComment.mLink.startsWith('http') ? mComment.mLink : 'http://' + mComment.mLink" target="_blank">Attached Link: {{ mComment.mLink }}</a>
+    </div>
+    
+    <!-- Image display -->
+    <img *ngIf="mComment.mFile && (mComment.mFile.mFileType === 'image/jpeg' || mComment.mFile.mFileType === 'image/png')"
+        [src]="'data:' + mComment.mFile.mFileType + ';base64,' + mComment.mFile.mBase64" alt="Posted Image" width="300" height="200" />
+
+    <!-- Audio display -->
+    <audio *ngIf="mComment.mFile && mComment.mFile.mFileType === 'audio/mpeg'" controls>
+        <source [src]="'data:' + mComment.mFile.mFileType + ';base64,' + mComment.mFile.mBase64" type="{{mComment.mFile.mFileType}}">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Video file display -->
+    <video *ngIf="mComment.mFile && mComment.mFile.mFileType === 'video/mp4'" controls>
+        <source [src]="'data:' + mComment.mFile.mFileType + ';base64,' + mComment.mFile.mBase64" type="{{mComment.mFile.mFileType}}">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- PDF download -->
+    <div *ngIf="mComment.mFile && mComment.mFile.mFileType === 'application/pdf'">
+        <a [href]="'data:' + mComment.mFile.mFileType + ';base64,' + mComment.mFile.mBase64" [download]="mComment.mFile.mFileName">Download {{ mComment.mFile.mFileName }}</a>
+    </div>
+
+    <!-- Text file download -->
+    <div *ngIf="mComment.mFile && mComment.mFile.mFileType === 'text/plain'">
+        <a [href]="'data:' + mComment.mFile.mFileType + ';base64,' + mComment.mFile.mBase64" [download]="mComment.mFile.mFileName">Download {{ mComment.mFile.mFileName }}</a>
+    </div>
+</div>
+
+<button id="showAdd" routerLink="/add-comment-page" style="cursor: pointer;">Add a comment</button>
+<button id="showHome" routerLink="/home-page" style="cursor: pointer;">Home</button>

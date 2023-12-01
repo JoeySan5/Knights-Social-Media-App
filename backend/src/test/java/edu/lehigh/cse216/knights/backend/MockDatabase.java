@@ -9,8 +9,10 @@ import org.checkerframework.checker.units.qual.m;
  * A mock database that stores a list of Ideas in memory.
  * Used for unit testing in a controlled environment.
  * 
- * NB: The methods of MockDatabase are synchronized, since they will be used from a 
- * web framework and there may be multiple concurrent accesses to the MockDatabase.
+ * NB: The methods of MockDatabase are synchronized, since they will be used
+ * from a
+ * web framework and there may be multiple concurrent accesses to the
+ * MockDatabase.
  * 
  * Currently adjusted so that the first entry
  * in the table has ID = 1. (not 0).
@@ -49,8 +51,8 @@ public class MockDatabase {
         mCommentRows = new ArrayList<>();
     }
 
-
-    public synchronized String createUserEntry(String userID, String username, String email, String GI, String SO, String note) {
+    public synchronized String createUserEntry(String userID, String username, String email, String GI, String SO,
+            String note) {
         if (username == null || email == null || GI == null || SO == null || note == null)
             return null;
         // id will be unique since mCounter is incremented on every successful call
@@ -58,7 +60,7 @@ public class MockDatabase {
         User user = new User(id, username, email, GI, SO, note, true);
         mUserRows.add(user);
         return id;
-    } 
+    }
 
     public synchronized int createIdeaEntry(String content, String userID) {
         if (content == null)
@@ -67,7 +69,7 @@ public class MockDatabase {
         mIdeaCounter++;
         int id = mIdeaCounter;
         Idea idea = new Idea(id, content, userID);
-        mIdeaRows.add(id-1, idea);
+        mIdeaRows.add(id - 1, idea);
         return id;
     }
 
@@ -77,12 +79,14 @@ public class MockDatabase {
         // id will be unique since mCounter is incremented on every successful call
         mCommentCounter++;
         int id = mCommentCounter;
-        Comment comment = new Comment(id, userID, ideaID, content);
-        mCommentRows.add(id-1, comment);
+        String link = null;
+        FileObject file = null;
+        Comment comment = new Comment(id, userID, ideaID, content, link, file);
+        mCommentRows.add(id - 1, comment);
         return id;
     }
-    
-     /**
+
+    /**
      * Get one complete row from the MockDatabase using its ID to select it
      * 
      * @param id The ID of the row to select
@@ -91,7 +95,7 @@ public class MockDatabase {
     public synchronized Idea readOne(int id) {
         if (id > mIdeaRows.size() || id <= 0)
             return null;
-        Idea idea = mIdeaRows.get(id-1);
+        Idea idea = mIdeaRows.get(id - 1);
         if (idea == null)
             return null;
         return new Idea(idea);
@@ -99,6 +103,7 @@ public class MockDatabase {
 
     /**
      * Get all of the Ideas that are present in the MockDatabase
+     * 
      * @return An ArrayList with all of the data
      */
     public synchronized ArrayList<Idea> readAll() {
@@ -110,11 +115,14 @@ public class MockDatabase {
         return data;
     }
 
-     /**
+    /**
      * Update the likeCount of an Idea in the MockDatabase
-     * @param id The ID of the row to update
-     * @param likeDelta the requested amount to change likes by; must be 1 or -1 to be successful
-     * @return the amount of posts affected by the given likeCountged.  -1 indicates an error.
+     * 
+     * @param id        The ID of the row to update
+     * @param likeDelta the requested amount to change likes by; must be 1 or -1 to
+     *                  be successful
+     * @return the amount of posts affected by the given likeCountged. -1 indicates
+     *         an error.
      */
     public synchronized int updateOneLikeCount(int id, int likeDelta) {
         // Do not update if we don't a valid likeDelta
@@ -122,10 +130,10 @@ public class MockDatabase {
             return -1; // default error return value
         // only update if the current entry is valid (not null)
         if (id > mIdeaRows.size() || id <= 0)
-            return 0;   // implying 0 rows updated
-        Idea data = mIdeaRows.get(id-1);
+            return 0; // implying 0 rows updated
+        Idea data = mIdeaRows.get(id - 1);
         if (data == null || id > mIdeaCounter)
-            return 0;   // implying 0 rows updated
+            return 0; // implying 0 rows updated
         // Update and then return 1, since 1 row is updated
         data.mLikeCount += likeDelta;
         // We can test this method by accessing mRows.get(id-1)
@@ -142,9 +150,9 @@ public class MockDatabase {
         // Deletion fails for an invalid Id or an Id that has already been deleted
         if (id > mIdeaRows.size() || id <= 0)
             return false;
-        if (mIdeaRows.get(id-1) == null)
+        if (mIdeaRows.get(id - 1) == null)
             return false;
-        mIdeaRows.set(id-1, null);
+        mIdeaRows.set(id - 1, null);
         return true;
     }
 

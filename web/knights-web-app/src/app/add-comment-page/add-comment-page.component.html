@@ -1,0 +1,18 @@
+<div id="addElement">
+<div id="addElement">
+    <h3>Add a Comment</h3>
+    <label for="newComment">Message</label>
+    <textarea id="newComment" placeholder="Enter your comment here"></textarea>
+    <label for="newLink">Link </label>
+    <textarea id="newLink" placeholder="Enter link here"></textarea>
+
+    <div class="comment-buttons">
+        <button id="addCancel" routerLink="/detailed-post" style="cursor: pointer;">Cancel</button>
+        <button id="addButton" (click)="onSubmit()" style="cursor: pointer;">Add</button>
+    </div>
+
+    <div class="fileButton">
+        <input type="file" (change)="onFileSelected($event)" accept=".jpg, .jpeg, .png, .mp3, .mp4" style="cursor: pointer;" />
+    </div>
+</div>
+</div>
