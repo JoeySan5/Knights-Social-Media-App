@@ -29,6 +29,9 @@
     * The app currently does not allow the user to effectively see their like/dislike be updated on a certain post without having to refresh. 
     The app does not allow the user to refresh without doing hot reload or closing the app.
 
+1. web (sprint 12)
+    * The web app allows for viewing and posting Ideas and comments on Ideas, which include text content, an optional link, and an optional file attachment. Profile pages can be viewed, and self profile content edited.
+
 ## Build & Run Instructions
 
 ### Mobile
