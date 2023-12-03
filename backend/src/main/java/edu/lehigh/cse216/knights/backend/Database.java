@@ -530,7 +530,7 @@ public class Database {
                     String content = rsComments.getString("content");
                     String userId = rsComments.getString("userid");
                     String link = rsComments.getString("link");
-                    String fileId = rs.getString("fileid");
+                    String fileId = rsComments.getString("fileid");
                     FileObject file = null;
                     System.out.println("this is rs" + rs);
                     System.out.println("this is get fileid" + rs.getString("fileid"));
