@@ -3,8 +3,8 @@ import { DetailedPostInfoService } from '../detailed-post-info.service';
 import { Router } from '@angular/router';
 
 
-const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
-// const backendUrl = "http://localhost:8998";
+// const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
+const backendUrl = "http://localhost:8998";
 
 const sessionKey = localStorage.getItem('sessionKey');
 

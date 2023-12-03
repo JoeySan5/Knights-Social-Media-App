@@ -6,8 +6,8 @@ import { Router } from '@angular/router';
 
 var mainList: IdeaListComponent;
 var $: any;
-const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
-// const backendUrl = "http://localhost:8998";
+// const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
+const backendUrl = "http://localhost:8998";
 
 const sessionKey = localStorage.getItem('sessionKey');
 
@@ -150,7 +150,7 @@ private userNClick(userId: String){
         headers: {
             'Content-type': 'application/json; charset=UTF-8'
         },
-        cache: 'force-cache'
+        cache: 'no-cache'
     }).then( (response) => {
         // If we get an "ok" idea, clear the form
         if (response.ok) {
@@ -192,7 +192,7 @@ private trClicK(Id: String){
             headers: {
                 'Content-type': 'application/json; charset=UTF-8'
             },
-            cache: 'force-cache'
+            cache: 'no-cache'
 
         }).then( (response) => {
             // If we get an "ok" idea, clear the form

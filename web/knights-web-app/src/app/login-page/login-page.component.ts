@@ -1,7 +1,9 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
+// const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
+const backendUrl = "http://localhost:8998";
+
 // Async/Await makes it easier to write promises. The keyword 'async' before a
 // function makes the function return a promise, always. And 
 //the keyword await is used inside async functions, which makes the 

@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
+const backendUrl = "http://localhost:8998";
+// const backendUrl = "https://team-knights.dokku.cse.lehigh.edu";
 const sessionKey = localStorage.getItem('sessionKey');  //a5PD5eZXWNg5=115632613034941022740
 @Component({
     selector: 'profile-page',
@@ -78,7 +79,7 @@ export class ProfilepageComponent implements OnInit {
                 headers: {
                     'Content-type': 'application/json; charset=UTF-8'
                 },
-                cache: 'force-cache'
+                cache: 'no-cache'
 
             }).then((response) => {
                 // If we get an "ok" idea, clear the form
