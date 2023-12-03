@@ -70,8 +70,8 @@ body {
 #showAdd{
     font-family: 'Roboto', sans-serif;
     position: fixed;
-    bottom: 10px;;
-    left:50%;
+    bottom: 30px;;
+    left: 90%;
     transform: translate(-50%);
     background-color: #CFFA7C;
     color: black;
@@ -79,12 +79,14 @@ body {
     border-radius: 10px;
     text-align: center;
     border: none;
+    cursor: pointer;
+
 }
 #showHome{
     font-family: 'Roboto', sans-serif;
     position: fixed;
-    bottom: 55px;;
-    left:50%;
+    bottom: 75px;;
+    left: 90%;
     transform: translate(-50%);
     background-color: #CFFA7C;
     color: black;
@@ -92,6 +94,8 @@ body {
     border-radius: 10px;
     text-align: center;
     border: none;
+    cursor: pointer;
+
 }
 
 
@@ -214,4 +218,3 @@ tr td:last-of-type {
     text-align: center;
 
 }
-
