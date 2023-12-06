@@ -218,3 +218,15 @@ tr td:last-of-type {
     text-align: center;
 
 }
+
+.edit-button {
+    font-family: 'Roboto', sans-serif;
+    background-color: #CFFA7C;
+    color: black;
+    border-radius: 10px;
+    text-align: center;
+    border: none;
+    padding:5px 10px;
+    float: right;
+    cursor: pointer;
+}

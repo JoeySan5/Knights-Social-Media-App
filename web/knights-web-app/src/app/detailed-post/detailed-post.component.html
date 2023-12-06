@@ -42,7 +42,10 @@
     <div *ngIf="mComment.mLink">
         <a [href]="mComment.mLink.startsWith('http') ? mComment.mLink : 'http://' + mComment.mLink" target="_blank">Attached Link: {{ mComment.mLink }}</a>
     </div>
-    
+
+    <button class="edit-button" routerLink="/edit-comment" [queryParams]="{commentId: mComment.id}">Edit</button>
+
+
     <!-- Image display -->
     <img *ngIf="mComment.mFile && (mComment.mFile.mFileType === 'image/jpeg' || mComment.mFile.mFileType === 'image/png')"
         [src]="'data:' + mComment.mFile.mFileType + ';base64,' + mComment.mFile.mBase64" alt="Posted Image" width="300" height="200" />
